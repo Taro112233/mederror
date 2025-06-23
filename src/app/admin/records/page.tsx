@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 // ประเภทข้อมูล Med Error
 export type MedErrorRecord = {
@@ -128,20 +129,23 @@ function Filter({ column }: { column: Column<any, unknown> }) {
     return (
       <div>
         <Label htmlFor={`${id}-select`}>{columnHeader}</Label>
-        <select
-          id={`${id}-select`}
+        <Select
           value={String(columnFilterValue ?? "all")}
-          onChange={e => {
-            if (e.target.value === "all") column.setFilterValue(undefined);
-            else if (e.target.value === "true") column.setFilterValue(true);
-            else if (e.target.value === "false") column.setFilterValue(false);
+          onValueChange={value => {
+            if (value === "all") column.setFilterValue(undefined);
+            else if (value === "true") column.setFilterValue(true);
+            else if (value === "false") column.setFilterValue(false);
           }}
-          className="block w-full border rounded px-2 py-1"
         >
-          <option value="all">ทั้งหมด</option>
-          <option value="true">แสดง</option>
-          <option value="false">ไม่แสดง</option>
-        </select>
+          <SelectTrigger id={`${id}-select`} className="mt-1 w-full">
+            <SelectValue placeholder="ทั้งหมด" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">ทั้งหมด</SelectItem>
+            <SelectItem value="true">แสดง</SelectItem>
+            <SelectItem value="false">ไม่แสดง</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     );
   }

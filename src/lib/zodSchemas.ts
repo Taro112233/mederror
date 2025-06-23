@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const MedErrorFormSchema = z.object({
-  eventDate: z.string().min(1, { message: "*" }),
-  description: z.string().min(1, { message: "*" }),
-  severity: z.string().min(1, { message: "*" }),
-  errorType: z.string().min(1, { message: "*" }),
-  subErrorType: z.string().min(1, { message: "*" }),
+  eventDate: z.string().min(1, { message: "" }),
+  description: z.string().min(1, { message: "" }),
+  severity: z.string().min(1, { message: "" }),
+  errorType: z.string().min(1, { message: "" }),
+  subErrorType: z.string().min(1, { message: "" }),
   image: z
     .any()
     .optional()
