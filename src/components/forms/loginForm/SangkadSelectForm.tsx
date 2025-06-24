@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export default function SangkadSelectForm({ onSelect }: { onSelect: (s: string) => void }) {
   return (
     <form

@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from "react";
-import LoginForm from "@/components/forms/loginForm/LoginForm";
+import LoginForm from "@/components/forms/LoginForm";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
