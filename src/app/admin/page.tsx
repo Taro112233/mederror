@@ -16,6 +16,11 @@ export default function AdminMenu() {
             <span>จัดการผู้ใช้</span>
           </Link>
         </Button>
+        <Button asChild size="lg" className="w-full text-lg py-6">
+          <Link href="/admin/developer">
+            <span>Developer Panel</span>
+          </Link>
+        </Button>
         <Button asChild size="lg" className="w-full text-lg py-6" variant="secondary">
           <Link href="/">
             <span>กลับหน้าแรก</span>

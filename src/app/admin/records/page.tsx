@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useMemo, useId } from "react";
 import {
@@ -9,7 +10,6 @@ import {
   getSortedRowModel,
   useReactTable,
   flexRender,
-  RowData,
   Column,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";

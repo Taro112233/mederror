@@ -23,22 +23,22 @@ export const MedErrorFormSchema = z.object({
 export type MedErrorFormSchemaType = z.infer<typeof MedErrorFormSchema>;
 
 export const LoginCredentialSchema = z.object({
-  username: z.string().min(1, { message: "กรุณากรอกชื่อผู้ใช้" }),
-  password: z.string().min(1, { message: "กรุณากรอกรหัสผ่าน" }),
+  username: z.string().min(1, { message: "" }),
+  password: z.string().min(1, { message: "" }),
 });
 
 export type LoginCredentialSchemaType = z.infer<typeof LoginCredentialSchema>;
 
-export const SangkadSelectSchema = z.object({
-  sangkad: z.string().min(1, { message: "กรุณาเลือกสังกัด" }),
+export const OrganizationSelectSchema = z.object({
+  organization: z.string().min(1, { message: "" }),
 });
 
-export type SangkadSelectSchemaType = z.infer<typeof SangkadSelectSchema>;
+export type OrganizationSelectSchemaType = z.infer<typeof OrganizationSelectSchema>;
 
 export const OnboardingFormSchema = z.object({
-  name: z.string().min(1, { message: "กรุณากรอกชื่อ-นามสกุล" }),
-  phone: z.string().min(1, { message: "กรุณากรอกเบอร์โทร" }),
-  position: z.string().min(1, { message: "กรุณากรอกตำแหน่ง" }),
+  name: z.string().min(1, { message: "" }),
+  phone: z.string().min(1, { message: "" }),
+  position: z.string().min(1, { message: "" }),
 });
 
 export type OnboardingFormSchemaType = z.infer<typeof OnboardingFormSchema>; 

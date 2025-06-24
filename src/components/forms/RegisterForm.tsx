@@ -2,22 +2,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import LoginCredentialForm from "./loginForm/LoginCredentialForm";
-import SangkadSelectForm from "./loginForm/SangkadSelectForm";
+import OrganizationSelectForm from "./loginForm/OrganizationSelectForm";
 
 export default function RegisterForm() {
   const [step, setStep] = useState(1);
-  const [sangkad, setSangkad] = useState("");
+  const [organization, setOrganization] = useState("");
   const router = useRouter();
 
-  const handleSangkadSelect = (value: string) => {
-    setSangkad(value);
+  const handleOrganizationSelect = (value: string) => {
+    setOrganization(value);
     setStep(2);
   };
 
   const handleRegister = async (username: string, password: string) => {
     const res = await fetch("/api/register", {
       method: "POST",
-      body: JSON.stringify({ sangkad, username, password }),
+      body: JSON.stringify({ organization, username, password }),
       headers: { "Content-Type": "application/json" },
     });
     if (res.ok) {
@@ -36,7 +36,7 @@ export default function RegisterForm() {
 
   return (
     <div>
-      {step === 1 && <SangkadSelectForm onSelect={handleSangkadSelect} />}
+      {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} />}
       {step === 2 && (
         <LoginCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} submitLabel="สมัครสมาชิก" />
       )}

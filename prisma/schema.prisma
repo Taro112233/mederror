@@ -8,40 +8,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id           String      @id @default(uuid())
-  username     String      @unique
-  passwordHash String
-  sangkad       String
-  name         String?
-  phone        String?
-  position     String?
-  onboarded    Boolean     @default(false)
-  role         Role        @default(NOT_APPROVED)
-  createdAt    DateTime    @default(now())
-  organization Organization? @relation(fields: [organizationId], references: [id])
+model Account {
+  id             String        @id @default(uuid())
+  username       String        @unique
+  passwordHash   String
+  onboarded      Boolean       @default(false)
+  approved       Boolean       @default(false)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationId String?
-  medErrors    MedError[]  @relation("UserMedErrors")
+  user           User?
+  createdAt      DateTime      @default(now())
+}
+
+model User {
+  id         String   @id @default(uuid())
+  name       String?
+  position   String?
+  phone      String?
+  account    Account  @relation(fields: [accountId], references: [id])
+  accountId  String   @unique
+  medErrors  MedError[]    @relation("UserMedErrors")
 }
 
 model Organization {
   id        String   @id @default(uuid())
   name      String
-  users     User[]
+  accounts  Account[]
   createdAt DateTime @default(now())
 }
 
 model MedError {
-  id            String   @id @default(uuid())
-  eventDate     DateTime
-  description   String
-  severity      String
-  errorType     String
-  subErrorType  String
-  imageUrl      String?
-  reporter      User     @relation("UserMedErrors", fields: [reporterId], references: [id])
-  reporterId    String
-  createdAt     DateTime @default(now())
+  id           String   @id @default(uuid())
+  eventDate    DateTime
+  description  String
+  severity     String
+  errorType    String
+  subErrorType String
+  imageUrl     String?
+  reporter     User     @relation("UserMedErrors", fields: [reporterId], references: [id])
+  reporterId   String
+  createdAt    DateTime @default(now())
 }
 
 enum Role {
