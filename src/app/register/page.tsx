@@ -1,8 +1,21 @@
+import React from "react";
+import jwt from "jsonwebtoken";
 import RegisterForm from "@/components/forms/RegisterForm";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RegisterPage() {
+  React.useEffect(() => {
+    const match = document.cookie.match(/session_token=([^;]+)/);
+    const sessionToken = match ? match[1] : null;
+    if (sessionToken) {
+      try {
+        jwt.verify(sessionToken, process.env.NEXT_PUBLIC_JWT_SECRET || "dev_secret");
+        window.location.replace("/");
+      } catch {}
+    }
+  }, []);
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-muted">
       <Card className="w-full max-w-md shadow-lg">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
@@ -10,8 +11,13 @@ export async function POST(req: NextRequest) {
     if (!sessionToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    // แยก accountId จาก session_token (รูปแบบ: accountId.timestamp)
-    const accountId = sessionToken.split(".")[0];
+    let payload: jwt.JwtPayload;
+    try {
+      payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+    } catch {
+      return NextResponse.json({ error: "Invalid session" }, { status: 401 });
+    }
+    const accountId = payload.id;
     if (!accountId) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }

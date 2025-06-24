@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
@@ -22,18 +23,23 @@ export async function POST(req: NextRequest) {
     if (!valid) {
       return NextResponse.json({ error: "ไม่พบผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" }, { status: 401 });
     }
-    // สร้าง session token (แบบง่าย: ใช้ uuid หรือ accountId + timestamp + hash)
-    // ใน production ควรใช้ JWT หรือ random token เก็บใน DB ด้วย
-    const sessionToken = `${account.id}.${Date.now()}`;
+    // Clear session เดิม (set session_token ให้หมดอายุทันที)
+    // (Next.js API route ไม่มี access cookie เดิมโดยตรง แต่ client ควรลบ cookie ก่อน login ใหม่)
+    // สร้าง JWT token
+    const jwtSecret = process.env.JWT_SECRET || "dev_secret";
+    const payload = {
+      id: account.id,
+      sub: account.id,
+      approved: account.approved,
+      onboarded: account.onboarded,
+      organizationId: account.organizationId,
+      role: account.approved ? "ADMIN" : "USER",
+    };
+    const sessionToken = jwt.sign(payload, jwtSecret, { expiresIn: "7d" });
     // set cookie (httpOnly, secure, path=/, maxAge 7 วัน)
     const res = NextResponse.json({
       success: true,
-      account: {
-        id: account.id,
-        approved: account.approved,
-        onboarded: account.onboarded,
-        organizationId: account.organizationId,
-      },
+      account: payload,
       sessionToken,
     });
     res.cookies.set("session_token", sessionToken, {

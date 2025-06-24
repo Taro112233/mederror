@@ -32,7 +32,7 @@ export default function LoginForm() {
       } else if (!data.account.approved) {
         router.replace("/pending-approval");
       } else {
-        router.replace("/dashboard");
+        router.replace("/");
       }
     } catch {
       alert("เกิดข้อผิดพลาด");

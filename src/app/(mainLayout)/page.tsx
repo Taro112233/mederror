@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@/generated/prisma";
+import jwt from "jsonwebtoken";
 
 export default async function HomePage() {
   // --- Logic ตรวจสอบ session, onboarding, approved, role ---
@@ -11,9 +12,14 @@ export default async function HomePage() {
   if (!sessionToken) {
     redirect("/login");
   }
-  const accountId = sessionToken.split(".")[0];
+  let payload: jwt.JwtPayload;
+  try {
+    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
+    redirect("/login");
+  }
   const prisma = new PrismaClient();
-  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  const account = await prisma.account.findUnique({ where: { id: payload.id } });
   if (!account) {
     redirect("/login");
   }

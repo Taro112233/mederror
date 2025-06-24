@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@/generated/prisma";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import PendingApprovalLogoutButton from "./PendingApprovalLogoutButton";
+import jwt from "jsonwebtoken";
 
 export default async function PendingApprovalPage() {
   const cookieStore = await cookies();
@@ -11,16 +11,16 @@ export default async function PendingApprovalPage() {
   if (!sessionToken) {
     redirect("/login");
   }
-  const accountId = sessionToken.split(".")[0];
-  const prisma = new PrismaClient();
-  const account = await prisma.account.findUnique({ where: { id: accountId } });
-  if (!account) {
+  let payload: jwt.JwtPayload;
+  try {
+    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
     redirect("/login");
   }
-  if (!account.onboarded) {
+  if (!payload.onboarded) {
     redirect("/onboarding");
   }
-  if (account.approved) {
+  if (payload.approved) {
     redirect("/");
   }
 

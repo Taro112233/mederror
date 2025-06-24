@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { PrismaClient } from "@/generated/prisma";
 import OnboardingForm from "@/components/forms/OnboardingForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import jwt from "jsonwebtoken";
 
 export default async function OnboardingPage() {
   const cookieStore = await cookies();
@@ -10,14 +11,20 @@ export default async function OnboardingPage() {
   if (!sessionToken) {
     redirect("/login");
   }
-  const accountId = sessionToken.split(".")[0];
+  let payload: jwt.JwtPayload;
+  try {
+    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
+    redirect("/login");
+  }
+  if (payload.onboarded) {
+    redirect("/");
+  }
+  const accountId = payload.accountId;
   const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: accountId } });
   if (!account) {
     redirect("/login");
-  }
-  if (account.onboarded) {
-    redirect("/");
   }
 
   return (
