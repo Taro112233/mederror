@@ -20,7 +20,7 @@ export default async function OnboardingPage() {
   if (payload.onboarded) {
     redirect("/");
   }
-  const accountId = payload.accountId;
+  const accountId = payload.id;
   if (!accountId) {
     redirect("/login");
   }

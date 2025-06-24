@@ -33,7 +33,32 @@ export async function POST(req: NextRequest) {
     });
     // set onboarded = true
     await prisma.account.update({ where: { id: accountId }, data: { onboarded: true } });
-    return NextResponse.json({ success: true });
+    // ดึง account ล่าสุด
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    if (!account) {
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    }
+    // สร้าง JWT ใหม่
+    const jwtSecret = process.env.JWT_SECRET || "dev_secret";
+    const newPayload = {
+      id: account.id,
+      sub: account.id,
+      approved: account.approved,
+      onboarded: account.onboarded,
+      organizationId: account.organizationId,
+      role: account.approved ? "ADMIN" : "USER",
+    };
+    const newSessionToken = jwt.sign(newPayload, jwtSecret, { expiresIn: "7d" });
+    // set cookie ใหม่
+    const res = NextResponse.json({ success: true });
+    res.cookies.set("session_token", newSessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7, // 7 วัน
+      sameSite: "lax",
+    });
+    return res;
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OnboardingFormSchema, OnboardingFormSchemaType } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
+import LogoutButton from "@/components/button/LogoutButton";
 
 export default function OnboardingForm() {
   const form = useForm<OnboardingFormSchemaType>({
@@ -75,9 +76,14 @@ export default function OnboardingForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          บันทึกข้อมูล
-        </Button>
+        <div className="flex flex-row gap-2">
+          <div className="flex-1 max-w-[150px]">
+            <LogoutButton />
+          </div>
+          <Button type="submit" className="flex-1">
+            บันทึกข้อมูล
+          </Button>
+        </div>
       </form>
     </Form>
   );
