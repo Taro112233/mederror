@@ -51,7 +51,7 @@ export default async function HomePage() {
             <span>Admin panel</span>
           </Link>
         </Button>
-        <LogoutButton />
+        <LogoutButton className="w-full text-lg py-6" />
       </div>
     </div>
   );
