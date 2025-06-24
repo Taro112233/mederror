@@ -1,20 +1,10 @@
 'use client';
-import React, { useEffect } from "react";
+import React from "react";
 import LoginForm from "@/components/forms/LoginForm";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
-  const router = useRouter();
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('session_token='));
-      if (hasToken) {
-        router.replace("/");
-      }
-    }
-  }, [router]);
   return (
     <div className="flex justify-center items-center min-h-screen bg-muted">
       <Card className="w-full max-w-md shadow-lg">

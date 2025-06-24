@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import RegisterCredentialForm from "./registerForm/RegisterCredentialForm";
-import OrganizationSelectForm from "./loginForm/OrganizationSelectForm";
+import RegisterCredentialForm from "./RegisterCredentialForm";
+import OrganizationSelectForm from "./OrganizationSelectForm";
 
 export default function RegisterForm() {
   const [step, setStep] = useState(1);
@@ -17,7 +17,7 @@ export default function RegisterForm() {
   const handleRegister = async (username: string, password: string) => {
     const res = await fetch("/api/register", {
       method: "POST",
-      body: JSON.stringify({ organization, username, password }),
+      body: JSON.stringify({ organizationId: organization, username, password }),
       headers: { "Content-Type": "application/json" },
     });
     if (res.ok) {

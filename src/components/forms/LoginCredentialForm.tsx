@@ -15,11 +15,9 @@ import { LoginCredentialSchema, LoginCredentialSchemaType } from "@/lib/zodSchem
 export default function LoginCredentialForm({
   onSubmit,
   onBack,
-  submitLabel = "เข้าสู่ระบบ",
 }: {
   onSubmit: (username: string, password: string) => void;
   onBack: () => void;
-  submitLabel?: string;
 }) {
   const form = useForm<LoginCredentialSchemaType>({
     resolver: zodResolver(LoginCredentialSchema),
@@ -64,7 +62,7 @@ export default function LoginCredentialForm({
           <Button type="button" variant="outline" onClick={onBack}>
             ย้อนกลับ
           </Button>
-          <Button type="submit">{submitLabel}</Button>
+          <Button type="submit">เข้าสู่ระบบ</Button>
         </div>
       </form>
     </Form>

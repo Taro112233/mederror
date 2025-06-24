@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing username or password" }, { status: 400 });
     }
     // Check if username exists
-    const existing = await prisma.account.findUnique({ where: { username } });
+    const existing = await prisma.account.findFirst({ where: { username, organizationId: organizationId || undefined } });
     if (existing) {
       return NextResponse.json({ error: "Username already exists" }, { status: 409 });
     }
