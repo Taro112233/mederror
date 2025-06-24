@@ -1,25 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import jwt from "jsonwebtoken";
 
-export default async function AdminMenu() {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session_token")?.value;
-  if (!sessionToken) {
-    redirect("/login");
-  }
-  let payload: jwt.JwtPayload;
-  try {
-    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
-  } catch {
-    redirect("/login");
-  }
-  if (payload.role !== "ADMIN") {
-    redirect("/");
-  }
-
+export default function AdminMenu() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8">
       <h1 className="text-3xl font-bold mb-8 text-center">Admin Menu</h1>
