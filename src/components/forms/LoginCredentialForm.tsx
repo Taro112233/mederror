@@ -58,11 +58,12 @@ export default function LoginCredentialForm({
             </FormItem>
           )}
         />
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onBack}>
+        <div className="flex flex-row justify-between items-center">
+          <Button type="button" variant="outline" onClick={onBack} className="w-30">
             ย้อนกลับ
           </Button>
-          <Button type="submit">เข้าสู่ระบบ</Button>
+          <div className="flex-1" />
+          <Button type="submit" className="w-30">เข้าสู่ระบบ</Button>
         </div>
       </form>
     </Form>

@@ -76,11 +76,10 @@ export default function OnboardingForm() {
             </FormItem>
           )}
         />
-        <div className="flex flex-row gap-2">
-          <div className="flex-1 max-w-[150px]">
-            <LogoutButton />
-          </div>
-          <Button type="submit" className="flex-1">
+        <div className="flex flex-row justify-between items-center">
+          <LogoutButton className="w-30" />
+          <div className="flex-1" />
+          <Button type="submit" className="w-30">
             บันทึกข้อมูล
           </Button>
         </div>

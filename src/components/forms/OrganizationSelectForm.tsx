@@ -65,7 +65,11 @@ export default function OrganizationSelectForm({ onSelect }: { onSelect: (s: str
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={loading || orgs.length === 0}>ถัดไป</Button>
+        <div className="flex flex-row justify-between items-center">
+          <div className="w-30" />
+          <div className="flex-1" />
+          <Button type="submit" disabled={loading || orgs.length === 0} className="w-30">ถัดไป</Button>
+        </div>
       </form>
     </Form>
   );

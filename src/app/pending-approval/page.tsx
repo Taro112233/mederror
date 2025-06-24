@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import PendingApprovalLogoutButton from "../../components/button/LogoutButton";
+import LogoutButton from "../../components/button/LogoutButton";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@/generated/prisma";
+import { Button } from "@/components/ui/button";
 
 export default async function PendingApprovalPage() {
   const cookieStore = await cookies();
@@ -63,7 +64,15 @@ export default async function PendingApprovalPage() {
               <span className="text-yellow-600 font-semibold">รอการอนุมัติ</span>
             </li>
           </ul>
-          <PendingApprovalLogoutButton />
+          <div className="flex flex-row justify-between items-center">
+            <div className="w-30">
+              <LogoutButton className="w-30" />
+            </div>
+            <div className="flex-1" />
+            <form action="" method="get" className="w-30">
+              <Button type="submit" className="w-30">รีเฟรช</Button>
+            </form>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -73,11 +73,12 @@ export default function RegisterCredentialForm({
             </FormItem>
           )}
         />
-        <div className="flex gap-2">
-          <Button type="button" variant="outline" onClick={onBack}>
+        <div className="flex flex-row justify-between items-center">
+          <Button type="button" variant="outline" onClick={onBack} className="w-30">
             ย้อนกลับ
           </Button>
-          <Button type="submit">{submitLabel}</Button>
+          <div className="flex-1" />
+          <Button type="submit" className="w-30">{submitLabel}</Button>
         </div>
       </form>
     </Form>
