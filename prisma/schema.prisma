@@ -14,6 +14,8 @@ model User {
   passwordHash String
   sangkad       String
   name         String?
+  phone        String?
+  position     String?
   onboarded    Boolean     @default(false)
   role         Role        @default(NOT_APPROVED)
   createdAt    DateTime    @default(now())

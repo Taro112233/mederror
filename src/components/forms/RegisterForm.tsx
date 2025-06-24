@@ -22,7 +22,7 @@ export default function RegisterForm() {
     });
     if (res.ok) {
       alert("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
-      router.push("/login");
+      router.push("/");
     } else {
       let data;
       try {

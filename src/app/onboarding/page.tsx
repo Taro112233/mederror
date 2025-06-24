@@ -1,24 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import OnboardingForm from "@/components/forms/OnboardingForm";
 
 export default function OnboardingPage() {
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setLoading(true);
-    // สมมติว่ามี API /api/onboarding
-    await fetch("/api/onboarding", { method: "POST" });
+  const handleSubmit = async (data: { name: string; phone: string; position: string }) => {
+    await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
     router.push("/");
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* ฟอร์ม onboarding */}
-      <button type="submit" disabled={loading}>บันทึก</button>
-    </form>
-  );
+  return <OnboardingForm onSubmit={handleSubmit} />;
 }

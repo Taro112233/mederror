@@ -33,4 +33,12 @@ export const SangkadSelectSchema = z.object({
   sangkad: z.string().min(1, { message: "กรุณาเลือกสังกัด" }),
 });
 
-export type SangkadSelectSchemaType = z.infer<typeof SangkadSelectSchema>; 
+export type SangkadSelectSchemaType = z.infer<typeof SangkadSelectSchema>;
+
+export const OnboardingFormSchema = z.object({
+  name: z.string().min(1, { message: "กรุณากรอกชื่อ-นามสกุล" }),
+  phone: z.string().min(1, { message: "กรุณากรอกเบอร์โทร" }),
+  position: z.string().min(1, { message: "กรุณากรอกตำแหน่ง" }),
+});
+
+export type OnboardingFormSchemaType = z.infer<typeof OnboardingFormSchema>; 

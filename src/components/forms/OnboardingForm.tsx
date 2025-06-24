@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface OnboardingFormProps {
   onSubmit: (data: { name: string; phone: string; position: string }) => void;
@@ -21,28 +23,28 @@ export default function OnboardingForm({ onSubmit }: OnboardingFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-xs mx-auto mt-10">
-      <div>
-        <label className="block text-sm font-medium mb-1">ชื่อ-นามสกุล</label>
-        <input
-          className="w-full border rounded px-3 py-2"
+      <div className="space-y-1">
+        <Label className="" htmlFor="name">ชื่อ-นามสกุล</Label>
+        <Input
+          id="name"
           value={name}
           onChange={e => setName(e.target.value)}
           required
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">เบอร์โทร</label>
-        <input
-          className="w-full border rounded px-3 py-2"
+      <div className="space-y-1">
+        <Label className="" htmlFor="phone">เบอร์โทร</Label>
+        <Input
+          id="phone"
           value={phone}
           onChange={e => setPhone(e.target.value)}
           required
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">ตำแหน่ง</label>
-        <input
-          className="w-full border rounded px-3 py-2"
+      <div className="space-y-1">
+        <Label className="" htmlFor="position">ตำแหน่ง</Label>
+        <Input
+          id="position"
           value={position}
           onChange={e => setPosition(e.target.value)}
           required
