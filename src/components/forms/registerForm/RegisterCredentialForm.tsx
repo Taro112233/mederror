@@ -10,30 +10,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { OnboardingFormSchema, OnboardingFormSchemaType } from "@/lib/zodSchemas";
+import { LoginCredentialSchema, LoginCredentialSchemaType } from "@/lib/zodSchemas";
 
-interface OnboardingFormProps {
-  onSubmit: (data: { name: string; phone: string; position: string }) => void;
-}
-
-export default function OnboardingForm({ onSubmit }: OnboardingFormProps) {
-  const form = useForm<OnboardingFormSchemaType>({
-    resolver: zodResolver(OnboardingFormSchema),
-    defaultValues: { name: "", phone: "", position: "" },
+export default function LoginCredentialForm({
+  onSubmit,
+  onBack,
+  submitLabel = "เข้าสู่ระบบ",
+}: {
+  onSubmit: (username: string, password: string) => void;
+  onBack: () => void;
+  submitLabel?: string;
+}) {
+  const form = useForm<LoginCredentialSchemaType>({
+    resolver: zodResolver(LoginCredentialSchema),
+    defaultValues: { username: "", password: "", confirmPassword: "" },
   });
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit((values) => {
+          onSubmit(values.username, values.password);
+        })}
         className="space-y-4"
       >
         <FormField
           control={form.control}
-          name="name"
+          name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ชื่อ-นามสกุล</FormLabel>
+              <FormLabel>Username</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -43,12 +49,12 @@ export default function OnboardingForm({ onSubmit }: OnboardingFormProps) {
         />
         <FormField
           control={form.control}
-          name="phone"
+          name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>เบอร์โทร</FormLabel>
+              <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -56,20 +62,23 @@ export default function OnboardingForm({ onSubmit }: OnboardingFormProps) {
         />
         <FormField
           control={form.control}
-          name="position"
+          name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ตำแหน่ง</FormLabel>
+              <FormLabel>ยืนยันรหัสผ่าน</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          บันทึกข้อมูล
-        </Button>
+        <div className="flex gap-2">
+          <Button type="button" variant="outline" onClick={onBack}>
+            ย้อนกลับ
+          </Button>
+          <Button type="submit">{submitLabel}</Button>
+        </div>
       </form>
     </Form>
   );

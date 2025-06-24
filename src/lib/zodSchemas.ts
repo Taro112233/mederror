@@ -25,6 +25,10 @@ export type MedErrorFormSchemaType = z.infer<typeof MedErrorFormSchema>;
 export const LoginCredentialSchema = z.object({
   username: z.string().min(1, { message: "" }),
   password: z.string().min(1, { message: "" }),
+  confirmPassword: z.string().min(1, { message: "" }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "รหัสผ่านไม่ตรงกัน",
+  path: ["confirmPassword"],
 });
 
 export type LoginCredentialSchemaType = z.infer<typeof LoginCredentialSchema>;

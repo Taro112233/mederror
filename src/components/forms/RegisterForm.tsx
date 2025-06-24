@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import LoginCredentialForm from "./loginForm/LoginCredentialForm";
+import RegisterCredentialForm from "./registerForm/RegisterCredentialForm";
 import OrganizationSelectForm from "./loginForm/OrganizationSelectForm";
 
 export default function RegisterForm() {
@@ -38,7 +38,7 @@ export default function RegisterForm() {
     <div>
       {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} />}
       {step === 2 && (
-        <LoginCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} submitLabel="สมัครสมาชิก" />
+        <RegisterCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} submitLabel="สมัครสมาชิก" />
       )}
     </div>
   );
