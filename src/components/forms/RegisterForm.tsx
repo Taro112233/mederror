@@ -24,7 +24,12 @@ export default function RegisterForm() {
       alert("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
       router.push("/login");
     } else {
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = { error: "เกิดข้อผิดพลาดที่ไม่คาดคิด (Invalid JSON response)" };
+      }
       alert(data.error || "สมัครสมาชิกไม่สำเร็จ");
     }
   };
