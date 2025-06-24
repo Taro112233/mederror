@@ -38,7 +38,7 @@ export default function RegisterForm() {
     <div>
       {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} />}
       {step === 2 && (
-        <RegisterCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} submitLabel="สมัครสมาชิก" />
+        <RegisterCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} />
       )}
     </div>
   );
