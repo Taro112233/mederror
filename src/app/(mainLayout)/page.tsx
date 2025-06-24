@@ -1,7 +1,30 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { PrismaClient } from "@/generated/prisma";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // --- Logic ตรวจสอบ session, onboarding, approved, role ---
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
+  if (!sessionToken) {
+    redirect("/login");
+  }
+  const accountId = sessionToken.split(".")[0];
+  const prisma = new PrismaClient();
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  if (!account) {
+    redirect("/login");
+  }
+  if (!account.onboarded) {
+    redirect("/onboarding");
+  }
+  if (!account.approved) {
+    redirect("/pending-approval");
+  }
+  // --- END Logic ---
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8">
       <h1 className="text-3xl font-bold mb-8 text-center">ยินดีต้อนรับ!</h1>

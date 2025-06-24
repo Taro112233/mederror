@@ -1,3 +1,4 @@
+'use client';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -11,21 +12,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OnboardingFormSchema, OnboardingFormSchemaType } from "@/lib/zodSchemas";
+import { useRouter } from "next/navigation";
 
-interface OnboardingFormProps {
-  onSubmit: (data: { name: string; phone: string; position: string }) => void;
-}
-
-export default function OnboardingForm({ onSubmit }: OnboardingFormProps) {
+export default function OnboardingForm() {
   const form = useForm<OnboardingFormSchemaType>({
     resolver: zodResolver(OnboardingFormSchema),
     defaultValues: { name: "", phone: "", position: "" },
   });
+  const router = useRouter();
+
+  const handleSubmit = async (data: { name: string; phone: string; position: string }) => {
+    await fetch("/api/onboarding", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    router.push("/");
+  };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4"
       >
         <FormField

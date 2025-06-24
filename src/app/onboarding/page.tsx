@@ -1,19 +1,24 @@
-'use client';
-import { useRouter } from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { PrismaClient } from "@/generated/prisma";
 import OnboardingForm from "@/components/forms/OnboardingForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-export default function OnboardingPage() {
-  const router = useRouter();
-
-  const handleSubmit = async (data: { name: string; phone: string; position: string }) => {
-    await fetch("/api/onboarding", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    router.push("/");
-  };
+export default async function OnboardingPage() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
+  if (!sessionToken) {
+    redirect("/login");
+  }
+  const accountId = sessionToken.split(".")[0];
+  const prisma = new PrismaClient();
+  const account = await prisma.account.findUnique({ where: { id: accountId } });
+  if (!account) {
+    redirect("/login");
+  }
+  if (account.onboarded) {
+    redirect("/");
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-muted">
@@ -22,7 +27,7 @@ export default function OnboardingPage() {
           <CardTitle>ลงทะเบียนข้อมูลผู้ใช้</CardTitle>
         </CardHeader>
         <CardContent>
-          <OnboardingForm onSubmit={handleSubmit} />
+          <OnboardingForm />
         </CardContent>
       </Card>
     </div>
