@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Welcome to the Menu</h1>
+      <h1 className="text-3xl font-bold mb-8 text-center">ยินดีต้อนรับ!</h1>
       <div className="flex flex-col gap-6 w-full max-w-xs">
         <Button asChild size="lg" className="w-full text-lg py-6">
           <Link href="/dashboard">

@@ -1,23 +1,23 @@
 'use client';
-import React from "react";
-import OnboardingForm from "@/components/forms/OnboardingForm";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function OnboardingPage() {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // ในอนาคตจะเชื่อม backend ที่นี่ (บันทึกข้อมูล onboarding)
-  const handleSubmit = (data: { name: string; phone: string; position: string }) => {
-    // mock: ไปหน้า pending-approval
-    router.push("/pending-approval");
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    // สมมติว่ามี API /api/onboarding
+    await fetch("/api/onboarding", { method: "POST" });
+    router.push("/");
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h1 className="text-xl font-bold mb-4 text-center">กรอกข้อมูล Onboarding</h1>
-        <OnboardingForm onSubmit={handleSubmit} />
-      </div>
-    </main>
+    <form onSubmit={handleSubmit}>
+      {/* ฟอร์ม onboarding */}
+      <button type="submit" disabled={loading}>บันทึก</button>
+    </form>
   );
 }

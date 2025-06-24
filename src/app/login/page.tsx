@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from "react";
-import LoginForm from "@/components/forms/LoginForm";
+import LoginForm from "@/components/forms/loginForm/LoginForm";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -17,14 +17,8 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h1 className="text-xl font-bold mb-4 text-center">เข้าสู่ระบบ</h1>
-        <LoginForm onSuccess={handleSuccess} onFail={handleFail} />
-        {loginFailed && (
-          <div className="text-center text-red-600 mt-2">Login Failed</div>
-        )}
-      </div>
-    </main>
+    <div className="flex justify-center items-center min-h-screen">
+      <LoginForm />
+    </div>
   );
 }
