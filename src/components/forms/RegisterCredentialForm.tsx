@@ -10,17 +10,19 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LoginCredentialSchema, LoginCredentialSchemaType } from "@/lib/zodSchemas";
+import { RegisterCredentialSchema, RegisterCredentialSchemaType } from "@/lib/zodSchemas";
 
-export default function LoginCredentialForm({
+export default function RegisterCredentialForm({
   onSubmit,
   onBack,
+  submitLabel = "เข้าสู่ระบบ",
 }: {
   onSubmit: (username: string, password: string) => void;
   onBack: () => void;
+  submitLabel?: string;
 }) {
-  const form = useForm<LoginCredentialSchemaType>({
-    resolver: zodResolver(LoginCredentialSchema),
+  const form = useForm<RegisterCredentialSchemaType>({
+    resolver: zodResolver(RegisterCredentialSchema),
     defaultValues: { username: "", password: "", confirmPassword: "" },
   });
 
@@ -75,7 +77,7 @@ export default function LoginCredentialForm({
           <Button type="button" variant="outline" onClick={onBack}>
             ย้อนกลับ
           </Button>
-          <Button type="submit">สมัครสมาชิก</Button>
+          <Button type="submit">{submitLabel}</Button>
         </div>
       </form>
     </Form>

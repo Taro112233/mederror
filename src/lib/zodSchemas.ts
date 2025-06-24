@@ -22,7 +22,15 @@ export const MedErrorFormSchema = z.object({
 
 export type MedErrorFormSchemaType = z.infer<typeof MedErrorFormSchema>;
 
+// Login: แค่ username, password
 export const LoginCredentialSchema = z.object({
+  username: z.string().min(1, { message: "" }),
+  password: z.string().min(1, { message: "" }),
+});
+export type LoginCredentialSchemaType = z.infer<typeof LoginCredentialSchema>;
+
+// Register: username, password, confirmPassword
+export const RegisterCredentialSchema = z.object({
   username: z.string().min(1, { message: "" }),
   password: z.string().min(1, { message: "" }),
   confirmPassword: z.string().min(1, { message: "" }),
@@ -30,8 +38,7 @@ export const LoginCredentialSchema = z.object({
   message: "รหัสผ่านไม่ตรงกัน",
   path: ["confirmPassword"],
 });
-
-export type LoginCredentialSchemaType = z.infer<typeof LoginCredentialSchema>;
+export type RegisterCredentialSchemaType = z.infer<typeof RegisterCredentialSchema>;
 
 export const OrganizationSelectSchema = z.object({
   organization: z.string().min(1, { message: "" }),
