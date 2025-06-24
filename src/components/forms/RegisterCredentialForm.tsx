@@ -15,7 +15,7 @@ import { RegisterCredentialSchema, RegisterCredentialSchemaType } from "@/lib/zo
 export default function RegisterCredentialForm({
   onSubmit,
   onBack,
-  submitLabel = "เข้าสู่ระบบ",
+  submitLabel = "สมัครสมาชิก",
 }: {
   onSubmit: (username: string, password: string) => void;
   onBack: () => void;

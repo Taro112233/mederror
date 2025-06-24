@@ -21,6 +21,9 @@ export default async function OnboardingPage() {
     redirect("/");
   }
   const accountId = payload.accountId;
+  if (!accountId) {
+    redirect("/login");
+  }
   const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: accountId } });
   if (!account) {

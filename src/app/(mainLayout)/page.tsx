@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@/generated/prisma";
 import jwt from "jsonwebtoken";
+import LogoutButton from "@/components/button/LogoutButton";
 
 export default async function HomePage() {
   // --- Logic ตรวจสอบ session, onboarding, approved, role ---
@@ -50,6 +51,7 @@ export default async function HomePage() {
             <span>Admin panel</span>
           </Link>
         </Button>
+        <LogoutButton />
       </div>
     </div>
   );

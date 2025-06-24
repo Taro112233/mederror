@@ -2,10 +2,10 @@
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 
-export default function PendingApprovalLogoutButton() {
+export default function LogoutButton() {
   const router = useRouter();
-  const handleLogout = () => {
-    document.cookie = 'session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+  const handleLogout = async () => {
+    await fetch('/api/logout', { method: 'POST' });
     router.replace('/login');
   };
   return (
