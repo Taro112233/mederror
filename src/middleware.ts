@@ -7,9 +7,10 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("session_token")?.value;
 
-  // ไม่ต้องเช็คหน้า login, onboarding, pending-approval
+  // ไม่ต้องเช็คหน้า login, register, onboarding, pending-approval
   if (
     pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
     pathname.startsWith("/onboarding") ||
     pathname.startsWith("/pending-approval") ||
     pathname.startsWith("/api")

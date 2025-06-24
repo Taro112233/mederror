@@ -20,4 +20,17 @@ export const MedErrorFormSchema = z.object({
     ),
 });
 
-export type MedErrorFormSchemaType = z.infer<typeof MedErrorFormSchema>; 
+export type MedErrorFormSchemaType = z.infer<typeof MedErrorFormSchema>;
+
+export const LoginCredentialSchema = z.object({
+  username: z.string().min(1, { message: "กรุณากรอกชื่อผู้ใช้" }),
+  password: z.string().min(1, { message: "กรุณากรอกรหัสผ่าน" }),
+});
+
+export type LoginCredentialSchemaType = z.infer<typeof LoginCredentialSchema>;
+
+export const SangkadSelectSchema = z.object({
+  sangkad: z.string().min(1, { message: "กรุณาเลือกสังกัด" }),
+});
+
+export type SangkadSelectSchemaType = z.infer<typeof SangkadSelectSchema>; 
