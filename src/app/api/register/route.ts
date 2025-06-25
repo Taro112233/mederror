@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         passwordHash,
         organizationId: organizationId || null,
         onboarded: false,
-        approved: false,
+        role: "UNAPPROVED",
         user: { create: {} },
       },
       include: { user: true },

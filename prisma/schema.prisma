@@ -13,7 +13,7 @@ model Account {
   username       String        @unique
   passwordHash   String
   onboarded      Boolean       @default(false)
-  approved       Boolean       @default(false)
+  role           Role          @default(UNAPPROVED)
   organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationId String?
   user           User?
@@ -22,20 +22,20 @@ model Account {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  name       String?
-  position   String?
-  phone      String?
-  account    Account  @relation(fields: [accountId], references: [id])
-  accountId  String   @unique
-  medErrors  MedError[]    @relation("UserMedErrors")
+  id        String     @id @default(uuid())
+  name      String?
+  position  String?
+  phone     String?
+  account   Account    @relation(fields: [accountId], references: [id])
+  accountId String     @unique
+  medErrors MedError[] @relation("UserMedErrors")
 }
 
 model Organization {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
   accounts  Account[]
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model MedError {
@@ -63,7 +63,7 @@ model LoginLog {
 }
 
 enum Role {
-  NOT_APPROVED
+  UNAPPROVED
   USER
   ADMIN
   DEVELOPER

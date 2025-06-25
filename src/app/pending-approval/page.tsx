@@ -21,10 +21,10 @@ export default async function PendingApprovalPage() {
   if (!payload.onboarded) {
     redirect("/onboarding");
   }
-  // เช็ค approved จาก database
+  // เช็ค role จาก database
   const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: payload.id } });
-  if (account?.approved) {
+  if (account?.role !== "UNAPPROVED") {
     redirect("http://localhost:3000");
   }
 

@@ -43,10 +43,9 @@ export async function POST(req: NextRequest) {
     const newPayload = {
       id: account.id,
       sub: account.id,
-      approved: account.approved,
       onboarded: account.onboarded,
       organizationId: account.organizationId,
-      role: account.approved ? "ADMIN" : "USER",
+      role: account.role,
     };
     const newSessionToken = jwt.sign(newPayload, jwtSecret, { expiresIn: "7d" });
     // set cookie ใหม่

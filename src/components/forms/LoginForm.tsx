@@ -29,7 +29,7 @@ export default function LoginForm() {
       // สำเร็จ: redirect ตามสถานะ
       if (!data.account.onboarded) {
         router.replace("/onboarding");
-      } else if (!data.account.approved) {
+      } else if (data.account.role === "UNAPPROVED") {
         router.replace("/pending-approval");
       } else {
         router.replace("/");

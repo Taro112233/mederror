@@ -27,7 +27,7 @@ export default async function HomePage() {
   if (!account.onboarded) {
     redirect("/onboarding");
   }
-  if (!account.approved) {
+  if (!account.role || account.role === "UNAPPROVED") {
     redirect("/pending-approval");
   }
   // --- END Logic ---
