@@ -6,6 +6,7 @@ import { PrismaClient } from "@/generated/prisma";
 import jwt from "jsonwebtoken";
 import LogoutButton from "@/components/button/LogoutButton";
 
+// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function HomePage() {
   // --- Logic ตรวจสอบ session, onboarding, approved, role ---
   const cookieStore = await cookies();

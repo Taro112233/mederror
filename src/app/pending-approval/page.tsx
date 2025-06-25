@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { PrismaClient } from "@/generated/prisma";
 import { Button } from "@/components/ui/button";
 
+// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role เป็น UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function PendingApprovalPage() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session_token")?.value;

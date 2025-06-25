@@ -5,6 +5,7 @@ import OnboardingForm from "@/components/forms/OnboardingForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import jwt from "jsonwebtoken";
 
+// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และยังไม่ได้ onboarded เท่านั้นที่เข้าถึงได้
 export default async function OnboardingPage() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session_token")?.value;
