@@ -7,7 +7,7 @@ export default function SelectOrganizationPage() {
   const router = useRouter();
 
   // ในอนาคตสามารถเชื่อม backend ที่นี่ (เช่น save orgId ใน context หรือ cookie)
-  const handleSelect = (orgId: string) => {
+  const handleSelect = () => {
     // mock: ไปหน้า login
     router.push("/login");
   };
