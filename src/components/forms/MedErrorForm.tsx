@@ -22,6 +22,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { MedErrorFormSchema, MedErrorFormSchemaType } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { ImageIcon, UploadIcon, XIcon, AlertCircleIcon } from "lucide-react";
 
 type FormValues = MedErrorFormSchemaType;
 
@@ -47,6 +49,39 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
   const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
   const [userInfo, setUserInfo] = useState<{ name: string; position: string } | null>(null);
   const [userLoading, setUserLoading] = useState(true);
+
+  const maxSizeMB = 5;
+  const maxSize = maxSizeMB * 1024 * 1024;
+  const maxFiles = 6;
+  const [
+    { files, isDragging, errors: fileErrors },
+    {
+      handleDragEnter,
+      handleDragLeave,
+      handleDragOver,
+      handleDrop,
+      openFileDialog,
+      removeFile,
+      getInputProps,
+    },
+  ] = useFileUpload({
+    accept: "image/svg+xml,image/png,image/jpeg,image/jpg,image/gif",
+    maxSize,
+    multiple: true,
+    maxFiles,
+  });
+
+  useEffect(() => {
+    if (files.length > 0) {
+      form.setValue(
+        "image",
+        files.map((f) => (f.file instanceof File ? f.file : undefined)).filter(Boolean)
+      );
+    } else {
+      form.setValue("image", undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files]);
 
   useEffect(() => {
     fetch("/api/severity")
@@ -198,29 +233,102 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
         <FormField
           control={form.control}
           name="image"
-          render={({ field }) => {
-            const { onChange, ref, name, ...rest } = field;
-            return (
-              <FormItem>
-                <FormLabel>แนบรูปภาพ</FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => onChange(e.target.files)}
-                    name={name}
-                    ref={ref}
-                    {...rest}
+          render={() => (
+            <FormItem>
+              <FormLabel>แนบรูปภาพ (อัปโหลดได้สูงสุด {maxFiles} รูป)<FormMessage /></FormLabel>
+              <FormControl>
+                <div
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  data-dragging={isDragging || undefined}
+                  data-files={files.length > 0 || undefined}
+                  className="border-input data-[dragging=true]:bg-accent/50 has-[input:focus]:border-ring has-[input:focus]:ring-ring/50 relative flex min-h-52 flex-col items-center overflow-hidden rounded-xl border border-dashed p-4 transition-colors not-data-[files]:justify-center has-[input:focus]:ring-[3px]"
+                >
+                  <input
+                    {...getInputProps()}
+                    className="sr-only"
+                    aria-label="Upload image file"
                   />
-                </FormControl>
-              </FormItem>
-            );
-          }}
+                  {files.length > 0 ? (
+                    <div className="flex w-full flex-col gap-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="truncate text-sm font-medium">
+                          Uploaded Files ({files.length})
+                        </h3>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={openFileDialog}
+                          disabled={files.length >= maxFiles}
+                          type="button"
+                        >
+                          <UploadIcon className="-ms-0.5 size-3.5 opacity-60" aria-hidden="true" />
+                          เพิ่มรูป
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                        {files.map((file) => (
+                          <div
+                            key={file.id}
+                            className="bg-accent relative aspect-square rounded-md"
+                          >
+                            <img
+                              src={file.preview}
+                              alt={file.file.name}
+                              className="size-full rounded-[inherit] object-cover"
+                            />
+                            <Button
+                              onClick={() => removeFile(file.id)}
+                              size="icon"
+                              className="border-background focus-visible:border-background absolute -top-2 -right-2 size-6 rounded-full border-2 shadow-none"
+                              aria-label="Remove image"
+                              type="button"
+                            >
+                              <XIcon className="size-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center px-4 py-3 text-center">
+                      <div
+                        className="bg-background mb-2 flex size-11 shrink-0 items-center justify-center rounded-full border"
+                        aria-hidden="true"
+                      >
+                        <ImageIcon className="size-4 opacity-60" />
+                      </div>
+                      <p className="mb-1.5 text-sm font-medium">ลากหรือวางรูปภาพที่นี่</p>
+                      <p className="text-muted-foreground text-xs">
+                        SVG, PNG, JPG หรือ GIF (สูงสุด {maxSizeMB}MB)
+                      </p>
+                      <Button variant="outline" className="mt-4" onClick={openFileDialog} type="button">
+                        <UploadIcon className="-ms-1 opacity-60" aria-hidden="true" />
+                        เลือกรูปภาพ
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              {(fileErrors.length > 0 || form.formState.errors.image) && (
+                <div className="text-destructive flex items-center gap-1 text-xs mt-1" role="alert">
+                  <AlertCircleIcon className="size-3 shrink-0" />
+                  <span>
+                    {fileErrors[0] ||
+                      (typeof form.formState.errors.image?.message === "string"
+                        ? form.formState.errors.image?.message
+                        : "")}
+                  </span>
+                </div>
+              )}
+            </FormItem>
+          )}
         />
         <Button type="submit" className="w-full mt-2">
           ส่งรายงาน
         </Button>
-        {/* User info section */}
         <div className="mt-6 p-4 border rounded bg-muted/50 text-sm text-gray-700">
           <div className="mb-1 font-semibold">ข้อมูลผู้รายงาน</div>
           {userLoading ? (

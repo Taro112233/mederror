@@ -10,10 +10,11 @@ export const MedErrorFormSchema = z.object({
     .any()
     .optional()
     .refine(
-      (files) =>
-        !files ||
-        (files instanceof FileList && files.length === 0) ||
-        (files instanceof FileList && files[0].type.startsWith("image/")),
+      (files) => {
+        if (!files || (Array.isArray(files) && files.length === 0) || (files instanceof FileList && files.length === 0)) return true;
+        const arr = files instanceof FileList ? Array.from(files) : Array.isArray(files) ? files : [files];
+        return arr.every((f) => f && typeof f.type === "string" && f.type.startsWith("image/"));
+      },
       {
         message: "ไฟล์ต้องเป็นรูปภาพเท่านั้น",
       }

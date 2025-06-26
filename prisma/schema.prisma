@@ -72,7 +72,7 @@ model MedError {
   errorTypeId  String
   subErrorType SubErrorType @relation(fields: [subErrorTypeId], references: [id])
   subErrorTypeId String
-  imageUrl     String?
+  images       MedErrorImage[]
   reporter     User        @relation("UserMedErrors", fields: [reporterId], references: [id])
   reporterId   String
   createdAt    DateTime    @default(now())
@@ -81,6 +81,14 @@ model MedError {
   reporterPosition String
   reporterPhone    String
   reporterOrganizationId String?
+}
+
+model MedErrorImage {
+  id         String   @id @default(uuid())
+  medError   MedError @relation(fields: [medErrorId], references: [id])
+  medErrorId String
+  url        String   // path or url of the image file
+  createdAt  DateTime @default(now())
 }
 
 model LoginLog {
