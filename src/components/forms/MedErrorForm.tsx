@@ -177,9 +177,9 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
           name="eventDate"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>วัน/เดือน/ปี ที่เกิดเหตุการณ์<FormMessage /></FormLabel>
+              <FormLabel>วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์<FormMessage /></FormLabel>
               <FormControl>
-                <Input type="date" {...field} />
+                <Input type="datetime-local" {...field} />
               </FormControl>
               
             </FormItem>
