@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Form,
   FormField,
@@ -18,30 +18,16 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { MedErrorFormSchema, MedErrorFormSchemaType } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-const severityLevels = [
-  { value: "A", label: "A - ไม่มีอันตราย" },
-  { value: "B", label: "B - เกือบเกิดอันตราย" },
-  { value: "C", label: "C - เกิดอันตรายเล็กน้อย" },
-  { value: "D", label: "D - เกิดอันตรายรุนแรง" },
-];
-const errorTypes = [
-  { value: "prescription", label: "การสั่งยา" },
-  { value: "dispensing", label: "การจ่ายยา" },
-  { value: "administration", label: "การให้ยา" },
-];
-const subErrorTypes = [
-  { value: "dose", label: "ขนาดยา" },
-  { value: "drug", label: "ชื่อยา" },
-  { value: "route", label: "วิธีให้ยา" },
-];
-
 type FormValues = MedErrorFormSchemaType;
+
+type Severity = { id: string; code: string; label: string };
+type SubErrorType = { id: string; code: string; label: string };
+type ErrorType = { id: string; code: string; label: string; subErrorTypes: SubErrorType[] };
 
 export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) {
   const form = useForm<FormValues>({
@@ -55,10 +41,40 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       image: undefined,
     },
   });
-  const [submitted, setSubmitted] = useState(false);
   const router = useRouter();
+  const [severities, setSeverities] = useState<Severity[]>([]);
+  const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
+  const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
+  const [userInfo, setUserInfo] = useState<{ name: string; position: string } | null>(null);
+  const [userLoading, setUserLoading] = useState(true);
 
-  const onSubmit = (data: FormValues) => {
+  useEffect(() => {
+    fetch("/api/severity")
+      .then((res) => res.json())
+      .then(setSeverities);
+    fetch("/api/errorType")
+      .then((res) => res.json())
+      .then(setErrorTypes);
+    fetch("/api/users/me")
+      .then((res) => res.json())
+      .then((data) => {
+        setUserInfo({ name: data.name, position: data.position });
+        setUserLoading(false);
+      })
+      .catch(() => setUserLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const errorTypeId = form.watch("errorType");
+    if (!errorTypeId) {
+      setFilteredSubErrorTypes([]);
+      return;
+    }
+    const found = errorTypes.find((e) => e.id === errorTypeId);
+    setFilteredSubErrorTypes(found ? found.subErrorTypes : []);
+  }, [form.watch("errorType"), errorTypes]);
+
+  const onSubmit = () => {
     form.reset();
     toast.success("ส่งรายงานสำเร็จ! ขอบคุณที่ส่งรายงาน Med error");
     if (onSuccess) onSuccess();
@@ -112,8 +128,8 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                     <SelectValue placeholder="-- เลือก --" />
                   </SelectTrigger>
                   <SelectContent>
-                    {severityLevels.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
+                    {severities.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
                         {s.label}
                       </SelectItem>
                     ))}
@@ -141,7 +157,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   </SelectTrigger>
                   <SelectContent>
                     {errorTypes.map((e) => (
-                      <SelectItem key={e.value} value={e.value}>
+                      <SelectItem key={e.id} value={e.id}>
                         {e.label}
                       </SelectItem>
                     ))}
@@ -168,8 +184,8 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                     <SelectValue placeholder="-- เลือก --" />
                   </SelectTrigger>
                   <SelectContent>
-                    {subErrorTypes.map((e) => (
-                      <SelectItem key={e.value} value={e.value}>
+                    {filteredSubErrorTypes.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
                         {e.label}
                       </SelectItem>
                     ))}
@@ -183,7 +199,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
           control={form.control}
           name="image"
           render={({ field }) => {
-            const { value, onChange, ref, name, ...rest } = field;
+            const { onChange, ref, name, ...rest } = field;
             return (
               <FormItem>
                 <FormLabel>แนบรูปภาพ</FormLabel>
@@ -204,6 +220,21 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
         <Button type="submit" className="w-full mt-2">
           ส่งรายงาน
         </Button>
+        {/* User info section */}
+        <div className="mt-6 p-4 border rounded bg-muted/50 text-sm text-gray-700">
+          <div className="mb-1 font-semibold">ข้อมูลผู้รายงาน</div>
+          {userLoading ? (
+            <div>กำลังโหลดข้อมูลผู้ใช้งาน...</div>
+          ) : userInfo ? (
+            <>
+              <div>ชื่อ-นามสกุล: <span className="font-medium">{userInfo.name || "-"}</span></div>
+              <div>ตำแหน่ง: <span className="font-medium">{userInfo.position || "-"}</span></div>
+              <div className="mt-2 text-xs text-gray-500">* ระบบจะบันทึกชื่อและตำแหน่งนี้ไว้กับรายงาน</div>
+            </>
+          ) : (
+            <div className="text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้งาน</div>
+          )}
+        </div>
       </form>
     </Form>
   );
