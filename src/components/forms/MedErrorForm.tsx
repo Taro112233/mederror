@@ -47,7 +47,10 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
   const [severities, setSeverities] = useState<Severity[]>([]);
   const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
   const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
-  const [userInfo, setUserInfo] = useState<{ name: string; position: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<
+    | { id: string; username: string; name: string; position: string; phone: string }
+    | null
+  >(null);
   const [userLoading, setUserLoading] = useState(true);
 
   const maxSizeMB = 5;
@@ -93,7 +96,13 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
     fetch("/api/users/me")
       .then((res) => res.json())
       .then((data) => {
-        setUserInfo({ name: data.name, position: data.position });
+        setUserInfo({
+          id: data.id,
+          username: data.username,
+          name: data.name,
+          position: data.position,
+          phone: data.phone,
+        });
         setUserLoading(false);
       })
       .catch(() => setUserLoading(false));
@@ -109,13 +118,49 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
     setFilteredSubErrorTypes(found ? found.subErrorTypes : []);
   }, [form.watch("errorType"), errorTypes]);
 
-  const onSubmit = () => {
-    form.reset();
-    toast.success("ส่งรายงานสำเร็จ! ขอบคุณที่ส่งรายงาน Med error");
-    if (onSuccess) onSuccess();
-    setTimeout(() => {
-      router.push("/");
-    }, 100);
+  const onSubmit = async (values: FormValues) => {
+    try {
+      if (!userInfo || !userInfo.id || !userInfo.username) {
+        toast.error("ไม่พบข้อมูลผู้รายงาน");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("eventDate", values.eventDate);
+      formData.append("description", values.description);
+      formData.append("severity", values.severity);
+      formData.append("errorType", values.errorType);
+      formData.append("subErrorType", values.subErrorType);
+      formData.append("reporterId", userInfo.id);
+      formData.append("reporterUsername", userInfo.username);
+      formData.append("reporterName", userInfo.name || "");
+      formData.append("reporterPosition", userInfo.position || "");
+      formData.append("reporterPhone", userInfo.phone || "");
+      formData.append("reporterOrganizationId", ""); // เพิ่มเติมถ้ามี
+      // แนบไฟล์รูปภาพ (รองรับหลายไฟล์)
+      if (Array.isArray(values.image)) {
+        for (const file of values.image) {
+          if (file) formData.append("image", file);
+        }
+      }
+      // ส่งไปยัง API
+      const res = await fetch("/api/mederror", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+      toast.success("ส่งรายงานสำเร็จ! ขอบคุณที่ส่งรายงาน Med error");
+      form.reset();
+      if (onSuccess) onSuccess();
+      setTimeout(() => {
+        router.push("/");
+      }, 100);
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        toast.error(e.message || "เกิดข้อผิดพลาด");
+      } else {
+        toast.error("เกิดข้อผิดพลาด");
+      }
+    }
   };
 
   return (
