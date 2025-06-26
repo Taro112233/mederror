@@ -42,9 +42,9 @@ model MedError {
   id           String   @id @default(uuid())
   eventDate    DateTime
   description  String
-  severity     String
-  errorType    String
-  subErrorType String
+  severity     Severity
+  errorType    ErrorType
+  subErrorType SubErrorTypePrescribing
   imageUrl     String?
   reporter     User     @relation("UserMedErrors", fields: [reporterId], references: [id])
   reporterId   String
@@ -67,4 +67,110 @@ enum Role {
   USER
   ADMIN
   DEVELOPER
+}
+
+enum Severity {
+  A // มีโอกาสผิดพลาด
+  B // เกิดขึ้นแต่ไม่ถึงตัวผู้ป่วย
+  C // ถึงตัวผู้ป่วยแต่ไม่มีอันตราย
+  D // ต้องคอยเฝ้าระวังเป็นพิเศษ
+  E // ต้องบำบัดรักษา
+  F // ต้อง Admit / พักรักษาในโรงพยาบาลนานขึ้น
+  G // ต้องพิการ
+  H // ต้องการปั๊มหัวใจ / เข้ารับการผ่าตัด
+  I // เสียชีวิต
+}
+
+enum ErrorType {
+  PRESCRIBING      // Prescribing error (การสั่งใช้ยา)
+  TRANSCRIPTION    // Transcription error (การคัดลอก การคีย์คำสั่งใช้ยา)
+  PRE_DISPENSING   // Pre-dispensing error (การจัดยาตามใบสั่งแพทย์)
+  DISPENSING       // Dispensing error (ห้องยาจ่ายยาไปแล้ว)
+  ADMINISTRATION   // Administration error (การบริหารยาแก่ผู้ป่วย)
+}
+
+enum SubErrorTypePrescribing {
+  UNSPECIFIED_STRENGTH                // ไม่ระบุความแรงของยา / ความแรงไม่ถูกต้อง
+  UNSPECIFIED_FORM                    // ไม่ระบุรูปแบบยา / ระบุรูปแบบยาผิด
+  UNSPECIFIED_QUANTITY                // ไม่ได้ระบุจำนวนยาที่ต้องการ
+  UNSPECIFIED_USAGE                   // ไม่ได้ระบุวิธีใช้
+  INCORRECT_DOSAGE                    // วิธีใช้ที่ระบุมากกว่า / น้อยกว่าขนาดที่ใช้โดยทั่วไป
+  CHANGED_USAGE_FROM_PREVIOUS         // วิธีใช้ที่ระบุเปลี่ยนแปลงจากเดิมที่เคยได้รับ
+  NAME_MISMATCH                       // ชื่อในใบสั่งยาไม่ตรงกับชื่อผู้ป่วย
+  DUPLICATE_SAME_PRESCRIPTION         // ได้รับยาซ้ำซ้อนจากใบสั่งยาเดียวกัน
+  DUPLICATE_DIFFERENT_CLINIC          // ได้รับยาซ้ำซ้อนจากต่างคลินิกกัน
+  INCORRECT_DRUG_NAME                 // ระบุชื่อยาผิด
+  DRUG_NOT_AVAILABLE                  // สั่งยาที่ไม่มีในโรงพยาบาล
+  TWO_STRENGTHS_SAME_PRESCRIPTION     // สั่งยา 2 ความแรงในใบสั่งยาเดียวกัน
+  ABNORMAL_QUANTITY                   // จำนวนยาที่แพทย์สั่งมากหรือน้อยผิดปกติ
+  CANNOT_ADMINISTER                   // ไม่สามารถบริหารยาตามขนาดหรือวิธีที่แพทย์สั่งได้
+  UNCLEAR_INSTRUCTION                 // คำสั่งใช้ยาไม่ชัดเจน / อ่านไม่ออก
+  NON_STANDARD_ABBREVIATION           // ใช้คำย่อไม่สากลหรือไม่เข้าใจคำย่อ
+  ALLERGY_HISTORY                     // ผู้ป่วยเคยแพ้ยาที่แพทย์สั่ง
+  DRUG_INTERACTION                    // อาจเกิด drug interaction ได้
+  RESTRICTED_DRUG                     // สั่งยาที่มีเงื่อนไขการสั่งใช้
+  CONTRAINDICATED_PREGNANCY           // สั่งยาห้ามใช้ในหญิงตั้งครรภ์ / ให้นมบุตร
+  OMITTED_NECESSARY_DRUG              // ไม่ได้สั่งยาที่ผู้ป่วยสมควรได้รับ
+  INCORRECT_FOR_DISEASE               // สั่งยาไม่ตรงกับโรค
+  PATIENT_REFUSED                     // ผู้ป่วยปฏิเสธรับยา
+  LACK_LAB_INFO                       // สั่งยาโดยขาดข้อมูลผลตรวจทางห้องปฏิบัติการที่จำเป็นตามแนวทางที่กำหนด
+  CONTRAINDICATED_OR_WARNING          // สั่งยาในผู้ป่วยที่มีข้อห้ามใช้ / ข้อควรระวัง
+}
+
+enum SubErrorTypeTranscribing {
+  INCORRECT_TYPE                // ผิดชนิด
+  INCORRECT_QUANTITY            // จำนวนไม่ถูกต้อง
+  INCOMPLETE_ITEMS              // รายการไม่ครบตามแพทย์สั่ง
+  INCORRECT_STRENGTH            // ผิดความแรง
+  INCORRECT_LABEL               // พิมพ์ฉลากยาผิด
+  INCORRECT_FORM                // ผิดรูปแบบ
+  INCORRECT_USAGE               // วิธีใช้ไม่ถูกต้อง
+  INCORRECT_DOSAGE              // ผิดขนาด
+  COPIED_UNORDERED_DRUG         // คัดลอกยาที่แพทย์ไม่ได้สั่ง / หยุดการสั่ง
+  NOT_SENT_COPY_ORDER           // ไม่ได้ฉีก Copy Order ส่งห้องยา
+  INCORRECT_PERSON              // ผิดคน
+}
+
+enum SubErrorTypePreDispensing {
+  INCORRECT_TYPE                // ผิดชนิด
+  INCORRECT_QUANTITY            // จำนวนไม่ถูกต้อง
+  INCOMPLETE_ITEMS              // รายการไม่ครบตามแพทย์สั่ง
+  INCORRECT_STRENGTH            // ผิดความแรง
+  INCORRECT_LABEL               // พิมพ์ฉลากยาผิด
+  INCORRECT_FORM                // ผิดรูปแบบ
+  MIXED_WITH_OTHER_PATIENT      // จัดยาปะปนกันกับผู้ป่วยรายอื่น
+  INCORRECT_DOSAGE              // ผิดขนาด
+  EXPIRED_OR_DETERIORATED       // ยาหมดอายุ / เสื่อมสภาพ
+  MIXED_DRUGS                   // ยาปะปนกัน
+  INCORRECT_PATIENT_MATCH       // จับคู่ใบสั่งยาผิดคน
+}
+
+enum SubErrorTypeDispensing {
+  INCORRECT_TYPE                // ผิดชนิด
+  INCORRECT_FORM                // ผิดรูปแบบ
+  INCORRECT_STRENGTH            // ผิดความแรง
+  INCORRECT_QUANTITY            // จำนวนไม่ถูกต้อง
+  INCOMPLETE_ITEMS              // รายการไม่ครบตามแพทย์สั่ง / ไม่ได้จ่ายยา
+  INCORRECT_OR_MISSING_LABEL    // ฉลากไม่ถูกต้อง / ไม่มีฉลาก
+  INCORRECT_PERSON_OR_MIXED     // ผิดคน / ยาผู้ป่วยปนกัน
+  UNORDERED_DRUG                // จ่ายยาที่แพทย์ไม่ได้สั่ง / หยุดการสั่ง
+  INCORRECT_USAGE               // วิธีใช้ไม่ถูกต้องตามแพทย์สั่ง
+  DUPLICATE_DRUG                // จ่ายยาซ้ำ
+  INCORRECT_DOSAGE              // ขนาดยาไม่ถูกต้องตามแพทย์สั่ง
+  DELAYED_DISPENSING            // จ่ายยาล่าช้าเกินเวลาที่กำหนด
+  EXPIRED_OR_DETERIORATED       // จ่ายยาหมดอายุ / เสื่อมสภาพ
+  INCORRECT_LOCKER              // จ่ายยาผิดช่องลงล็อคยา
+}
+
+enum SubErrorTypeAdministration {
+  INCORRECT_PERSON                // ผิดคน
+  INCORRECT_TYPE                  // ผิดชนิด (ตัวยา / สารน้ำผิดชนิด)
+  INCORRECT_DOSAGE_OR_STRENGTH    // ผิดขนาด / ความแรง / ความเข้มข้น
+  DUPLICATE_OR_UNORDERED_DRUG     // ให้ยาซ้ำ / ให้ยาที่แพทย์ไม่ได้สั่ง / หยุดการสั่ง
+  INCORRECT_OR_MISSED_TIME        // ผิดเวลาเกินกว่า 1 ชม. / ไม่ได้ให้ยา
+  INCORRECT_ROUTE_OR_SIDE         // วิถีทางบริหารยาผิด / ผิดข้าง
+  INCORRECT_TECHNIQUE             // ผิดเทคนิค
+  ALLERGY_OR_CONTRAINDICATION     // ให้ยาที่ผู้ป่วยมีประวัติแพ้ยา / ผู้ป่วยมีข้อห้ามใช้
+  INCORRECT_USAGE                 // วิธีใช้ไม่ถูกต้องตามแพทย์สั่ง
+  EXPIRED_OR_UNSTABLE             // ให้ยาที่หมดอายุ / ไม่มีความคงตัวแล้ว
 }
