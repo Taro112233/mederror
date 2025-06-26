@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useMemo, useId } from "react";
+import { useState, useMemo } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -10,16 +10,12 @@ import {
   getSortedRowModel,
   useReactTable,
   flexRender,
-  Column,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 // ประเภทข้อมูล Med Error
 export type MedErrorRecord = {
@@ -45,29 +41,7 @@ const mockRecords: MedErrorRecord[] = [
 // columns สำหรับ TanStack Table
 const columns: ColumnDef<MedErrorRecord>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    header: "วัน/เดือน/ปี ที่เกิดเหตุการณ์",
+    header: "วันที่",
     accessorKey: "date",
     meta: { filterVariant: "text" },
   },
@@ -77,31 +51,19 @@ const columns: ColumnDef<MedErrorRecord>[] = [
     meta: { filterVariant: "text" },
   },
   {
-    header: "ระดับความรุนแรง",
+    header: "ระดับ",
     accessorKey: "severity",
     meta: { filterVariant: "text" },
   },
   {
-    header: "ประเภทความคลาดเคลื่อน",
+    header: "ประเภท",
     accessorKey: "errorType",
     meta: { filterVariant: "text" },
   },
   {
-    header: "ชนิดความคลาดเคลื่อน",
+    header: "ชนิด",
     accessorKey: "subErrorType",
     meta: { filterVariant: "text" },
-  },
-  {
-    header: "แสดงบน Dashboard",
-    accessorKey: "included",
-    cell: ({ row, getValue }) => (
-      <Checkbox
-        checked={getValue() as boolean}
-        onCheckedChange={() => row.original.onToggleInclude?.(row.original.id)}
-      />
-    ),
-    enableSorting: false,
-    meta: { filterVariant: "select" },
   },
   {
     header: "จัดการ",
@@ -117,58 +79,12 @@ const columns: ColumnDef<MedErrorRecord>[] = [
   },
 ];
 
-// Filter component (เหมือน comp-478)
-function Filter({ column }: { column: Column<any, unknown> }) {
-  const id = useId();
-  const columnFilterValue = column.getFilterValue();
-  const { filterVariant } = column.columnDef.meta ?? {};
-  const columnHeader = typeof column.columnDef.header === "string" ? column.columnDef.header : "";
-
-  if (filterVariant === "select") {
-    // สำหรับ included (true/false)
-    return (
-      <div>
-        <Label htmlFor={`${id}-select`}>{columnHeader}</Label>
-        <Select
-          value={String(columnFilterValue ?? "all")}
-          onValueChange={value => {
-            if (value === "all") column.setFilterValue(undefined);
-            else if (value === "true") column.setFilterValue(true);
-            else if (value === "false") column.setFilterValue(false);
-          }}
-        >
-          <SelectTrigger id={`${id}-select`} className="mt-1 w-full">
-            <SelectValue placeholder="ทั้งหมด" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ทั้งหมด</SelectItem>
-            <SelectItem value="true">แสดง</SelectItem>
-            <SelectItem value="false">ไม่แสดง</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    );
-  }
-  // text filter
-  return (
-    <div>
-      <Label htmlFor={id}>{columnHeader}</Label>
-      <Input
-        id={id}
-        value={String(columnFilterValue ?? "")}
-        onChange={e => column.setFilterValue(e.target.value)}
-        placeholder={`ค้นหา...`}
-        className="mt-1"
-      />
-    </div>
-  );
-}
-
 export default function AdminRecordsPage() {
   const [records, setRecords] = useState<MedErrorRecord[]>(mockRecords);
   const [showDetailId, setShowDetailId] = useState<number | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   // inject action handlers to each row
   const data: MedErrorRecord[] = useMemo(() =>
@@ -181,16 +97,30 @@ export default function AdminRecordsPage() {
     [records]
   );
 
+  // Custom global filter function: match if any string field contains the filter value
+  function globalStringFilter(row: any, _columnId: string, filterValue: string) {
+    if (!filterValue) return true;
+    const lower = filterValue.toLowerCase();
+    // ตรวจสอบทุกฟิลด์ string ใน row.original
+    return Object.values(row.original).some((value) => {
+      if (typeof value === "string") return value.toLowerCase().includes(lower);
+      if (typeof value === "boolean") return (value ? "แสดง" : "ไม่แสดง").includes(filterValue);
+      return false;
+    });
+  }
+
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters },
+    state: { sorting, columnFilters, globalFilter },
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableSortingRemoval: false,
+    globalFilterFn: globalStringFilter,
   });
 
   return (
@@ -201,15 +131,15 @@ export default function AdminRecordsPage() {
           <CardDescription>จัดการรายการ Med error ของคุณได้ที่นี่</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Filters */}
-          <div className="flex flex-wrap gap-3 mb-4">
-            {table.getAllLeafColumns().map(col =>
-              col.getCanFilter() && col.id !== "actions" && (
-                <div key={col.id} className="w-44">
-                  <Filter column={col} />
-                </div>
-              )
-            )}
+          {/* Global Search Only */}
+          <div className="mb-4">
+            <div className="font-semibold mb-1">ค้นหา</div>
+            <Input
+              placeholder="ค้นหาทุกคอลัมน์..."
+              value={globalFilter}
+              onChange={e => setGlobalFilter(e.target.value)}
+              className="w-64"
+            />
           </div>
           <Table>
             <TableHeader>
@@ -218,7 +148,7 @@ export default function AdminRecordsPage() {
                   {headerGroup.headers.map(header => (
                     <TableHead
                       key={header.id}
-                      className="relative h-10 border-t select-none"
+                      className="relative h-10 border-t select-none text-center"
                       aria-sort={
                         header.column.getIsSorted() === "asc"
                           ? "ascending"
@@ -252,7 +182,7 @@ export default function AdminRecordsPage() {
             <TableBody>
               {table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map(row => (
-                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                  <TableRow key={row.id}>
                     {row.getVisibleCells().map(cell => (
                       <TableCell key={cell.id}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -276,7 +206,7 @@ export default function AdminRecordsPage() {
       {showDetailId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setShowDetailId(null)}>ปิด</button>
+            <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
             <h2 className="text-lg font-bold mb-2">รายละเอียด Med error</h2>
             <div className="mb-2">
               <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {records.find(r => r.id === showDetailId)?.date}

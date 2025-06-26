@@ -1,23 +1,18 @@
 "use client";
-import { useState, useMemo, useId } from "react";
+import { useState, useMemo } from "react";
 import {
   ColumnDef,
-  ColumnFiltersState,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
   flexRender,
-  RowData,
-  Column,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export type UserRow = {
   id: number;
@@ -67,52 +62,10 @@ const columns: ColumnDef<UserRow>[] = [
   },
 ];
 
-function Filter({ column }: { column: Column<any, unknown> }) {
-  const id = useId();
-  const columnFilterValue = column.getFilterValue();
-  const { filterVariant } = column.columnDef.meta ?? {};
-  const columnHeader = typeof column.columnDef.header === "string" ? column.columnDef.header : "";
-
-  if (filterVariant === "select") {
-    // สำหรับ role
-    return (
-      <div>
-        <Label htmlFor={`${id}-select`}>{columnHeader}</Label>
-        <Select
-          value={String(columnFilterValue ?? "all")}
-          onValueChange={value => column.setFilterValue(value === "all" ? undefined : value)}
-        >
-          <SelectTrigger id={`${id}-select`} className="mt-1 w-full">
-            <SelectValue placeholder="ทั้งหมด" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">ทั้งหมด</SelectItem>
-            <SelectItem value="user">User</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-    );
-  }
-  // text filter
-  return (
-    <div>
-      <Label htmlFor={id}>{columnHeader}</Label>
-      <Input
-        id={id}
-        value={String(columnFilterValue ?? "")}
-        onChange={e => column.setFilterValue(e.target.value)}
-        placeholder={`ค้นหา...`}
-        className="mt-1"
-      />
-    </div>
-  );
-}
-
 export default function AdminUserPage() {
   const [users, setUsers] = useState<UserRow[]>(mockUsers);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const data: UserRow[] = useMemo(() =>
     users.map(u => ({
@@ -122,16 +75,26 @@ export default function AdminUserPage() {
     [users]
   );
 
+  function globalStringFilter(row: { original: UserRow }, _columnId: string, filterValue: string) {
+    if (!filterValue) return true;
+    const lower = filterValue.toLowerCase();
+    return Object.values(row.original).some((value) => {
+      if (typeof value === "string") return value.toLowerCase().includes(lower);
+      return false;
+    });
+  }
+
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnFilters },
-    onColumnFiltersChange: setColumnFilters,
+    state: { sorting, globalFilter },
     onSortingChange: setSorting,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     enableSortingRemoval: false,
+    globalFilterFn: globalStringFilter,
   });
 
   return (
@@ -141,15 +104,15 @@ export default function AdminUserPage() {
         <div className="font-semibold mb-2">รายชื่อผู้ใช้ในสังกัด</div>
       </CardHeader>
       <CardContent>
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-4">
-          {table.getAllLeafColumns().map(col =>
-            col.getCanFilter() && (
-              <div key={col.id} className="w-44">
-                <Filter column={col} />
-              </div>
-            )
-          )}
+        {/* Global Search Only */}
+        <div className="mb-4">
+          <div className="font-semibold mb-1">ค้นหา</div>
+          <Input
+            placeholder="ค้นหาทุกคอลัมน์..."
+            value={globalFilter}
+            onChange={e => setGlobalFilter(e.target.value)}
+            className="w-64"
+          />
         </div>
         <Table>
           <TableHeader>
@@ -158,7 +121,7 @@ export default function AdminUserPage() {
                 {headerGroup.headers.map(header => (
                   <TableHead
                     key={header.id}
-                    className="relative h-10 border-t select-none"
+                    className="relative h-10 border-t select-none text-center"
                     aria-sort={
                       header.column.getIsSorted() === "asc"
                         ? "ascending"
@@ -175,7 +138,7 @@ export default function AdminUserPage() {
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {{
-                          asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
+                          asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />, 
                           desc: <ChevronDownIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
                         }[header.column.getIsSorted() as string] ?? (
                           <span className="size-4" aria-hidden="true" />
@@ -192,7 +155,7 @@ export default function AdminUserPage() {
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map(row => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map(cell => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
