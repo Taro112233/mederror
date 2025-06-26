@@ -48,7 +48,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
   const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
   const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
   const [userInfo, setUserInfo] = useState<
-    | { id: string; username: string; name: string; position: string; phone: string }
+    | { accountId: string; username: string; name: string; position: string; phone: string; role: string }
     | null
   >(null);
   const [userLoading, setUserLoading] = useState(true);
@@ -97,11 +97,12 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       .then((res) => res.json())
       .then((data) => {
         setUserInfo({
-          id: data.id,
+          accountId: data.accountId,
           username: data.username,
           name: data.name,
           position: data.position,
           phone: data.phone,
+          role: data.role,
         });
         setUserLoading(false);
       })
@@ -120,8 +121,12 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
 
   const onSubmit = async (values: FormValues) => {
     try {
-      if (!userInfo || !userInfo.id || !userInfo.username) {
+      if (!userInfo || !userInfo.accountId || !userInfo.username) {
         toast.error("ไม่พบข้อมูลผู้รายงาน");
+        return;
+      }
+      if (userInfo.role === "UNAPPROVED") {
+        toast.error("บัญชีนี้ยังไม่ได้รับอนุมัติ ไม่สามารถส่งรายงานได้");
         return;
       }
       const formData = new FormData();
@@ -130,7 +135,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       formData.append("severity", values.severity);
       formData.append("errorType", values.errorType);
       formData.append("subErrorType", values.subErrorType);
-      formData.append("reporterId", userInfo.id);
+      formData.append("reporterAccountId", userInfo.accountId);
       formData.append("reporterUsername", userInfo.username);
       formData.append("reporterName", userInfo.name || "");
       formData.append("reporterPosition", userInfo.position || "");

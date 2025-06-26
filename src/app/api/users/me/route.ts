@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     }
     return NextResponse.json({
       id: account.id,
+      accountId: account.id,
       username: account.username,
       role: account.role,
       name: account.user?.name || "",

@@ -16,13 +16,19 @@ export async function POST(req: NextRequest) {
     const severityId = formData.get("severity");
     const errorTypeId = formData.get("errorType");
     const subErrorTypeId = formData.get("subErrorType");
-    // ข้อมูลผู้รายงาน (ควรดึงจาก session จริงๆ)
-    const reporterId = formData.get("reporterId");
+    // ข้อมูลผู้รายงาน (Account)
+    const reporterAccountId = formData.get("reporterAccountId");
     const reporterUsername = formData.get("reporterUsername");
     const reporterName = formData.get("reporterName");
     const reporterPosition = formData.get("reporterPosition");
     const reporterPhone = formData.get("reporterPhone");
     const reporterOrganizationId = formData.get("reporterOrganizationId");
+
+    // ตรวจสอบว่า account ไม่ใช่ UNAPPROVED
+    const account = await prisma.account.findUnique({ where: { id: reporterAccountId as string } });
+    if (!account || account.role === "UNAPPROVED") {
+      return NextResponse.json({ error: "บัญชีนี้ยังไม่ได้รับอนุมัติ ไม่สามารถส่งรายงานได้" }, { status: 403 });
+    }
 
     // รับไฟล์รูป (รองรับหลายไฟล์)
     const images = formData.getAll("image").filter(Boolean);
@@ -34,7 +40,7 @@ export async function POST(req: NextRequest) {
         severityId: severityId as string,
         errorTypeId: errorTypeId as string,
         subErrorTypeId: subErrorTypeId as string,
-        reporterId: reporterId as string,
+        reporterAccountId: reporterAccountId as string,
         reporterUsername: reporterUsername as string,
         reporterName: reporterName as string,
         reporterPosition: reporterPosition as string,

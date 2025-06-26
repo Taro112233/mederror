@@ -18,6 +18,7 @@ model Account {
   user           User?
   createdAt      DateTime      @default(now())
   loginLogs      LoginLog[]
+  medErrors      MedError[]    @relation("AccountMedErrors")
   @@unique([organizationId, username])
 }
 
@@ -28,7 +29,6 @@ model User {
   phone     String?
   account   Account    @relation(fields: [accountId], references: [id])
   accountId String     @unique
-  medErrors MedError[] @relation("UserMedErrors")
 }
 
 model Organization {
@@ -73,8 +73,8 @@ model MedError {
   subErrorType SubErrorType @relation(fields: [subErrorTypeId], references: [id])
   subErrorTypeId String
   images       MedErrorImage[]
-  reporter     User        @relation("UserMedErrors", fields: [reporterId], references: [id])
-  reporterId   String
+  reporterAccount   Account   @relation("AccountMedErrors", fields: [reporterAccountId], references: [id])
+  reporterAccountId String
   createdAt    DateTime    @default(now())
   reporterUsername String
   reporterName     String
