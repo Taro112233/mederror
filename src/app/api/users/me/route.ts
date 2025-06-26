@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
       name: account.user?.name || "",
       position: account.user?.position || "",
       phone: account.user?.phone || "",
+      organizationId: account.organizationId || "",
     });
   } catch (e) {
     console.error(e);

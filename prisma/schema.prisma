@@ -85,7 +85,7 @@ model MedError {
 
 model MedErrorImage {
   id         String   @id @default(uuid())
-  medError   MedError @relation(fields: [medErrorId], references: [id])
+  medError   MedError @relation(fields: [medErrorId], references: [id], onDelete: Cascade)
   medErrorId String
   url        String   // path or url of the image file
   createdAt  DateTime @default(now())

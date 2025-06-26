@@ -48,7 +48,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
   const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
   const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
   const [userInfo, setUserInfo] = useState<
-    | { accountId: string; username: string; name: string; position: string; phone: string; role: string }
+    | { accountId: string; username: string; name: string; position: string; phone: string; role: string; organizationId: string }
     | null
   >(null);
   const [userLoading, setUserLoading] = useState(true);
@@ -103,6 +103,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
           position: data.position,
           phone: data.phone,
           role: data.role,
+          organizationId: data.organizationId,
         });
         setUserLoading(false);
       })
@@ -140,7 +141,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       formData.append("reporterName", userInfo.name || "");
       formData.append("reporterPosition", userInfo.position || "");
       formData.append("reporterPhone", userInfo.phone || "");
-      formData.append("reporterOrganizationId", ""); // เพิ่มเติมถ้ามี
+      formData.append("reporterOrganizationId", userInfo.organizationId || "");
       // แนบไฟล์รูปภาพ (รองรับหลายไฟล์)
       if (Array.isArray(values.image)) {
         for (const file of values.image) {
