@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import LogoutButton from "../../components/button/LogoutButton";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role เป็น UNAPPROVED เท่านั้นที่เข้าถึงได้

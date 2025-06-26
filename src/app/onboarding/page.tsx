@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@/generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import OnboardingForm from "@/components/forms/OnboardingForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import jwt from "jsonwebtoken";
