@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และมี role เป็น ADMIN เท่านั้นที่เข้าถึงได้
@@ -17,7 +18,12 @@ export default async function AdminMenu() {
   } catch {
     redirect("/login");
   }
-  if (payload.role !== "ADMIN") {
+  const prisma = new PrismaClient();
+  const account = await prisma.account.findUnique({ where: { id: payload.id } });
+  if (!account) {
+    redirect("/login");
+  }
+  if (account.role !== "ADMIN") {
     redirect("/");
   }
 
