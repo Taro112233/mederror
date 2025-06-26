@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ColumnDef,
   SortingState,
@@ -14,9 +14,11 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export type UserRow = {
   id: number;
+  username: string;
   name: string;
   position: string;
   phone: string;
@@ -26,12 +28,6 @@ export type UserRow = {
   onShowDetail?: (id: number) => void;
 };
 
-const mockUsers: UserRow[] = [
-  { id: 1, name: "สมชาย ใจดี", position: "เภสัชกร", phone: "0812345678", role: "USER" },
-  { id: 2, name: "สมหญิง รักเรียน", position: "พยาบาล", phone: "0898765432", role: "USER" },
-  { id: 3, name: "ดร. สมปอง เก่งมาก", position: "แพทย์", phone: "0822222222", role: "ADMIN" },
-];
-
 const ROLE_OPTIONS = [
   { value: "UNAPPROVED", label: "Unapproved" },
   { value: "USER", label: "User" },
@@ -40,6 +36,11 @@ const ROLE_OPTIONS = [
 ];
 
 const columns: ColumnDef<UserRow>[] = [
+  {
+    header: "Username",
+    accessorKey: "username",
+    meta: { filterVariant: "text" },
+  },
   {
     header: "ชื่อ-นามสกุล",
     accessorKey: "name",
@@ -89,20 +90,64 @@ const columns: ColumnDef<UserRow>[] = [
 ];
 
 export default function AdminUserPage() {
-  const [users, setUsers] = useState<UserRow[]>(mockUsers);
+  const [users, setUsers] = useState<UserRow[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [showDetailId, setShowDetailId] = useState<number | null>(null);
+  const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
+  const [justDeleted, setJustDeleted] = useState(false);
 
-  const handleDelete = (id: number) => {
-    setUsers(prev => prev.filter(u => u.id !== id));
+  // ดึงข้อมูลสมาชิกจริง
+  useEffect(() => {
+    fetch("/api/users")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setUsers(data); // ใช้ id จริงจาก backend
+      });
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+      const user = users.find(u => u.id === id);
+      if (!user) return;
+      // เรียก API ลบ
+      const res = await fetch(`/api/users/${user.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("ลบไม่สำเร็จ");
+      setUsers(prev => prev.filter(u => u.id !== id));
+      setDeleteUserId(null);
+      setJustDeleted(true);
+    } catch {
+      toast.error("ลบผู้ใช้ไม่สำเร็จ");
+    }
   };
+
+  useEffect(() => {
+    if (justDeleted) {
+      toast.success("ลบผู้ใช้สำเร็จ");
+      setJustDeleted(false);
+    }
+  }, [justDeleted]);
 
   const data: UserRow[] = useMemo(() =>
     users.map(u => ({
       ...u,
-      onRoleChange: (id: number, newRole: string) => setUsers(prev => prev.map(x => x.id === id ? { ...x, role: newRole } : x)),
-      onDelete: handleDelete,
+      onRoleChange: async (id: number, newRole: string) => {
+        try {
+          const user = users.find(x => x.id === id);
+          if (!user) return;
+          const res = await fetch(`/api/users/${user.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ role: newRole }),
+          });
+          if (!res.ok) throw new Error("เปลี่ยน role ไม่สำเร็จ");
+          setUsers(prev => prev.map(x => x.id === id ? { ...x, role: newRole } : x));
+          toast.success("เปลี่ยน Role ผู้ใช้สำเร็จ");
+        } catch {
+          toast.error("เปลี่ยน Role ไม่สำเร็จ");
+        }
+      },
+      onDelete: (id: number) => setDeleteUserId(id),
       onShowDetail: (id: number) => setShowDetailId(id),
     })),
     [users]
@@ -216,6 +261,9 @@ export default function AdminUserPage() {
             <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
             <h2 className="text-lg font-bold mb-2">รายละเอียดผู้ใช้</h2>
             <div className="mb-2">
+              <b>Username:</b> {users.find(u => u.id === showDetailId)?.username}
+            </div>
+            <div className="mb-2">
               <b>ชื่อ-นามสกุล:</b> {users.find(u => u.id === showDetailId)?.name}
             </div>
             <div className="mb-2">
@@ -226,6 +274,29 @@ export default function AdminUserPage() {
             </div>
             <div className="mb-2">
               <b>Role:</b> {users.find(u => u.id === showDetailId)?.role}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal ยืนยันการลบ */}
+      {deleteUserId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+            <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setDeleteUserId(null)}>❌</button>
+            <h2 className="text-lg font-bold mb-4 text-red-600">ยืนยันการลบผู้ใช้</h2>
+            <div className="mb-2">
+              <b>ชื่อ-นามสกุล:</b> {users.find(u => u.id === deleteUserId)?.name}
+            </div>
+            <div className="mb-2">
+              <b>ตำแหน่ง:</b> {users.find(u => u.id === deleteUserId)?.position}
+            </div>
+            <div className="mb-2">
+              <b>เบอร์โทร:</b> {users.find(u => u.id === deleteUserId)?.phone}
+            </div>
+            <div className="flex gap-4 mt-6 justify-end">
+              <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setDeleteUserId(null)}>ยกเลิก</button>
+              <button className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(deleteUserId)}>ยืนยันลบ</button>
             </div>
           </div>
         </div>
