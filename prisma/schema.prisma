@@ -9,7 +9,7 @@ datasource db {
 
 model Account {
   id             String        @id @default(uuid())
-  username       String        @unique
+  username       String
   passwordHash   String
   onboarded      Boolean       @default(false)
   role           Role          @default(UNAPPROVED)
@@ -18,6 +18,7 @@ model Account {
   user           User?
   createdAt      DateTime      @default(now())
   loginLogs      LoginLog[]
+  @@unique([organizationId, username])
 }
 
 model User {
