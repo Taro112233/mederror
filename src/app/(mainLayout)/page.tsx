@@ -21,7 +21,7 @@ export default async function HomePage() {
     redirect("/login");
   }
   const prisma = new PrismaClient();
-  const account = await prisma.account.findUnique({ where: { id: payload.id } });
+  const account = await prisma.account.findUnique({ where: { id: payload.id }, include: { organization: true, user: true } });
   if (!account) {
     redirect("/login");
   }
@@ -35,7 +35,16 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">ยินดีต้อนรับ!</h1>
+      <div className="flex flex-col items-center gap-0 mb-6">
+        <div className="text-xl font-bold text-center">ระบบรายงานความคลาดเคลื่อนทางยา</div>
+        <div className="text-xl font-bold text-center">{account.organization?.name || '-'}</div>
+        <div className="mt-3 p-4 border rounded bg-muted/50 text-sm text-gray-700 w-full max-w-md">
+          <div className="mb-1 font-semibold">ข้อมูลผู้ใช้งาน</div>
+          <div>ชื่อ-นามสกุล: <span className="font-medium">{account.user?.name || '-'}</span></div>
+          <div>ตำแหน่ง: <span className="font-medium">{account.user?.position || '-'}</span></div>
+          <div className="mt-2 text-xs text-gray-500">* ระบบจะบันทึกข้อมูลการใช้งานในชื่อนี้</div>
+        </div>
+      </div>
       <div className="flex flex-col gap-6 w-full max-w-xs">
         <Button asChild size="lg" className="w-full text-lg py-6">
           <Link href="/dashboard">
@@ -52,7 +61,7 @@ export default async function HomePage() {
             <span>Admin panel</span>
           </Link>
         </Button>
-        <LogoutButton className="w-full text-lg py-6" variant="secondary" />
+        <LogoutButton className="w-full text-lg py-6" variant="destructive" />
       </div>
     </div>
   );
