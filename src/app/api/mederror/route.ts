@@ -77,4 +77,43 @@ export async function POST(req: NextRequest) {
     console.error(e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    // รับ organizationId จาก query parameter
+    const { searchParams } = new URL(req.url);
+    const organizationId = searchParams.get("organizationId");
+
+    if (!organizationId) {
+      return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
+    }
+
+    // ดึงข้อมูล MedError ที่อยู่ใน organization เดียวกัน
+    const medErrors = await prisma.medError.findMany({
+      where: {
+        reporterOrganizationId: organizationId,
+      },
+      include: {
+        unit: true,
+        severity: true,
+        errorType: true,
+        subErrorType: true,
+        images: true,
+        reporterAccount: {
+          include: {
+            organization: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(medErrors);
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 } 

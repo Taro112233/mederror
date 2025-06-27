@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -16,53 +16,62 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
-// ประเภทข้อมูล Med Error
+// ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
-  id: number;
-  date: string;
-  reporter: string;
-  severity: string;
-  errorType: string;
-  subErrorType: string;
-  included: boolean;
-  detail: string;
+  id: string;
+  eventDate: string;
+  unit: {
+    label: string;
+  };
+  severity: {
+    label: string;
+  };
+  errorType: {
+    label: string;
+  };
+  subErrorType: {
+    label: string;
+  };
+  reporterName: string;
+  description: string;
+  reporterUsername: string;
+  reporterPosition: string;
+  reporterPhone: string;
+  images: Array<{
+    url: string;
+  }>;
   // สำหรับ action ในตาราง (inject run-time)
-  onToggleInclude?: (id: number) => void;
-  onDelete?: (id: number) => void;
-  onShowDetail?: (id: number) => void;
+  onDelete?: (id: string) => void;
+  onShowDetail?: (id: string) => void;
 };
-
-const mockRecords: MedErrorRecord[] = [
-  { id: 1, date: "2024-06-01", reporter: "สมชาย ใจดี", severity: "A", errorType: "การสั่งยา", subErrorType: "ขนาดยา", included: true, detail: "ลืมจ่ายยา X" },
-  { id: 2, date: "2024-06-02", reporter: "สมหญิง รักเรียน", severity: "B", errorType: "การจ่ายยา", subErrorType: "ชื่อยา", included: false, detail: "จ่ายยาผิดขนาด" },
-];
 
 // columns สำหรับ TanStack Table
 const columns: ColumnDef<MedErrorRecord>[] = [
   {
-    header: "วันที่",
-    accessorKey: "date",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "ผู้รายงาน",
-    accessorKey: "reporter",
+    header: "หน่วยงาน/แผนก",
+    accessorKey: "unit.label",
     meta: { filterVariant: "text" },
   },
   {
     header: "ระดับ",
-    accessorKey: "severity",
+    accessorKey: "severity.label",
     meta: { filterVariant: "text" },
   },
   {
     header: "ประเภท",
-    accessorKey: "errorType",
+    accessorKey: "errorType.label",
     meta: { filterVariant: "text" },
   },
   {
     header: "ชนิด",
-    accessorKey: "subErrorType",
+    accessorKey: "subErrorType.label",
+    meta: { filterVariant: "text" },
+  },
+  {
+    header: "ผู้รายงาน",
+    accessorKey: "reporterName",
     meta: { filterVariant: "text" },
   },
   {
@@ -84,25 +93,76 @@ const columns: ColumnDef<MedErrorRecord>[] = [
 ];
 
 export default function AdminRecordsPage() {
-  const [records, setRecords] = useState<MedErrorRecord[]>(mockRecords);
-  const [showDetailId, setShowDetailId] = useState<number | null>(null);
-  const [deleteRecordId, setDeleteRecordId] = useState<number | null>(null);
+  const [records, setRecords] = useState<MedErrorRecord[]>([]);
+  const [showDetailId, setShowDetailId] = useState<string | null>(null);
+  const [deleteRecordId, setDeleteRecordId] = useState<string | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+
+  // ดึง organizationId ของผู้ใช้ปัจจุบัน
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/users/me");
+        if (res.ok) {
+          const user = await res.json();
+          setOrganizationId(user.organizationId || null);
+        }
+      } catch {
+        setOrganizationId(null);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // ดึงข้อมูล MedError จากฐานข้อมูล เมื่อได้ organizationId จริง
+  useEffect(() => {
+    if (!organizationId) return;
+    const fetchMedErrors = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/mederror?organizationId=${organizationId}`);
+        if (response.ok) {
+          const data = await response.json();
+          const formattedData: MedErrorRecord[] = data.map((item: any) => ({
+            id: item.id,
+            eventDate: new Date(item.eventDate).toLocaleDateString('th-TH'),
+            unit: item.unit,
+            severity: item.severity,
+            errorType: item.errorType,
+            subErrorType: item.subErrorType,
+            reporterName: item.reporterName,
+            description: item.description,
+            reporterUsername: item.reporterUsername,
+            reporterPosition: item.reporterPosition,
+            reporterPhone: item.reporterPhone,
+            images: item.images,
+          }));
+          setRecords(formattedData);
+        }
+      } catch (error) {
+        console.error("Error fetching med errors:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMedErrors();
+  }, [organizationId]);
 
   // inject action handlers to each row
   const data: MedErrorRecord[] = useMemo(() =>
     records.map(r => ({
       ...r,
-      onToggleInclude: (id: number) => setRecords(prev => prev.map(x => x.id === id ? { ...x, included: !x.included } : x)),
-      onDelete: (id: number) => setDeleteRecordId(id),
-      onShowDetail: (id: number) => setShowDetailId(id),
+      onDelete: (id: string) => setDeleteRecordId(id),
+      onShowDetail: (id: string) => setShowDetailId(id),
     })),
     [records]
   );
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     setRecords(prev => prev.filter(x => x.id !== id));
     setDeleteRecordId(null);
   };
@@ -112,9 +172,9 @@ export default function AdminRecordsPage() {
     if (!filterValue) return true;
     const lower = filterValue.toLowerCase();
     // ตรวจสอบทุกฟิลด์ string ใน row.original
-    return Object.values(row.original).some((value) => {
+    return Object.values(row.original).some((value: any) => {
       if (typeof value === "string") return value.toLowerCase().includes(lower);
-      if (typeof value === "boolean") return (value ? "แสดง" : "ไม่แสดง").includes(filterValue);
+      if (typeof value === "object" && value?.label) return value.label.toLowerCase().includes(lower);
       return false;
     });
   }
@@ -190,7 +250,13 @@ export default function AdminRecordsPage() {
               ))}
             </TableHeader>
             <TableBody>
-              {table.getRowModel().rows.length ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    กำลังโหลดข้อมูล...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length ? (
                 table.getRowModel().rows.map(row => (
                   <TableRow key={row.id}>
                     {row.getVisibleCells().map(cell => (
@@ -215,27 +281,78 @@ export default function AdminRecordsPage() {
       {/* Modal รายละเอียด */}
       {showDetailId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
-            <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
-            <h2 className="text-lg font-bold mb-4">รายละเอียด Med error</h2>
-            <div className="mb-3">
-              <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {records.find(r => r.id === showDetailId)?.date}
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative mx-4 max-h-full overflow-y-auto flex flex-col px-4 pb-4 pt-0 box-border">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b py-3">
+              <h2 className="text-lg font-bold text-center flex-1">รายละเอียด Med error</h2>
+              <button className="btn btn-xs ml-2" onClick={() => setShowDetailId(null)}>❌</button>
             </div>
-            <div className="mb-3">
-              <b>ผู้รายงาน:</b> {records.find(r => r.id === showDetailId)?.reporter}
-            </div>
-            <div className="mb-3">
-              <b>ระดับความรุนแรง:</b> {records.find(r => r.id === showDetailId)?.severity}
-            </div>
-            <div className="mb-3">
-              <b>ประเภทความคลาดเคลื่อน:</b> {records.find(r => r.id === showDetailId)?.errorType}
-            </div>
-            <div className="mb-3">
-              <b>ชนิดความคลาดเคลื่อน:</b> {records.find(r => r.id === showDetailId)?.subErrorType}
-            </div>
-            <div className="mb-3">
-              <b>รายละเอียดเหตุการณ์:</b> {records.find(r => r.id === showDetailId)?.detail}
-            </div>
+            {(() => {
+              const record = records.find(r => r.id === showDetailId);
+              if (!record) return <div>ไม่พบข้อมูล</div>;
+              return (
+                <>
+                  <div className="flex flex-col gap-3 pb-2">
+                    <div>
+                      <b>วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์:</b><br />
+                      <span>{record.eventDate}</span>
+                    </div>
+                    <div>
+                      <b>หน่วยงาน/แผนก:</b><br />
+                      <span>{record.unit.label}</span>
+                    </div>
+                    <div>
+                      <b>รายละเอียดเหตุการณ์:</b><br />
+                      <span>{record.description}</span>
+                    </div>
+                    <div>
+                      <b>ระดับความรุนแรง:</b><br />
+                      <span>{record.severity.label}</span>
+                    </div>
+                    <div>
+                      <b>ประเภทความคลาดเคลื่อน:</b><br />
+                      <span>{record.errorType.label}</span>
+                    </div>
+                    <div>
+                      <b>ชนิดความคลาดเคลื่อน:</b><br />
+                      <span>{record.subErrorType.label}</span>
+                    </div>
+                    {record.images && record.images.length > 0 && (
+                      <div>
+                        <b>รูปภาพ:</b>
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          {record.images.map((image, index) => (
+                            <Image
+                              key={index}
+                              src={image.url}
+                              alt={`รูปภาพ ${index + 1}`}
+                              width={300}
+                              height={128}
+                              className="w-full h-32 object-cover rounded"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* ข้อมูลผู้รายงาน */}
+                  <div className="mt-4 mb-2">
+                    <div className="border rounded-lg bg-gray-50 p-4">
+                      <div className="font-semibold mb-2 text-gray-700">ข้อมูลผู้รายงาน</div>
+                      <div className="mb-1">
+                        <b>ชื่อ-นามสกุล:</b> <span>{record.reporterName || '-'}</span>
+                      </div>
+                      <div className="mb-1">
+                        <b>ตำแหน่ง:</b> <span>{record.reporterPosition || '-'}</span>
+                      </div>
+                      <div className="mb-1">
+                        <b>เบอร์โทร:</b> <span>{record.reporterPhone || '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
@@ -246,25 +363,37 @@ export default function AdminRecordsPage() {
           <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
             <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setDeleteRecordId(null)}>❌</button>
             <h2 className="text-lg font-bold mb-4 text-red-600">ยืนยันการลบ Med error</h2>
-            <div className="mb-3">
-              <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {records.find(r => r.id === deleteRecordId)?.date}
-            </div>
-            <div className="mb-3">
-              <b>ผู้รายงาน:</b> {records.find(r => r.id === deleteRecordId)?.reporter}
-            </div>
-            <div className="mb-3">
-              <b>ระดับความรุนแรง:</b> {records.find(r => r.id === deleteRecordId)?.severity}
-            </div>
-            <div className="mb-3">
-              <b>ประเภทความคลาดเคลื่อน:</b> {records.find(r => r.id === deleteRecordId)?.errorType}
-            </div>
-            <div className="mb-3">
-              <b>ชนิดความคลาดเคลื่อน:</b> {records.find(r => r.id === deleteRecordId)?.subErrorType}
-            </div>
-            <div className="flex gap-4 mt-6 justify-end">
-              <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setDeleteRecordId(null)}>ยกเลิก</button>
-              <button className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(deleteRecordId)}>ยืนยันลบ</button>
-            </div>
+            {(() => {
+              const record = records.find(r => r.id === deleteRecordId);
+              if (!record) return <div>ไม่พบข้อมูล</div>;
+              
+              return (
+                <>
+                  <div className="mb-3">
+                    <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {record.eventDate}
+                  </div>
+                  <div className="mb-3">
+                    <b>หน่วยงาน/แผนก:</b> {record.unit.label}
+                  </div>
+                  <div className="mb-3">
+                    <b>ผู้รายงาน:</b> {record.reporterName}
+                  </div>
+                  <div className="mb-3">
+                    <b>ระดับความรุนแรง:</b> {record.severity.label}
+                  </div>
+                  <div className="mb-3">
+                    <b>ประเภทความคลาดเคลื่อน:</b> {record.errorType.label}
+                  </div>
+                  <div className="mb-3">
+                    <b>ชนิดความคลาดเคลื่อน:</b> {record.subErrorType.label}
+                  </div>
+                  <div className="flex gap-4 mt-6 justify-end">
+                    <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setDeleteRecordId(null)}>ยกเลิก</button>
+                    <button className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(deleteRecordId)}>ยืนยันลบ</button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
