@@ -13,101 +13,102 @@ model Account {
   passwordHash   String
   onboarded      Boolean       @default(false)
   role           Role          @default(UNAPPROVED)
-  organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationId String?
-  user           User?
   createdAt      DateTime      @default(now())
+  organization   Organization? @relation(fields: [organizationId], references: [id])
   loginLogs      LoginLog[]
   medErrors      MedError[]    @relation("AccountMedErrors")
+  user           User?
+
   @@unique([organizationId, username])
 }
 
 model User {
-  id        String     @id @default(uuid())
+  id        String  @id @default(uuid())
   name      String?
   position  String?
   phone     String?
-  account   Account    @relation(fields: [accountId], references: [id])
-  accountId String     @unique
+  accountId String  @unique
+  account   Account @relation(fields: [accountId], references: [id])
 }
 
 model Organization {
   id        String    @id @default(uuid())
   name      String
-  accounts  Account[]
   createdAt DateTime  @default(now())
+  accounts  Account[]
 }
 
 model Severity {
-  id    String @id @default(uuid())
-  code  String @unique
-  label String
+  id        String     @id @default(uuid())
+  code      String     @unique
+  label     String
   medErrors MedError[]
 }
 
 model ErrorType {
-  id    String @id @default(uuid())
-  code  String @unique
-  label String
+  id            String         @id @default(uuid())
+  code          String         @unique
+  label         String
+  medErrors     MedError[]
   subErrorTypes SubErrorType[]
-  medErrors MedError[]
 }
 
 model SubErrorType {
-  id          String    @id @default(uuid())
-  code        String    @unique
+  id          String     @id @default(uuid())
+  code        String     @unique
   label       String
-  errorType   ErrorType @relation(fields: [errorTypeId], references: [id])
   errorTypeId String
   medErrors   MedError[]
+  errorType   ErrorType  @relation(fields: [errorTypeId], references: [id])
 }
 
 model MedError {
-  id           String      @id @default(uuid())
-  eventDate    DateTime
-  unit         Unit      @relation(fields: [unitId], references: [id])
-  unitId       String
-  description  String
-  severity     Severity    @relation(fields: [severityId], references: [id])
-  severityId   String
-  errorType    ErrorType   @relation(fields: [errorTypeId], references: [id])
-  errorTypeId  String
-  subErrorType SubErrorType @relation(fields: [subErrorTypeId], references: [id])
-  subErrorTypeId String
-  images       MedErrorImage[]
-  reporterAccount   Account   @relation("AccountMedErrors", fields: [reporterAccountId], references: [id])
-  reporterAccountId String
-  createdAt    DateTime    @default(now())
-  reporterUsername String
-  reporterName     String
-  reporterPosition String
-  reporterPhone    String
+  id                     String          @id @default(uuid())
+  eventDate              DateTime
+  unitId                 String
+  description            String
+  severityId             String
+  errorTypeId            String
+  subErrorTypeId         String
+  reporterAccountId      String
+  createdAt              DateTime        @default(now())
+  reporterUsername       String
+  reporterName           String
+  reporterPosition       String
+  reporterPhone          String
   reporterOrganizationId String?
+  errorType              ErrorType       @relation(fields: [errorTypeId], references: [id])
+  reporterAccount        Account         @relation("AccountMedErrors", fields: [reporterAccountId], references: [id])
+  severity               Severity        @relation(fields: [severityId], references: [id])
+  subErrorType           SubErrorType    @relation(fields: [subErrorTypeId], references: [id])
+  unit                   Unit            @relation(fields: [unitId], references: [id])
+  images                 MedErrorImage[]
 }
 
 model MedErrorImage {
   id         String   @id @default(uuid())
-  medError   MedError @relation(fields: [medErrorId], references: [id], onDelete: Cascade)
   medErrorId String
-  url        String   // path or url of the image file
+  url        String
   createdAt  DateTime @default(now())
+  medError   MedError @relation(fields: [medErrorId], references: [id], onDelete: Cascade)
 }
 
 model LoginLog {
   id             String   @id @default(uuid())
-  account        Account  @relation(fields: [accountId], references: [id])
   accountId      String
   organizationId String
   createdAt      DateTime @default(now())
   expiresAt      DateTime
   ip             String?
   userAgent      String?
+  account        Account  @relation(fields: [accountId], references: [id])
 }
 
 model Unit {
-  id    String @id @default(uuid())
-  code  String @unique
-  label String
+  id        String     @id @default(uuid())
+  code      String     @unique
+  label     String
   medErrors MedError[]
 }
 
