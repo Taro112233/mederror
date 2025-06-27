@@ -39,13 +39,24 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
     const { params } = await context;
-    // ลบ user ก่อน (ถ้ามี)
-    await prisma.user.deleteMany({ where: { accountId: params.id } });
-    // ลบ account
-    await prisma.account.delete({ where: { id: params.id } });
+    
+    // ใช้ transaction เพื่อให้แน่ใจว่าการลบทั้งสองตารางจะสำเร็จหรือล้มเหลวพร้อมกัน
+    await prisma.$transaction(async (tx) => {
+      // ลบ user ก่อน (ถ้ามี) - ใช้ delete() แทน deleteMany() เพราะเป็น one-to-one relationship
+      try {
+        await tx.user.delete({ where: { accountId: params.id } });
+      } catch {
+        // ถ้าไม่มี user ให้ข้ามไป (ไม่ใช่ error)
+        console.log(`No user found for account ${params.id}`);
+      }
+      
+      // ลบ account
+      await tx.account.delete({ where: { id: params.id } });
+    });
+    
     return NextResponse.json({ success: true });
   } catch (e) {
-    console.error(e);
+    console.error("Error deleting user/account:", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 } 
