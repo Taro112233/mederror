@@ -12,7 +12,7 @@ import {
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -176,16 +176,16 @@ export default function AdminUserPage() {
   });
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <h1 className="text-xl font-bold mb-2 text-center">Admin panel</h1>
-          <div className="font-semibold mb-2">รายชื่อผู้ใช้ในสังกัด</div>
-        </CardHeader>
-        <CardContent>
+    <div className="container mx-auto p-4 max-w-7xl">
+      <div className="mb-6">
+        <h1 className="text-xl font-bold mb-2 text-center">Admin panel</h1>
+        <div className="font-semibold mb-2 text-center">รายชื่อผู้ใช้ในสังกัด</div>
+      </div>
+      <Card className="shadow-lg">
+        <CardContent className="px-6 pb-6">
           {/* Global Search Only */}
-          <div className="mb-4">
-            <div className="font-semibold mb-1">ค้นหา</div>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="font-semibold whitespace-nowrap">ค้นหา</div>
             <Input
               placeholder="ค้นหาทุกคอลัมน์..."
               value={globalFilter}
@@ -256,23 +256,23 @@ export default function AdminUserPage() {
 
       {/* Modal รายละเอียด */}
       {showDetailId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
-            <h2 className="text-lg font-bold mb-2">รายละเอียดผู้ใช้</h2>
-            <div className="mb-2">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
+            <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
+            <h2 className="text-lg font-bold mb-4">รายละเอียดผู้ใช้</h2>
+            <div className="mb-3">
               <b>Username:</b> {users.find(u => u.id === showDetailId)?.username}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ชื่อ-นามสกุล:</b> {users.find(u => u.id === showDetailId)?.name}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ตำแหน่ง:</b> {users.find(u => u.id === showDetailId)?.position}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>เบอร์โทร:</b> {users.find(u => u.id === showDetailId)?.phone}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>Role:</b> {users.find(u => u.id === showDetailId)?.role}
             </div>
           </div>
@@ -281,17 +281,17 @@ export default function AdminUserPage() {
 
       {/* Modal ยืนยันการลบ */}
       {deleteUserId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setDeleteUserId(null)}>❌</button>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
+            <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setDeleteUserId(null)}>❌</button>
             <h2 className="text-lg font-bold mb-4 text-red-600">ยืนยันการลบผู้ใช้</h2>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ชื่อ-นามสกุล:</b> {users.find(u => u.id === deleteUserId)?.name}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ตำแหน่ง:</b> {users.find(u => u.id === deleteUserId)?.position}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>เบอร์โทร:</b> {users.find(u => u.id === deleteUserId)?.phone}
             </div>
             <div className="flex gap-4 mt-6 justify-end">
@@ -301,6 +301,6 @@ export default function AdminUserPage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

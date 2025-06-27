@@ -12,7 +12,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,8 +71,12 @@ const columns: ColumnDef<MedErrorRecord>[] = [
     cell: ({ row }) => (
       <div className="flex gap-1 justify-end">
         <Button size="sm" variant="secondary" onClick={() => row.original.onShowDetail?.(row.original.id)}>ดูรายละเอียด</Button>
-        <Button size="sm" variant="outline" disabled>แก้ไข</Button>
-        <Button size="sm" variant="destructive" onClick={() => row.original.onDelete?.(row.original.id)}>ลบ</Button>
+        <button
+          onClick={() => row.original.onDelete?.(row.original.id)}
+          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          ลบ
+        </button>
       </div>
     ),
     enableSorting: false,
@@ -82,6 +86,7 @@ const columns: ColumnDef<MedErrorRecord>[] = [
 export default function AdminRecordsPage() {
   const [records, setRecords] = useState<MedErrorRecord[]>(mockRecords);
   const [showDetailId, setShowDetailId] = useState<number | null>(null);
+  const [deleteRecordId, setDeleteRecordId] = useState<number | null>(null);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -91,11 +96,16 @@ export default function AdminRecordsPage() {
     records.map(r => ({
       ...r,
       onToggleInclude: (id: number) => setRecords(prev => prev.map(x => x.id === id ? { ...x, included: !x.included } : x)),
-      onDelete: (id: number) => setRecords(prev => prev.filter(x => x.id !== id)),
+      onDelete: (id: number) => setDeleteRecordId(id),
       onShowDetail: (id: number) => setShowDetailId(id),
     })),
     [records]
   );
+
+  const handleDelete = (id: number) => {
+    setRecords(prev => prev.filter(x => x.id !== id));
+    setDeleteRecordId(null);
+  };
 
   // Custom global filter function: match if any string field contains the filter value
   function globalStringFilter(row: any, _columnId: string, filterValue: string) {
@@ -124,16 +134,16 @@ export default function AdminRecordsPage() {
   });
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>รายการ Med error (Admin)</CardTitle>
-          <CardDescription>จัดการรายการ Med error ของคุณได้ที่นี่</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="container mx-auto p-4 max-w-7xl">
+      <div className="mb-6">
+        <h1 className="text-xl font-bold mb-2 text-center">Admin panel</h1>
+        <div className="font-semibold mb-2 text-center">รายการ Med error (Admin)</div>
+      </div>
+      <Card className="shadow-lg">
+        <CardContent className="px-6 pb-6">
           {/* Global Search Only */}
-          <div className="mb-4">
-            <div className="font-semibold mb-1">ค้นหา</div>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="font-semibold whitespace-nowrap">ค้นหา</div>
             <Input
               placeholder="ค้นหาทุกคอลัมน์..."
               value={globalFilter}
@@ -204,31 +214,60 @@ export default function AdminRecordsPage() {
 
       {/* Modal รายละเอียด */}
       {showDetailId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
-            <h2 className="text-lg font-bold mb-2">รายละเอียด Med error</h2>
-            <div className="mb-2">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
+            <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
+            <h2 className="text-lg font-bold mb-4">รายละเอียด Med error</h2>
+            <div className="mb-3">
               <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {records.find(r => r.id === showDetailId)?.date}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ผู้รายงาน:</b> {records.find(r => r.id === showDetailId)?.reporter}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ระดับความรุนแรง:</b> {records.find(r => r.id === showDetailId)?.severity}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ประเภทความคลาดเคลื่อน:</b> {records.find(r => r.id === showDetailId)?.errorType}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>ชนิดความคลาดเคลื่อน:</b> {records.find(r => r.id === showDetailId)?.subErrorType}
             </div>
-            <div className="mb-2">
+            <div className="mb-3">
               <b>รายละเอียดเหตุการณ์:</b> {records.find(r => r.id === showDetailId)?.detail}
             </div>
           </div>
         </div>
       )}
-    </>
+
+      {/* Modal ยืนยันการลบ */}
+      {deleteRecordId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
+            <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setDeleteRecordId(null)}>❌</button>
+            <h2 className="text-lg font-bold mb-4 text-red-600">ยืนยันการลบ Med error</h2>
+            <div className="mb-3">
+              <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {records.find(r => r.id === deleteRecordId)?.date}
+            </div>
+            <div className="mb-3">
+              <b>ผู้รายงาน:</b> {records.find(r => r.id === deleteRecordId)?.reporter}
+            </div>
+            <div className="mb-3">
+              <b>ระดับความรุนแรง:</b> {records.find(r => r.id === deleteRecordId)?.severity}
+            </div>
+            <div className="mb-3">
+              <b>ประเภทความคลาดเคลื่อน:</b> {records.find(r => r.id === deleteRecordId)?.errorType}
+            </div>
+            <div className="mb-3">
+              <b>ชนิดความคลาดเคลื่อน:</b> {records.find(r => r.id === deleteRecordId)?.subErrorType}
+            </div>
+            <div className="flex gap-4 mt-6 justify-end">
+              <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setDeleteRecordId(null)}>ยกเลิก</button>
+              <button className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(deleteRecordId)}>ยืนยันลบ</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
