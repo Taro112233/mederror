@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     // รับข้อมูลฟอร์ม
     const eventDate = formData.get("eventDate");
+    const unitId = formData.get("unitId");
     const description = formData.get("description");
     const severityId = formData.get("severity");
     const errorTypeId = formData.get("errorType");
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
     const medError = await prisma.medError.create({
       data: {
         eventDate: new Date(eventDate as string),
+        unitId: unitId as string,
         description: description as string,
         severityId: severityId as string,
         errorTypeId: errorTypeId as string,

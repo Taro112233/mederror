@@ -52,6 +52,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
     | null
   >(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [units, setUnits] = useState<{ id: string; code: string; label: string }[]>([]);
 
   const maxSizeMB = 5;
   const maxSize = maxSizeMB * 1024 * 1024;
@@ -93,6 +94,9 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
     fetch("/api/errorType")
       .then((res) => res.json())
       .then(setErrorTypes);
+    fetch("/api/unit")
+      .then((res) => res.json())
+      .then(setUnits);
     fetch("/api/users/me")
       .then((res) => res.json())
       .then((data) => {
@@ -132,6 +136,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       }
       const formData = new FormData();
       formData.append("eventDate", values.eventDate);
+      formData.append("unitId", values.unit);
       formData.append("description", values.description);
       formData.append("severity", values.severity);
       formData.append("errorType", values.errorType);
@@ -181,7 +186,33 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
               <FormControl>
                 <Input type="datetime-local" {...field} />
               </FormControl>
-              
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="unit"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>หน่วยงาน/แผนก<FormMessage /></FormLabel>
+              <FormControl>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  defaultValue=""
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="-- เลือก --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {units.map((u) => (
+                      <SelectItem key={u.id} value={u.id}>
+                        {u.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
             </FormItem>
           )}
         />
@@ -194,7 +225,6 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
               <FormControl>
                 <Textarea rows={4} {...field} />
               </FormControl>
-              
             </FormItem>
           )}
         />
@@ -222,7 +252,6 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   </SelectContent>
                 </Select>
               </FormControl>
-              
             </FormItem>
           )}
         />
@@ -250,7 +279,6 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   </SelectContent>
                 </Select>
               </FormControl>
-              
             </FormItem>
           )}
         />

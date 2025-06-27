@@ -65,6 +65,8 @@ model SubErrorType {
 model MedError {
   id           String      @id @default(uuid())
   eventDate    DateTime
+  unit         Unit      @relation(fields: [unitId], references: [id])
+  unitId       String
   description  String
   severity     Severity    @relation(fields: [severityId], references: [id])
   severityId   String
@@ -100,6 +102,13 @@ model LoginLog {
   expiresAt      DateTime
   ip             String?
   userAgent      String?
+}
+
+model Unit {
+  id    String @id @default(uuid())
+  code  String @unique
+  label String
+  medErrors MedError[]
 }
 
 enum Role {

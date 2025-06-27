@@ -141,6 +141,27 @@ async function main() {
       });
     }
   }
+
+  // Seed Unit
+  const units = [
+    { code: 'OPD', label: 'ผู้ป่วยนอก' },
+    { code: 'ER', label: 'ห้องฉุกเฉิน' },
+    { code: 'DIALYSIS', label: 'ห้องไตเทียม' },
+    { code: 'MEDWARD', label: 'หอผู้ป่วยอายุรกรรม' },
+    { code: 'ICU', label: 'หอผู้ป่วยหนัก' },
+    { code: 'SURGWARD', label: 'หอผู้ป่วยศัลยกรรม' },
+    { code: 'SPECIALWARD', label: 'หอผู้ป่วยพิเศษ' },
+    { code: 'PEDWARD', label: 'หอผู้ป่วยเด็ก' },
+    { code: 'OR', label: 'ห้องผ่าตัด' },
+    { code: 'PHARMACY', label: 'เภสัชกรรม' },
+  ];
+  for (const u of units) {
+    await prisma.unit.upsert({
+      where: { code: u.code },
+      update: {},
+      create: u,
+    });
+  }
 }
 
 main().catch(e => {
