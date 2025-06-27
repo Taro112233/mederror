@@ -116,4 +116,24 @@ export async function GET(req: NextRequest) {
     console.error(e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "MedError id is required" }, { status: 400 });
+    }
+
+    // Delete MedErrorImage records first
+    await prisma.medErrorImage.deleteMany({ where: { medErrorId: id } });
+    // Then delete MedError record
+    await prisma.medError.delete({ where: { id } });
+
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 } 

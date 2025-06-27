@@ -11,17 +11,19 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, CopyIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
+import { toast } from "sonner";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
   id: string;
-  eventDate: string;
+  eventDate: string; // เวลาที่ผู้ใช้งานกรอก
+  createdAt: string; // เวลาที่บันทึกข้อมูล
   unit: {
     label: string;
   };
@@ -49,6 +51,11 @@ export type MedErrorRecord = {
 
 // columns สำหรับ TanStack Table
 const columns: ColumnDef<MedErrorRecord>[] = [
+  {
+    header: "วันที่ เวลา",
+    accessorKey: "eventDate",
+    meta: { filterVariant: "text" },
+  },
   {
     header: "หน่วยงาน/แผนก",
     accessorKey: "unit.label",
@@ -130,6 +137,7 @@ export default function AdminRecordsPage() {
           const formattedData: MedErrorRecord[] = data.map((item: any) => ({
             id: item.id,
             eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
+            createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
             unit: item.unit,
             severity: item.severity,
             errorType: item.errorType,
@@ -162,9 +170,20 @@ export default function AdminRecordsPage() {
     [records]
   );
 
-  const handleDelete = (id: string) => {
-    setRecords(prev => prev.filter(x => x.id !== id));
-    setDeleteRecordId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/mederror?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('ลบข้อมูลไม่สำเร็จ');
+      setRecords(prev => prev.filter(x => x.id !== id));
+      setDeleteRecordId(null);
+      toast.success('ลบข้อมูลเรียบร้อย');
+    } catch (e: any) {
+      if (e instanceof Error && (e as any).code === 'P2025') {
+        toast.success('ข้อมูลถูกลบไปแล้ว');
+      } else {
+        toast.error('เกิดข้อผิดพลาดในการลบข้อมูล');
+      }
+    }
   };
 
   // Custom global filter function: match if any string field contains the filter value
@@ -285,7 +304,36 @@ export default function AdminRecordsPage() {
             {/* Sticky Header */}
             <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b py-3">
               <h2 className="text-lg font-bold text-black text-center flex-1">รายละเอียด Med error</h2>
-              <button className="btn btn-xs ml-2" onClick={() => setShowDetailId(null)}>❌</button>
+              <div className="flex items-center gap-4 ml-2">
+                <button
+                  className="btn btn-xs"
+                  title="คัดลอกข้อมูลทั้งหมด"
+                  aria-label="คัดลอกข้อมูลทั้งหมด"
+                  onClick={() => {
+                    const record = records.find(r => r.id === showDetailId);
+                    if (!record) return;
+                    const text = [
+                      `errorID: ${record.id}`,
+                      `วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์: ${record.eventDate}`,
+                      `หน่วยงาน/แผนก: ${record.unit.label}`,
+                      `รายละเอียดเหตุการณ์: ${record.description}`,
+                      `ระดับความรุนแรง: ${record.severity.label}`,
+                      `ประเภทความคลาดเคลื่อน: ${record.errorType.label}`,
+                      `ชนิดความคลาดเคลื่อน: ${record.subErrorType.label}`,
+                      record.images && record.images.length > 0 ? `รูปภาพ: ${record.images.map(img => img.url).join(", ")}` : null,
+                      `ชื่อ-นามสกุล: ${record.reporterName || '-'}`,
+                      `ตำแหน่ง: ${record.reporterPosition || '-'}`,
+                      `เบอร์โทร: ${record.reporterPhone || '-'}`,
+                      `เวลาบันทึก: ${record.createdAt}`,
+                    ].filter(Boolean).join('\n');
+                    navigator.clipboard.writeText(text);
+                    toast.success('คัดลอกข้อมูลเรียบร้อย');
+                  }}
+                >
+                  <CopyIcon className="size-4" />
+                </button>
+                <button className="btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
+              </div>
             </div>
             {(() => {
               const record = records.find(r => r.id === showDetailId);
@@ -293,6 +341,10 @@ export default function AdminRecordsPage() {
               return (
                 <>
                   <div className="flex flex-col gap-3 pb-2">
+                    <div>
+                      <span className="font-bold text-black">errorID:</span><br />
+                      <span className="text-blue-700">{record.id}</span>
+                    </div>
                     <div>
                       <span className="font-bold text-black">วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์:</span><br />
                       <span className="text-blue-700">{record.eventDate}</span>
@@ -348,6 +400,9 @@ export default function AdminRecordsPage() {
                       <div className="mb-1">
                         <span className="font-bold text-black">เบอร์โทร:</span> <span className="text-blue-700">{record.reporterPhone || '-'}</span>
                       </div>
+                      <div className="mb-1">
+                        <span className="font-bold text-black">เวลาบันทึก:</span> <span className="text-blue-700">{record.createdAt}</span>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -370,22 +425,28 @@ export default function AdminRecordsPage() {
               return (
                 <>
                   <div className="mb-3">
-                    <b>วัน/เดือน/ปี ที่เกิดเหตุการณ์:</b> {record.eventDate}
+                    <span className="font-bold text-black">errorID:</span> <span className="text-blue-700">{record.id}</span>
                   </div>
                   <div className="mb-3">
-                    <b>หน่วยงาน/แผนก:</b> {record.unit.label}
+                    <span className="font-bold text-black">วัน/เดือน/ปี ที่เกิดเหตุการณ์:</span> <span className="text-blue-700">{record.eventDate}</span>
                   </div>
                   <div className="mb-3">
-                    <b>ผู้รายงาน:</b> {record.reporterName}
+                    <span className="font-bold text-black">หน่วยงาน/แผนก:</span> <span className="text-blue-700">{record.unit.label}</span>
                   </div>
                   <div className="mb-3">
-                    <b>ระดับความรุนแรง:</b> {record.severity.label}
+                    <span className="font-bold text-black">รายละเอียดเหตุการณ์:</span> <span className="text-blue-700">{record.description}</span>
                   </div>
                   <div className="mb-3">
-                    <b>ประเภทความคลาดเคลื่อน:</b> {record.errorType.label}
+                    <span className="font-bold text-black">ระดับความรุนแรง:</span> <span className="text-blue-700">{record.severity.label}</span>
                   </div>
                   <div className="mb-3">
-                    <b>ชนิดความคลาดเคลื่อน:</b> {record.subErrorType.label}
+                    <span className="font-bold text-black">ประเภทความคลาดเคลื่อน:</span> <span className="text-blue-700">{record.errorType.label}</span>
+                  </div>
+                  <div className="mb-3">
+                    <span className="font-bold text-black">ชนิดความคลาดเคลื่อน:</span> <span className="text-blue-700">{record.subErrorType.label}</span>
+                  </div>
+                  <div className="mb-3">
+                    <span className="font-bold text-black">ผู้รายงาน:</span> <span className="text-blue-700">{record.reporterName}</span>
                   </div>
                   <div className="flex gap-4 mt-6 justify-end">
                     <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setDeleteRecordId(null)}>ยกเลิก</button>
