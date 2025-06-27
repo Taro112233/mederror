@@ -129,7 +129,7 @@ export default function AdminRecordsPage() {
           const data = await response.json();
           const formattedData: MedErrorRecord[] = data.map((item: any) => ({
             id: item.id,
-            eventDate: new Date(item.eventDate).toLocaleDateString('th-TH'),
+            eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
             unit: item.unit,
             severity: item.severity,
             errorType: item.errorType,
@@ -284,7 +284,7 @@ export default function AdminRecordsPage() {
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative mx-4 max-h-full overflow-y-auto flex flex-col px-4 pb-4 pt-0 box-border">
             {/* Sticky Header */}
             <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b py-3">
-              <h2 className="text-lg font-bold text-center flex-1">รายละเอียด Med error</h2>
+              <h2 className="text-lg font-bold text-black text-center flex-1">รายละเอียด Med error</h2>
               <button className="btn btn-xs ml-2" onClick={() => setShowDetailId(null)}>❌</button>
             </div>
             {(() => {
@@ -294,32 +294,32 @@ export default function AdminRecordsPage() {
                 <>
                   <div className="flex flex-col gap-3 pb-2">
                     <div>
-                      <b>วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์:</b><br />
-                      <span>{record.eventDate}</span>
+                      <span className="font-bold text-black">วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์:</span><br />
+                      <span className="text-blue-700">{record.eventDate}</span>
                     </div>
                     <div>
-                      <b>หน่วยงาน/แผนก:</b><br />
-                      <span>{record.unit.label}</span>
+                      <span className="font-bold text-black">หน่วยงาน/แผนก:</span><br />
+                      <span className="text-blue-700">{record.unit.label}</span>
                     </div>
                     <div>
-                      <b>รายละเอียดเหตุการณ์:</b><br />
-                      <span>{record.description}</span>
+                      <span className="font-bold text-black">รายละเอียดเหตุการณ์:</span><br />
+                      <span className="text-blue-700">{record.description}</span>
                     </div>
                     <div>
-                      <b>ระดับความรุนแรง:</b><br />
-                      <span>{record.severity.label}</span>
+                      <span className="font-bold text-black">ระดับความรุนแรง:</span><br />
+                      <span className="text-blue-700">{record.severity.label}</span>
                     </div>
                     <div>
-                      <b>ประเภทความคลาดเคลื่อน:</b><br />
-                      <span>{record.errorType.label}</span>
+                      <span className="font-bold text-black">ประเภทความคลาดเคลื่อน:</span><br />
+                      <span className="text-blue-700">{record.errorType.label}</span>
                     </div>
                     <div>
-                      <b>ชนิดความคลาดเคลื่อน:</b><br />
-                      <span>{record.subErrorType.label}</span>
+                      <span className="font-bold text-black">ชนิดความคลาดเคลื่อน:</span><br />
+                      <span className="text-blue-700">{record.subErrorType.label}</span>
                     </div>
                     {record.images && record.images.length > 0 && (
                       <div>
-                        <b>รูปภาพ:</b>
+                        <span className="font-bold text-black">รูปภาพ:</span>
                         <div className="mt-2 grid grid-cols-2 gap-2">
                           {record.images.map((image, index) => (
                             <Image
@@ -340,13 +340,13 @@ export default function AdminRecordsPage() {
                     <div className="border rounded-lg bg-gray-50 p-4">
                       <div className="font-semibold mb-2 text-gray-700">ข้อมูลผู้รายงาน</div>
                       <div className="mb-1">
-                        <b>ชื่อ-นามสกุล:</b> <span>{record.reporterName || '-'}</span>
+                        <span className="font-bold text-black">ชื่อ-นามสกุล:</span> <span className="text-blue-700">{record.reporterName || '-'}</span>
                       </div>
                       <div className="mb-1">
-                        <b>ตำแหน่ง:</b> <span>{record.reporterPosition || '-'}</span>
+                        <span className="font-bold text-black">ตำแหน่ง:</span> <span className="text-blue-700">{record.reporterPosition || '-'}</span>
                       </div>
                       <div className="mb-1">
-                        <b>เบอร์โทร:</b> <span>{record.reporterPhone || '-'}</span>
+                        <span className="font-bold text-black">เบอร์โทร:</span> <span className="text-blue-700">{record.reporterPhone || '-'}</span>
                       </div>
                     </div>
                   </div>
