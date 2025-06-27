@@ -257,40 +257,41 @@ export default function AdminUserPage() {
       {/* Modal รายละเอียด */}
       {showDetailId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative mx-4 max-h-full overflow-y-auto flex flex-col px-4 pb-4 pt-0 box-border">
-            {/* Sticky Header */}
-            <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b py-3">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl relative mx-4 max-h-full overflow-y-auto flex flex-col box-border">
+            <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b pt-0 pb-3" style={{padding: 20}}>
               <h2 className="text-lg font-bold text-black text-center flex-1">รายละเอียดผู้ใช้</h2>
               <button className="btn btn-xs ml-2" onClick={() => setShowDetailId(null)}>❌</button>
             </div>
-            {(() => {
-              const user = users.find(u => u.id === showDetailId);
-              if (!user) return <div>ไม่พบข้อมูล</div>;
-              return (
-                <div className="flex flex-col gap-3 pb-2 mt-2">
-                  <div>
-                    <span className="font-bold text-black">Username:</span><br />
-                    <span className="text-blue-700">{user.username}</span>
+            <div className="flex-1 w-full" style={{padding: 32}}>
+              {(() => {
+                const user = users.find(u => u.id === showDetailId);
+                if (!user) return <div>ไม่พบข้อมูล</div>;
+                return (
+                  <div className="flex flex-col gap-3 pb-2 mt-2">
+                    <div>
+                      <span className="font-bold text-black">Username:</span><br />
+                      <span className="text-blue-700">{user.username}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-black">ชื่อ-นามสกุล:</span><br />
+                      <span className="text-blue-700">{user.name}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-black">ตำแหน่ง:</span><br />
+                      <span className="text-blue-700">{user.position}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-black">เบอร์โทร:</span><br />
+                      <span className="text-blue-700">{user.phone}</span>
+                    </div>
+                    <div>
+                      <span className="font-bold text-black">Role:</span><br />
+                      <span className="text-blue-700">{user.role}</span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="font-bold text-black">ชื่อ-นามสกุล:</span><br />
-                    <span className="text-blue-700">{user.name}</span>
-                  </div>
-                  <div>
-                    <span className="font-bold text-black">ตำแหน่ง:</span><br />
-                    <span className="text-blue-700">{user.position}</span>
-                  </div>
-                  <div>
-                    <span className="font-bold text-black">เบอร์โทร:</span><br />
-                    <span className="text-blue-700">{user.phone}</span>
-                  </div>
-                  <div>
-                    <span className="font-bold text-black">Role:</span><br />
-                    <span className="text-blue-700">{user.role}</span>
-                  </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
+            </div>
           </div>
         </div>
       )}
@@ -298,7 +299,7 @@ export default function AdminUserPage() {
       {/* Modal ยืนยันการลบ */}
       {deleteUserId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative mx-4">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl relative mx-4 max-h-full overflow-y-auto p-8 box-border">
             <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setDeleteUserId(null)}>❌</button>
             <h2 className="text-lg font-bold mb-4 text-red-600">ยืนยันการลบผู้ใช้</h2>
             <div className="mb-3">
