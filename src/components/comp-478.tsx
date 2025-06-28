@@ -1,30 +1,20 @@
 "use client"
 
-import { useId, useMemo, useState } from "react"
+import { useState, useMemo, useId } from "react"
 import {
-  Column,
   ColumnDef,
-  ColumnFiltersState,
+  Column,
   flexRender,
   getCoreRowModel,
-  getFacetedMinMaxValues,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
-  RowData,
-  SortingState,
   useReactTable,
+  RowData,
+  ColumnFiltersState,
+  SortingState,
 } from "@tanstack/react-table"
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  ExternalLinkIcon,
-  SearchIcon,
-} from "lucide-react"
-
-import { cn } from "@/lib/utils"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -42,13 +32,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
-declare module "@tanstack/react-table" {
-  //allows us to define custom properties for our columns
-  interface ColumnMeta<TData extends RowData, TValue> {
-    filterVariant?: "text" | "range" | "select"
-  }
-}
+import { Checkbox } from "@/components/ui/checkbox"
+import { cn } from "@/lib/utils"
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ExternalLinkIcon,
+  SearchIcon,
+} from "lucide-react"
 
 type Item = {
   id: string
@@ -122,7 +113,7 @@ const columns: ColumnDef<Item>[] = [
     },
     enableSorting: false,
     meta: {
-      filterVariant: "select",
+      filterVariant: "select" as const,
     },
     filterFn: (row, id, filterValue) => {
       const rowValue = row.getValue(id)
@@ -140,7 +131,7 @@ const columns: ColumnDef<Item>[] = [
       }).format(volume)
     },
     meta: {
-      filterVariant: "range",
+      filterVariant: "range" as const,
     },
   },
   {
@@ -148,7 +139,7 @@ const columns: ColumnDef<Item>[] = [
     accessorKey: "cpc",
     cell: ({ row }) => <div>${row.getValue("cpc")}</div>,
     meta: {
-      filterVariant: "range",
+      filterVariant: "range" as const,
     },
   },
   {
@@ -162,7 +153,7 @@ const columns: ColumnDef<Item>[] = [
       }).format(traffic)
     },
     meta: {
-      filterVariant: "range",
+      filterVariant: "range" as const,
     },
   },
   {
@@ -272,9 +263,7 @@ export default function Component() {
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(), //client-side filtering
     getSortedRowModel: getSortedRowModel(),
-    getFacetedRowModel: getFacetedRowModel(), // client-side faceting
-    getFacetedUniqueValues: getFacetedUniqueValues(), // generate unique values for select filter/autocomplete
-    getFacetedMinMaxValues: getFacetedMinMaxValues(), // generate min/max values for range filter
+    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     enableSortingRemoval: false,
   })
@@ -414,17 +403,20 @@ export default function Component() {
   )
 }
 
-function Filter({ column }: { column: Column<any, unknown> }) {
+function Filter({ column }: { column: Column<Item, unknown> }) {
   const id = useId()
   const columnFilterValue = column.getFilterValue()
-  const { filterVariant } = column.columnDef.meta ?? {}
+  const { filterVariant } = (column.columnDef.meta as { filterVariant?: string }) ?? {}
   const columnHeader =
     typeof column.columnDef.header === "string" ? column.columnDef.header : ""
+  
+  const facetedUniqueValues = column.getFacetedUniqueValues()
+  
   const sortedUniqueValues = useMemo(() => {
     if (filterVariant === "range") return []
 
     // Get all unique values from the column
-    const values = Array.from(column.getFacetedUniqueValues().keys())
+    const values = Array.from(facetedUniqueValues.keys())
 
     // If the values are arrays, flatten them and get unique items
     const flattenedValues = values.reduce((acc: string[], curr) => {
@@ -436,7 +428,7 @@ function Filter({ column }: { column: Column<any, unknown> }) {
 
     // Get unique values and sort them
     return Array.from(new Set(flattenedValues)).sort()
-  }, [column.getFacetedUniqueValues(), filterVariant])
+  }, [facetedUniqueValues, filterVariant])
 
   if (filterVariant === "range") {
     return (

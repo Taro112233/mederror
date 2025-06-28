@@ -114,15 +114,17 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       .catch(() => setUserLoading(false));
   }, []);
 
+  const watchedErrorType = form.watch("errorType");
+  
   useEffect(() => {
-    const errorTypeId = form.watch("errorType");
+    const errorTypeId = watchedErrorType;
     if (!errorTypeId) {
       setFilteredSubErrorTypes([]);
       return;
     }
     const found = errorTypes.find((e) => e.id === errorTypeId);
     setFilteredSubErrorTypes(found ? found.subErrorTypes : []);
-  }, [form.watch("errorType"), errorTypes]);
+  }, [watchedErrorType, errorTypes]);
 
   const onSubmit = async (values: FormValues) => {
     try {

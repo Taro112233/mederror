@@ -1,103 +1,152 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
-import jwt from "jsonwebtoken";
+"use client"
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   AlertTriangle, 
   Users, 
   TrendingUp, 
   Calendar,
   Plus,
-  Eye
+  Eye,
+  Filter
 } from "lucide-react";
 import Link from "next/link";
 import { DashboardCharts } from "@/components/DashboardCharts";
 
-// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
-export default async function DashboardPage() {
-  // --- Logic ตรวจสอบ session, onboarding, approved, role ---
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session_token")?.value;
-  if (!sessionToken) {
-    redirect("/login");
-  }
-  let payload: jwt.JwtPayload;
-  try {
-    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
-  } catch {
-    redirect("/login");
-  }
-  const prisma = new PrismaClient();
-  const account = await prisma.account.findUnique({ where: { id: payload.id } });
-  if (!account) {
-    redirect("/login");
-  }
-  if (!account.onboarded) {
-    redirect("/onboarding");
-  }
-  if (!account.role || account.role === "UNAPPROVED") {
-    redirect("/pending-approval");
-  }
-  // --- END Logic ---
+interface MedError {
+  id: string;
+  eventDate: string;
+  description: string;
+  createdAt: string;
+  reporterName: string;
+  errorType: { label: string };
+  severity: { label: string };
+  unit: { label: string };
+}
 
-  // Fetch dashboard data
-  const [
-    totalErrors,
-    totalUsers,
-    recentErrors,
-    errorsBySeverity,
-    monthlyTrend
-  ] = await Promise.all([
-    prisma.medError.count(),
-    prisma.account.count({ where: { role: { not: "UNAPPROVED" } } }),
-    prisma.medError.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      include: {
-        errorType: true,
-        severity: true,
+interface ChartData {
+  name: string;
+  value: number;
+  date?: string;
+}
+
+interface DashboardData {
+  totalErrors: number;
+  totalUsers: number;
+  errorsThisMonth: number;
+  errorsThisWeek: number;
+  errorsToday: number;
+  monthlyData: ChartData[];
+  weeklyData: ChartData[];
+  dailyData: ChartData[];
+  recentErrors: MedError[];
+  filteredErrors: MedError[];
+}
+
+export default function DashboardPage() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<"year" | "month" | "week">("year");
+  const [selectedBar, setSelectedBar] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch('/api/dashboard');
+      if (response.ok) {
+        const dashboardData = await response.json();
+        setData(dashboardData);
       }
-    }),
-    prisma.medError.groupBy({
-      by: ["severityId"],
-      _count: { id: true }
-    }),
-    prisma.medError.groupBy({
-      by: ["createdAt"],
-      _count: { id: true },
-      where: {
-        createdAt: {
-          gte: new Date(new Date().getFullYear(), new Date().getMonth() - 6, 1)
-        }
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBarClick = (clickedData: ChartData) => {
+    if (selectedBar === clickedData.name) {
+      setSelectedBar(null);
+      setData(prev => prev ? { ...prev, filteredErrors: prev.recentErrors } : null);
+    } else {
+      setSelectedBar(clickedData.name);
+      // Filter errors based on selected bar
+      if (clickedData && clickedData.date && data) {
+        const selectedDate = new Date(clickedData.date);
+        const filtered = data.recentErrors.filter((error: MedError) => {
+          const errorDate = new Date(error.createdAt);
+          if (selectedPeriod === "year") {
+            return errorDate.getMonth() === selectedDate.getMonth() && 
+                   errorDate.getFullYear() === selectedDate.getFullYear();
+          } else if (selectedPeriod === "month") {
+            return errorDate.toDateString() === selectedDate.toDateString();
+          } else {
+            return errorDate.toDateString() === selectedDate.toDateString();
+          }
+        });
+        setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
       }
-    })
-  ]);
+    }
+  };
 
-  // Fetch severity data for mapping
-  const severities = await prisma.severity.findMany();
+  const getChartData = () => {
+    if (!data) return [];
+    
+    switch (selectedPeriod) {
+      case "year":
+        return data.monthlyData;
+      case "month":
+        return data.weeklyData;
+      case "week":
+        return data.dailyData;
+      default:
+        return data.monthlyData;
+    }
+  };
 
-  const severityData = errorsBySeverity.map(item => {
-    const severity = severities.find(s => s.id === item.severityId);
-    return {
-      name: severity?.label || "Unknown",
-      value: item._count.id,
-      color: severity?.label === "Critical" ? "hsl(var(--destructive))" : 
-             severity?.label === "High" ? "hsl(var(--destructive) / 0.8)" :
-             severity?.label === "Medium" ? "hsl(var(--warning))" :
-             "hsl(var(--muted-foreground))"
-    };
-  });
+  const getChartTitle = () => {
+    switch (selectedPeriod) {
+      case "year":
+        return "แนวโน้มรายเดือน (12 เดือนล่าสุด)";
+      case "month":
+        return "แนวโน้มรายสัปดาห์ (30 วันล่าสุด)";
+      case "week":
+        return "แนวโน้มรายวัน (7 วันล่าสุด)";
+      default:
+        return "แนวโน้มการรายงานข้อผิดพลาด";
+    }
+  };
 
-  const trendData = monthlyTrend.map(item => ({
-    name: new Date(item.createdAt).toLocaleDateString('th-TH', { month: 'short', year: 'numeric' }),
-    value: item._count.id
-  }));
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">กำลังโหลดข้อมูล...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-red-500">ไม่สามารถโหลดข้อมูลได้</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
@@ -118,7 +167,7 @@ export default async function DashboardPage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalErrors}</div>
+            <div className="text-2xl font-bold">{data.totalErrors}</div>
             <p className="text-xs text-muted-foreground">
               รายงานข้อผิดพลาดทางการแพทย์
             </p>
@@ -131,9 +180,9 @@ export default async function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsers}</div>
+            <div className="text-2xl font-bold">{data.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
-              ผู้ใช้ที่ได้รับการอนุมัติ
+              ผู้ใช้ในองค์กร
             </p>
           </CardContent>
         </Card>
@@ -144,11 +193,7 @@ export default async function DashboardPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {monthlyTrend.filter(item => 
-                new Date(item.createdAt).getMonth() === new Date().getMonth()
-              ).reduce((sum, item) => sum + item._count.id, 0)}
-            </div>
+            <div className="text-2xl font-bold">{data.errorsThisMonth}</div>
             <p className="text-xs text-muted-foreground">
               รายงานในเดือนปัจจุบัน
             </p>
@@ -157,33 +202,58 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">อัตราการรายงาน</CardTitle>
+            <CardTitle className="text-sm font-medium">ข้อผิดพลาดสัปดาห์นี้</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {Math.round((totalErrors / Math.max(totalUsers, 1)) * 100) / 100}
-            </div>
+            <div className="text-2xl font-bold">{data.errorsThisWeek}</div>
             <p className="text-xs text-muted-foreground">
-              ข้อผิดพลาดต่อผู้ใช้
+              รายงานในสัปดาห์ปัจจุบัน
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>แนวโน้มการรายงานข้อผิดพลาด</CardTitle>
-            <CardDescription>
-              จำนวนข้อผิดพลาดที่รายงานใน 6 เดือนที่ผ่านมา
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pl-2">
+      {/* Bar Chart Section */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>{getChartTitle()}</CardTitle>
+              <CardDescription>
+                คลิกที่แท่งเพื่อกรองข้อมูลในตารางด้านล่าง
+              </CardDescription>
+            </div>
+            <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}>
+              <TabsList>
+                <TabsTrigger value="year">ปี</TabsTrigger>
+                <TabsTrigger value="month">เดือน</TabsTrigger>
+                <TabsTrigger value="week">สัปดาห์</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div 
+            className="cursor-pointer"
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              const barElement = target.closest('.recharts-bar-rectangle');
+              if (barElement) {
+                const dataKey = barElement.getAttribute('data-key');
+                if (dataKey) {
+                  const chartData = getChartData();
+                  const clickedData = chartData.find(item => item.name === dataKey);
+                  if (clickedData) {
+                    handleBarClick(clickedData);
+                  }
+                }
+              }
+            }}
+          >
             <DashboardCharts 
-              type="line"
-              data={trendData}
+              type="bar"
+              data={getChartData()}
               config={{
                 value: {
                   label: "จำนวนข้อผิดพลาด",
@@ -191,70 +261,81 @@ export default async function DashboardPage() {
                 }
               }}
             />
-          </CardContent>
-        </Card>
+          </div>
+          {selectedBar && (
+            <div className="mt-4 p-3 bg-muted rounded-lg flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              <span className="text-sm">
+                กรองข้อมูล: {selectedBar} 
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="ml-2 h-6 px-2"
+                  onClick={() => {
+                    setSelectedBar(null);
+                    setData(prev => prev ? { ...prev, filteredErrors: prev.recentErrors } : null);
+                  }}
+                >
+                  ล้างตัวกรอง
+                </Button>
+              </span>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>ข้อผิดพลาดตามระดับความรุนแรง</CardTitle>
-            <CardDescription>
-              การกระจายของข้อผิดพลาดตามระดับความรุนแรง
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <DashboardCharts 
-              type="pie"
-              data={severityData}
-              config={{
-                Critical: { label: "วิกฤต", color: "hsl(var(--destructive))" },
-                High: { label: "สูง", color: "hsl(var(--destructive) / 0.8)" },
-                Medium: { label: "ปานกลาง", color: "hsl(var(--warning))" },
-                Low: { label: "ต่ำ", color: "hsl(var(--muted-foreground))" }
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Errors */}
+      {/* Data Table */}
       <Card>
         <CardHeader>
-          <CardTitle>ข้อผิดพลาดล่าสุด</CardTitle>
+          <CardTitle>รายละเอียดข้อผิดพลาด</CardTitle>
           <CardDescription>
-            ข้อผิดพลาดที่รายงานล่าสุด 5 รายการ
+            {selectedBar ? `ข้อมูลสำหรับ: ${selectedBar}` : 'ข้อผิดพลาดทั้งหมด'}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {recentErrors.map((error) => (
-              <div key={error.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{error.errorType.label}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      รายงานโดย: {error.reporterName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(error.createdAt).toLocaleDateString('th-TH')}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Badge variant={
-                    error.severity.label === "Critical" ? "destructive" :
-                    error.severity.label === "High" ? "destructive" :
-                    error.severity.label === "Medium" ? "secondary" :
-                    "outline"
-                  }>
-                    {error.severity.label}
-                  </Badge>
-                  <Button variant="outline" size="sm">
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>วันที่เกิดเหตุการณ์</TableHead>
+                <TableHead>ประเภทข้อผิดพลาด</TableHead>
+                <TableHead>ระดับความรุนแรง</TableHead>
+                <TableHead>หน่วยงาน</TableHead>
+                <TableHead>ผู้รายงาน</TableHead>
+                <TableHead>รายละเอียด</TableHead>
+                <TableHead>การดำเนินการ</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(selectedBar ? data.filteredErrors : data.recentErrors).map((error) => (
+                <TableRow key={error.id}>
+                  <TableCell>
+                    {new Date(error.eventDate).toLocaleDateString('th-TH')}
+                  </TableCell>
+                  <TableCell>{error.errorType.label}</TableCell>
+                  <TableCell>
+                    <Badge variant={
+                      error.severity.label === "Critical" ? "destructive" :
+                      error.severity.label === "High" ? "destructive" :
+                      error.severity.label === "Medium" ? "secondary" :
+                      "outline"
+                    }>
+                      {error.severity.label}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{error.unit.label}</TableCell>
+                  <TableCell>{error.reporterName}</TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {error.description}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="outline" size="sm">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

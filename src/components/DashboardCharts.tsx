@@ -12,6 +12,8 @@ import {
   LineChart,
   Pie,
   PieChart,
+  Bar,
+  BarChart,
   Cell,
   XAxis,
   YAxis,
@@ -64,6 +66,33 @@ export function DashboardCharts({ type, data, config }: DashboardChartsProps) {
             activeDot={{ r: 6, stroke: "hsl(var(--primary))", strokeWidth: 2 }}
           />
         </LineChart>
+      </ChartContainer>
+    )
+  }
+
+  if (type === "bar") {
+    return (
+      <ChartContainer config={config}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis 
+            dataKey="name" 
+            tick={{ fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis 
+            tick={{ fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <Bar
+            dataKey="value"
+            fill="hsl(var(--primary))"
+            radius={[4, 4, 0, 0]}
+          />
+        </BarChart>
       </ChartContainer>
     )
   }
