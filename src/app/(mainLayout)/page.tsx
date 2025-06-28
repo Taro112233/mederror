@@ -41,7 +41,7 @@ export default async function HomePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">ยินดีต้อนรับ</h1>
           <p className="text-muted-foreground">
-            ระบบรายงานความคลาดเคลื่อนทางยา
+            {account.organization?.name || 'ระบบรายงานความคลาดเคลื่อนทางยา'}
           </p>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default async function HomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-3">
             <div className="space-y-2">
               <div className="text-sm font-medium text-muted-foreground">ชื่อ-นามสกุล</div>
               <div className="text-lg font-semibold">{account.user?.name || '-'}</div>
@@ -66,10 +66,6 @@ export default async function HomePage() {
             <div className="space-y-2">
               <div className="text-sm font-medium text-muted-foreground">ตำแหน่ง</div>
               <div className="text-lg font-semibold">{account.user?.position || '-'}</div>
-            </div>
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-muted-foreground">องค์กร</div>
-              <div className="text-lg font-semibold">{account.organization?.name || '-'}</div>
             </div>
             <div className="space-y-2">
               <div className="text-sm font-medium text-muted-foreground">สิทธิ์การเข้าถึง</div>
