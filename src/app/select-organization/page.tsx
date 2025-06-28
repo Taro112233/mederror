@@ -15,16 +15,17 @@ export default function SelectOrganizationPage() {
   };
 
   return (
-    <GlobalSidebar showAuthLinks={true}>
-      <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center">เลือกสังกัด</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <SelectOrgForm onSelect={handleSelect} />
-          </CardContent>
-        </Card>
+    <GlobalSidebar>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">เลือกองค์กร</h1>
+            <p className="text-muted-foreground">
+              กรุณาเลือกองค์กรที่คุณต้องการเข้าถึง
+            </p>
+          </div>
+          <SelectOrgForm onSelect={handleSelect} />
+        </div>
       </div>
     </GlobalSidebar>
   );

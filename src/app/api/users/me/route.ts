@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     }
     const account = await prisma.account.findUnique({
       where: { id: payload.id },
-      include: { user: true },
+      include: { user: true, organization: true },
     });
     if (!account) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
       position: account.user?.position || "",
       phone: account.user?.phone || "",
       organizationId: account.organizationId || "",
+      organizationName: account.organization?.name || "",
     });
   } catch (e) {
     console.error(e);
