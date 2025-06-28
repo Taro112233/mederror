@@ -114,28 +114,6 @@ export default function GlobalSidebar({ children, showAuthLinks = false }: Globa
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroup>
-              
-              <SidebarGroup>
-                <SidebarGroupLabel>รายงาน</SidebarGroupLabel>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === "/admin/records"}>
-                      <Link href="/admin/records">
-                        <BarChart3 />
-                        <span>รายงานสถิติ</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === "/admin/user"}>
-                      <Link href="/admin/user">
-                        <Users />
-                        <span>จัดการผู้ใช้</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroup>
             </>
           )}
         </SidebarContent>
