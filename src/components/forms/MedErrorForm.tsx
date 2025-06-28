@@ -23,13 +23,62 @@ import { MedErrorFormSchema, MedErrorFormSchemaType } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { ImageIcon, UploadIcon, XIcon, AlertCircleIcon } from "lucide-react";
+import { ImageIcon, UploadIcon, XIcon, AlertCircleIcon, User } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type FormValues = MedErrorFormSchemaType;
 
 type Severity = { id: string; code: string; label: string };
 type SubErrorType = { id: string; code: string; label: string };
 type ErrorType = { id: string; code: string; label: string; subErrorTypes: SubErrorType[] };
+
+// Component สำหรับข้อมูลผู้รายงาน
+export function ReporterInfoCard({ 
+  userInfo, 
+  userLoading 
+}: { 
+  userInfo: { accountId: string; username: string; name: string; position: string; phone: string; role: string; organizationId: string } | null;
+  userLoading: boolean;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <User className="h-5 w-5" />
+          ข้อมูลผู้รายงาน
+        </CardTitle>
+        <CardDescription>
+          ข้อมูลผู้ใช้งานที่จะถูกบันทึกกับรายงาน
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {userLoading ? (
+          <div className="text-sm text-muted-foreground">กำลังโหลดข้อมูลผู้ใช้งาน...</div>
+        ) : userInfo ? (
+          <>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">ชื่อ-นามสกุล</div>
+              <div className="text-base font-semibold">{userInfo.name || "-"}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">ตำแหน่ง</div>
+              <div className="text-base font-semibold">{userInfo.position || "-"}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">เบอร์โทรศัพท์</div>
+              <div className="text-base font-semibold">{userInfo.phone || "-"}</div>
+            </div>
+            <div className="pt-2 text-xs text-muted-foreground border-t">
+              * ระบบจะบันทึกชื่อและตำแหน่งนี้ไว้กับรายงาน
+            </div>
+          </>
+        ) : (
+          <div className="text-sm text-destructive">ไม่สามารถโหลดข้อมูลผู้ใช้งาน</div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) {
   const form = useForm<FormValues>({
@@ -47,11 +96,6 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
   const [severities, setSeverities] = useState<Severity[]>([]);
   const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
   const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
-  const [userInfo, setUserInfo] = useState<
-    | { accountId: string; username: string; name: string; position: string; phone: string; role: string; organizationId: string }
-    | null
-  >(null);
-  const [userLoading, setUserLoading] = useState(true);
   const [units, setUnits] = useState<{ id: string; code: string; label: string }[]>([]);
 
   const maxSizeMB = 5;
@@ -97,21 +141,6 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
     fetch("/api/unit")
       .then((res) => res.json())
       .then(setUnits);
-    fetch("/api/users/me")
-      .then((res) => res.json())
-      .then((data) => {
-        setUserInfo({
-          accountId: data.accountId,
-          username: data.username,
-          name: data.name,
-          position: data.position,
-          phone: data.phone,
-          role: data.role,
-          organizationId: data.organizationId,
-        });
-        setUserLoading(false);
-      })
-      .catch(() => setUserLoading(false));
   }, []);
 
   const watchedErrorType = form.watch("errorType");
@@ -128,14 +157,23 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
 
   const onSubmit = async (values: FormValues) => {
     try {
-      if (!userInfo || !userInfo.accountId || !userInfo.username) {
+      // ดึงข้อมูลผู้ใช้จาก API
+      const userResponse = await fetch("/api/users/me");
+      if (!userResponse.ok) {
+        toast.error("ไม่สามารถดึงข้อมูลผู้รายงานได้");
+        return;
+      }
+      const userData = await userResponse.json();
+      
+      if (!userData.accountId || !userData.username) {
         toast.error("ไม่พบข้อมูลผู้รายงาน");
         return;
       }
-      if (userInfo.role === "UNAPPROVED") {
+      if (userData.role === "UNAPPROVED") {
         toast.error("บัญชีนี้ยังไม่ได้รับอนุมัติ ไม่สามารถส่งรายงานได้");
         return;
       }
+      
       const formData = new FormData();
       formData.append("eventDate", values.eventDate);
       formData.append("unitId", values.unit);
@@ -143,12 +181,12 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       formData.append("severity", values.severity);
       formData.append("errorType", values.errorType);
       formData.append("subErrorType", values.subErrorType);
-      formData.append("reporterAccountId", userInfo.accountId);
-      formData.append("reporterUsername", userInfo.username);
-      formData.append("reporterName", userInfo.name || "");
-      formData.append("reporterPosition", userInfo.position || "");
-      formData.append("reporterPhone", userInfo.phone || "");
-      formData.append("reporterOrganizationId", userInfo.organizationId || "");
+      formData.append("reporterAccountId", userData.accountId);
+      formData.append("reporterUsername", userData.username);
+      formData.append("reporterName", userData.name || "");
+      formData.append("reporterPosition", userData.position || "");
+      formData.append("reporterPhone", userData.phone || "");
+      formData.append("reporterOrganizationId", userData.organizationId || "");
       // แนบไฟล์รูปภาพ (รองรับหลายไฟล์)
       if (Array.isArray(values.image)) {
         for (const file of values.image) {
@@ -410,20 +448,6 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
         <Button type="submit" className="w-full mt-2">
           ส่งรายงาน
         </Button>
-        <div className="mt-6 p-4 border rounded bg-muted/50 text-sm text-gray-700">
-          <div className="mb-1 font-semibold">ข้อมูลผู้รายงาน</div>
-          {userLoading ? (
-            <div>กำลังโหลดข้อมูลผู้ใช้งาน...</div>
-          ) : userInfo ? (
-            <>
-              <div>ชื่อ-นามสกุล: <span className="font-medium">{userInfo.name || "-"}</span></div>
-              <div>ตำแหน่ง: <span className="font-medium">{userInfo.position || "-"}</span></div>
-              <div className="mt-2 text-xs text-gray-500">* ระบบจะบันทึกชื่อและตำแหน่งนี้ไว้กับรายงาน</div>
-            </>
-          ) : (
-            <div className="text-red-500">ไม่สามารถโหลดข้อมูลผู้ใช้งาน</div>
-          )}
-        </div>
       </form>
     </Form>
   );
