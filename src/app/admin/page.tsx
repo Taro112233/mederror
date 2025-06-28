@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Code, Settings } from "lucide-react";
+import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และมี role เป็น ADMIN เท่านั้นที่เข้าถึงได้
 export default async function AdminMenu() {
@@ -35,16 +35,30 @@ export default async function AdminMenu() {
         <h2 className="text-3xl font-bold tracking-tight">จัดการระบบ</h2>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/admin/records">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                รายการ Med error
+                รายการ Med error ทั้งหมด
               </CardTitle>
               <CardDescription>
                 ดูและจัดการรายการข้อผิดพลาดทั้งหมด
+              </CardDescription>
+            </CardHeader>
+          </Link>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <Link href="/admin/my-records">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5" />
+                รายการ Med error ของตนเอง
+              </CardTitle>
+              <CardDescription>
+                ดูรายการข้อผิดพลาดที่คุณรายงาน
               </CardDescription>
             </CardHeader>
           </Link>
