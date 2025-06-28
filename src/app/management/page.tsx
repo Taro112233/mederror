@@ -109,7 +109,7 @@ export default async function ManagementMenu() {
       {/* สำหรับ Developer */}
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-gray-800">สำหรับ Developer</h3>
-        <div className="grid gap-4 md:grid-cols-1">
+        <div className="grid gap-4 md:grid-cols-2">
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <Link href="/management/developer">
               <CardHeader>
