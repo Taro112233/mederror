@@ -117,7 +117,7 @@ export default async function HomePage() {
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin">
+          <Link href="/management">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />

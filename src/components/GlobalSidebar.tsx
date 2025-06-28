@@ -88,10 +88,10 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
         icon: <FileText className="h-4 w-4" />,
         isCurrent: true
       });
-    } else if (pathname.startsWith("/admin")) {
+    } else if (pathname.startsWith("/management")) {
       items.push({
         label: "จัดการระบบ",
-        href: "/admin",
+        href: "/management",
         icon: <Settings className="h-4 w-4" />,
         isCurrent: true
       });
@@ -153,8 +153,8 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/admin")}>
-                  <Link href="/admin">
+                <SidebarMenuButton asChild isActive={pathname.startsWith("/management")}>
+                  <Link href="/management">
                     <Settings />
                     <span>จัดการระบบ</span>
                   </Link>

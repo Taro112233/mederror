@@ -97,7 +97,7 @@ export default async function NotificationSettings() {
 
       <div className="flex justify-start">
         <Button asChild variant="secondary">
-          <Link href="/admin/settings">
+          <Link href="/management/settings">
             <ArrowLeft className="mr-2 h-4 w-4" />
             กลับไปหน้าตั้งค่า
           </Link>

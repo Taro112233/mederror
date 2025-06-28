@@ -37,7 +37,7 @@ export default async function AdminSettings() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/settings/profile">
+          <Link href="/management/settings/profile">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
@@ -51,7 +51,7 @@ export default async function AdminSettings() {
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/settings/security">
+          <Link href="/management/settings/security">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
@@ -65,7 +65,7 @@ export default async function AdminSettings() {
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/settings/notifications">
+          <Link href="/management/settings/notifications">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5" />
@@ -79,7 +79,7 @@ export default async function AdminSettings() {
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/settings/system">
+          <Link href="/management/settings/system">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Database className="h-5 w-5" />
@@ -95,7 +95,7 @@ export default async function AdminSettings() {
 
       <div className="flex justify-start">
         <Button asChild variant="secondary">
-          <Link href="/admin">
+          <Link href="/management">
             <Settings className="mr-2 h-4 w-4" />
             กลับไปหน้าจัดการระบบ
           </Link>

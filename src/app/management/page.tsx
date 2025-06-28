@@ -1,0 +1,127 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
+
+// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และมี role เป็น ADMIN เท่านั้นที่เข้าถึงได้
+export default async function AdminMenu() {
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
+  if (!sessionToken) {
+    redirect("/login");
+  }
+  let payload: jwt.JwtPayload;
+  try {
+    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
+    redirect("/login");
+  }
+  const prisma = new PrismaClient();
+  const account = await prisma.account.findUnique({ where: { id: payload.id } });
+  if (!account) {
+    redirect("/login");
+  }
+  if (account.role !== "ADMIN") {
+    redirect("/");
+  }
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">จัดการระบบ</h2>
+      </div>
+
+      {/* การจัดการ */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-gray-800">การจัดการ</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/my-records">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserCheck className="h-5 w-5" />
+                  รายการ Med error ที่ส่งไป
+                </CardTitle>
+                <CardDescription>
+                  ดูรายการข้อผิดพลาดที่คุณรายงาน
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/settings">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  ตั้งค่า
+                </CardTitle>
+                <CardDescription>
+                  จัดการการตั้งค่าผู้ใช้งานระบบ
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+        </div>
+      </div>
+
+      {/* สำหรับ Admin */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-gray-800">สำหรับ Admin</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/records">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  รายการ Med error ทั้งหมด
+                </CardTitle>
+                <CardDescription>
+                  ดูและจัดการรายการข้อผิดพลาดทั้งหมด
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/user">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  รายชื่อผู้ใช้งานระบบ
+                </CardTitle>
+                <CardDescription>
+                  จัดการผู้ใช้งานและสิทธิ์การเข้าถึง
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+        </div>
+      </div>
+
+      {/* สำหรับ Developer */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-gray-800">สำหรับ Developer</h3>
+        <div className="grid gap-4 md:grid-cols-1">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/developer">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Developer Panel
+                </CardTitle>
+                <CardDescription>
+                  เครื่องมือสำหรับนักพัฒนา
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
