@@ -68,7 +68,7 @@ export default async function PendingApprovalPage() {
             </ul>
             <div className="flex flex-row justify-between items-center">
               <div className="w-30">
-                <LogoutButton className="w-30" />
+                <LogoutButton className="w-30" variant="secondary" />
               </div>
               <div className="flex-1" />
               <form action="" method="get" className="w-30">

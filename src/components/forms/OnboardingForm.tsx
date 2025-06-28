@@ -77,7 +77,7 @@ export default function OnboardingForm() {
           )}
         />
         <div className="flex flex-row justify-between items-center">
-          <LogoutButton className="w-30" />
+          <LogoutButton className="w-30" variant="secondary" />
           <div className="flex-1" />
           <Button type="submit" className="w-30">
             บันทึกข้อมูล
