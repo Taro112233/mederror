@@ -81,19 +81,28 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    // รับ organizationId จาก query parameter
+    // รับ organizationId และ reporterAccountId จาก query parameter
     const { searchParams } = new URL(req.url);
     const organizationId = searchParams.get("organizationId");
+    const reporterAccountId = searchParams.get("reporterAccountId");
 
     if (!organizationId) {
       return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
     }
 
+    // สร้าง where condition
+    const whereCondition: any = {
+      reporterOrganizationId: organizationId,
+    };
+
+    // ถ้ามี reporterAccountId ให้กรองตาม reporterAccountId ด้วย
+    if (reporterAccountId) {
+      whereCondition.reporterAccountId = reporterAccountId;
+    }
+
     // ดึงข้อมูล MedError ที่อยู่ใน organization เดียวกัน
     const medErrors = await prisma.medError.findMany({
-      where: {
-        reporterOrganizationId: organizationId,
-      },
+      where: whereCondition,
       include: {
         unit: true,
         severity: true,

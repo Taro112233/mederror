@@ -121,7 +121,7 @@ export default async function HomePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5" />
-                จัดการระบบ
+                ศูนย์จัดการ
               </CardTitle>
               <CardDescription>
                 จัดการผู้ใช้และระบบ

@@ -90,7 +90,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       });
     } else if (pathname.startsWith("/management")) {
       items.push({
-        label: "จัดการระบบ",
+        label: "ศูนย์จัดการ",
         href: "/management",
         icon: <Settings className="h-4 w-4" />,
         isCurrent: true
@@ -156,7 +156,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                 <SidebarMenuButton asChild isActive={pathname.startsWith("/management")}>
                   <Link href="/management">
                     <Settings />
-                    <span>จัดการระบบ</span>
+                    <span>ศูนย์จัดการ</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

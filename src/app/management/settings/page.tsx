@@ -97,7 +97,7 @@ export default async function AdminSettings() {
         <Button asChild variant="secondary">
           <Link href="/management">
             <Settings className="mr-2 h-4 w-4" />
-            กลับไปหน้าจัดการระบบ
+            กลับไปหน้าศูนย์จัดการ
           </Link>
         </Button>
       </div>
