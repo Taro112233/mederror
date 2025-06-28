@@ -2,6 +2,8 @@
 import React from "react";
 import SelectOrgForm from "@/components/forms/SelectOrgForm";
 import { useRouter } from "next/navigation";
+import GlobalSidebar from "@/components/GlobalSidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SelectOrganizationPage() {
   const router = useRouter();
@@ -13,11 +15,17 @@ export default function SelectOrganizationPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded shadow">
-        <h1 className="text-xl font-bold mb-4 text-center">เลือกสังกัด</h1>
-        <SelectOrgForm onSelect={handleSelect} />
+    <GlobalSidebar showAuthLinks={true}>
+      <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-center">เลือกสังกัด</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SelectOrgForm onSelect={handleSelect} />
+          </CardContent>
+        </Card>
       </div>
-    </main>
+    </GlobalSidebar>
   );
 }

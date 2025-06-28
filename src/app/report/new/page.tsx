@@ -4,10 +4,14 @@ import MedErrorForm from "@/components/forms/MedErrorForm";
 
 export default function ReportNewPage() {
   return (
-    <div className="max-w-xl mx-auto w-full p-4 sm:p-6 mt-4">
-      <Card>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">รายงานข้อผิดพลาดใหม่</h2>
+      </div>
+      
+      <Card className="max-w-2xl">
         <CardHeader>
-          <CardTitle className="text-center">รายงาน Med error</CardTitle>
+          <CardTitle>รายงาน Med error</CardTitle>
         </CardHeader>
         <CardContent>
           <MedErrorForm />

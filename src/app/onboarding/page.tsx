@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import OnboardingForm from "@/components/forms/OnboardingForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import jwt from "jsonwebtoken";
+import GlobalSidebar from "@/components/GlobalSidebar";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และยังไม่ได้ onboarded เท่านั้นที่เข้าถึงได้
 export default async function OnboardingPage() {
@@ -32,15 +33,17 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-muted">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle>ลงทะเบียนข้อมูลผู้ใช้</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <OnboardingForm />
-        </CardContent>
-      </Card>
-    </div>
+    <GlobalSidebar showAuthLinks={true}>
+      <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle>ลงทะเบียนข้อมูลผู้ใช้</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OnboardingForm />
+          </CardContent>
+        </Card>
+      </div>
+    </GlobalSidebar>
   );
 }

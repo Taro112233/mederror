@@ -127,20 +127,16 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg">กำลังโหลดข้อมูล...</div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">กำลังโหลดข้อมูล...</div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-red-500">ไม่สามารถโหลดข้อมูลได้</div>
-        </div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-500">ไม่สามารถโหลดข้อมูลได้</div>
       </div>
     );
   }

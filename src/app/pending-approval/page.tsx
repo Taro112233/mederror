@@ -5,6 +5,7 @@ import LogoutButton from "../../components/button/LogoutButton";
 import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
+import GlobalSidebar from "@/components/GlobalSidebar";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role เป็น UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function PendingApprovalPage() {
@@ -41,41 +42,43 @@ export default async function PendingApprovalPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-muted">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-center">รอการอนุมัติ</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-2 mb-4">
-            <li className="flex justify-between">
-              <span className="font-medium">ชื่อ-นามสกุล:</span>
-              <span>{user?.name || '-'}</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="font-medium">เบอร์โทร:</span>
-              <span>{user?.phone || '-'}</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="font-medium">ตำแหน่ง:</span>
-              <span>{user?.position || '-'}</span>
-            </li>
-            <li className="flex justify-between">
-              <span className="font-medium">สถานะ:</span>
-              <span className="text-yellow-600 font-semibold">รอการอนุมัติ</span>
-            </li>
-          </ul>
-          <div className="flex flex-row justify-between items-center">
-            <div className="w-30">
-              <LogoutButton className="w-30" />
+    <GlobalSidebar showAuthLinks={true}>
+      <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-center">รอการอนุมัติ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2 mb-4">
+              <li className="flex justify-between">
+                <span className="font-medium">ชื่อ-นามสกุล:</span>
+                <span>{user?.name || '-'}</span>
+              </li>
+              <li className="flex justify-between">
+                <span className="font-medium">เบอร์โทร:</span>
+                <span>{user?.phone || '-'}</span>
+              </li>
+              <li className="flex justify-between">
+                <span className="font-medium">ตำแหน่ง:</span>
+                <span>{user?.position || '-'}</span>
+              </li>
+              <li className="flex justify-between">
+                <span className="font-medium">สถานะ:</span>
+                <span className="text-yellow-600 font-semibold">รอการอนุมัติ</span>
+              </li>
+            </ul>
+            <div className="flex flex-row justify-between items-center">
+              <div className="w-30">
+                <LogoutButton className="w-30" />
+              </div>
+              <div className="flex-1" />
+              <form action="" method="get" className="w-30">
+                <Button type="submit" className="w-30">รีเฟรช</Button>
+              </form>
             </div>
-            <div className="flex-1" />
-            <form action="" method="get" className="w-30">
-              <Button type="submit" className="w-30">รีเฟรช</Button>
-            </form>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </CardContent>
+        </Card>
+      </div>
+    </GlobalSidebar>
   );
 }

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DeveloperPanel() {
   const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
@@ -42,29 +43,46 @@ export default function DeveloperPanel() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Developer Panel</h1>
-      <form onSubmit={handleCreate} className="flex gap-2 mb-8">
-        <Input
-          placeholder="ชื่อ Organization"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          className="w-64"
-          disabled={loading}
-        />
-        <Button type="submit" disabled={loading || !name.trim()}>{loading ? "กำลังสร้าง..." : "สร้าง Organization"}</Button>
-      </form>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
-      <div className="w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">รายการ Organization</h2>
-        <ul className="space-y-2">
-          {orgs.map(org => (
-            <li key={org.id} className="border rounded px-4 py-2 bg-white shadow">
-              {org.name}
-            </li>
-          ))}
-        </ul>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">Developer Panel</h2>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>สร้าง Organization ใหม่</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleCreate} className="flex gap-2">
+            <Input
+              placeholder="ชื่อ Organization"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="flex-1"
+              disabled={loading}
+            />
+            <Button type="submit" disabled={loading || !name.trim()}>
+              {loading ? "กำลังสร้าง..." : "สร้าง Organization"}
+            </Button>
+          </form>
+          {error && <div className="text-red-500 mt-2">{error}</div>}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>รายการ Organization</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {orgs.map(org => (
+              <div key={org.id} className="border rounded px-4 py-2 bg-muted/50">
+                {org.name}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 } 

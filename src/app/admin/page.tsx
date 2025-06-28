@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, FileText, Code, Home } from "lucide-react";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และมี role เป็น ADMIN เท่านั้นที่เข้าถึงได้
 export default async function AdminMenu() {
@@ -28,27 +30,60 @@ export default async function AdminMenu() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Admin Menu</h1>
-      <div className="flex flex-col gap-6 w-full max-w-xs">
-        <Button asChild size="lg" className="w-full text-lg py-6">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">จัดการระบบ</h2>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/admin/records">
-            <span>รายการ Med error (admin)</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                รายการ Med error
+              </CardTitle>
+              <CardDescription>
+                ดูและจัดการรายการข้อผิดพลาดทั้งหมด
+              </CardDescription>
+            </CardHeader>
           </Link>
-        </Button>
-        <Button asChild size="lg" className="w-full text-lg py-6">
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/admin/user">
-            <span>จัดการผู้ใช้</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                จัดการผู้ใช้
+              </CardTitle>
+              <CardDescription>
+                จัดการผู้ใช้งานและสิทธิ์การเข้าถึง
+              </CardDescription>
+            </CardHeader>
           </Link>
-        </Button>
-        <Button asChild size="lg" className="w-full text-lg py-6">
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/admin/developer">
-            <span>Developer Panel</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Developer Panel
+              </CardTitle>
+              <CardDescription>
+                เครื่องมือสำหรับนักพัฒนา
+              </CardDescription>
+            </CardHeader>
           </Link>
-        </Button>
-        <Button asChild size="lg" className="w-full text-lg py-6" variant="secondary">
+        </Card>
+      </div>
+
+      <div className="flex justify-center">
+        <Button asChild variant="secondary">
           <Link href="/">
-            <span>กลับหน้าแรก</span>
+            <Home className="mr-2 h-4 w-4" />
+            กลับหน้าแรก
           </Link>
         </Button>
       </div>

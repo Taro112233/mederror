@@ -4,7 +4,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import LogoutButton from "@/components/button/LogoutButton";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { User, Building2, Shield } from "lucide-react";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function HomePage() {
@@ -34,34 +36,106 @@ export default async function HomePage() {
   // --- END Logic ---
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8">
-      <div className="flex flex-col items-center gap-0 mb-6">
-        <div className="text-xl font-bold text-center">ระบบรายงานความคลาดเคลื่อนทางยา</div>
-        <div className="text-xl font-bold text-center">{account.organization?.name || '-'}</div>
-        <div className="mt-3 p-4 border rounded bg-muted/50 text-sm text-gray-700 w-full max-w-md">
-          <div className="mb-1 font-semibold">ข้อมูลผู้ใช้งาน</div>
-          <div>ชื่อ-นามสกุล: <span className="font-medium">{account.user?.name || '-'}</span></div>
-          <div>ตำแหน่ง: <span className="font-medium">{account.user?.position || '-'}</span></div>
-          <div className="mt-2 text-xs text-gray-500">* ระบบจะบันทึกข้อมูลการใช้งานในชื่อนี้</div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">ยินดีต้อนรับ</h1>
+          <p className="text-muted-foreground">
+            ระบบรายงานความคลาดเคลื่อนทางยา
+          </p>
         </div>
       </div>
-      <div className="flex flex-col gap-6 w-full max-w-xs">
-        <Button asChild size="lg" className="w-full text-lg py-6">
+
+      {/* User Info Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            ข้อมูลผู้ใช้งาน
+          </CardTitle>
+          <CardDescription>
+            ข้อมูลส่วนตัวและสิทธิ์การเข้าถึงระบบ
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">ชื่อ-นามสกุล</div>
+              <div className="text-lg font-semibold">{account.user?.name || '-'}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">ตำแหน่ง</div>
+              <div className="text-lg font-semibold">{account.user?.position || '-'}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">องค์กร</div>
+              <div className="text-lg font-semibold">{account.organization?.name || '-'}</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">สิทธิ์การเข้าถึง</div>
+              <div>
+                <Badge variant={
+                  account.role === "ADMIN" ? "destructive" :
+                  account.role === "DEVELOPER" ? "secondary" :
+                  "outline"
+                }>
+                  {account.role === "ADMIN" ? "ผู้ดูแลระบบ" :
+                   account.role === "DEVELOPER" ? "ผู้พัฒนา" :
+                   "ผู้ใช้งาน"}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/dashboard">
-            <span>Dashboard</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Dashboard
+              </CardTitle>
+              <CardDescription>
+                ดูสถิติและข้อมูลสรุป
+              </CardDescription>
+            </CardHeader>
           </Link>
-        </Button>
-        <Button asChild size="lg" className="w-full text-lg py-6">
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/report/new">
-            <span>รายงาน Med error</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                รายงานข้อผิดพลาด
+              </CardTitle>
+              <CardDescription>
+                สร้างรายงานข้อผิดพลาดใหม่
+              </CardDescription>
+            </CardHeader>
           </Link>
-        </Button>
-        <Button asChild size="lg" className="w-full text-lg py-6">
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
           <Link href="/admin">
-            <span>Admin panel</span>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                จัดการระบบ
+              </CardTitle>
+              <CardDescription>
+                จัดการผู้ใช้และระบบ
+              </CardDescription>
+            </CardHeader>
           </Link>
-        </Button>
-        <LogoutButton className="w-full text-lg py-6" variant="destructive" />
+        </Card>
+      </div>
+
+      <div className="text-xs text-muted-foreground text-center">
+        * ระบบจะบันทึกข้อมูลการใช้งานในชื่อ {account.user?.name || 'ผู้ใช้งาน'}
       </div>
     </div>
   );

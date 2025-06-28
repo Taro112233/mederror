@@ -12,7 +12,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon, CopyIcon } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -213,13 +213,16 @@ export default function AdminRecordsPage() {
   });
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold mb-2 text-center">Admin panel</h1>
-        <div className="font-semibold mb-2 text-center">รายการ Med error (Admin)</div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-3xl font-bold tracking-tight">รายการข้อผิดพลาด</h2>
       </div>
-      <Card className="shadow-lg">
-        <CardContent className="px-6 pb-6">
+
+      <Card>
+        <CardHeader>
+          <CardTitle>รายการ Med Error ทั้งหมด</CardTitle>
+        </CardHeader>
+        <CardContent>
           {/* Global Search Only */}
           <div className="mb-4 flex items-center gap-3">
             <div className="font-semibold whitespace-nowrap">ค้นหา</div>
