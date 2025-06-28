@@ -1,6 +1,6 @@
 "use client"
 
-import { ReactNode, useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 interface GlobalSidebarProps {
   children: ReactNode;
@@ -59,6 +60,54 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
         console.error("Failed to fetch user info:", error);
       });
   }, []);
+
+  // Function to get breadcrumb items based on current path
+  const getBreadcrumbItems = () => {
+    const items = [];
+    
+    // Always add home
+    items.push({
+      label: "หน้าแรก",
+      href: "/",
+      icon: <Home className="h-4 w-4" />,
+      isCurrent: pathname === "/"
+    });
+
+    // Add specific pages
+    if (pathname === "/dashboard") {
+      items.push({
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: <LayoutDashboard className="h-4 w-4" />,
+        isCurrent: true
+      });
+    } else if (pathname === "/report/new") {
+      items.push({
+        label: "รายงานข้อผิดพลาด",
+        href: "/report/new",
+        icon: <FileText className="h-4 w-4" />,
+        isCurrent: true
+      });
+    } else if (pathname.startsWith("/admin")) {
+      items.push({
+        label: "จัดการระบบ",
+        href: "/admin",
+        icon: <Settings className="h-4 w-4" />,
+        isCurrent: true
+      });
+    } else if (pathname === "/") {
+      items.push({
+        label: "หน้าหลัก",
+        href: "/",
+        icon: null,
+        isCurrent: true
+      });
+    }
+
+    return items;
+  };
+
+  const breadcrumbItems = getBreadcrumbItems();
 
   return (
     <>
@@ -145,9 +194,28 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             <SidebarTrigger className="-ml-1" />
             <div className="h-4 w-px bg-sidebar-border" />
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">
-                ระบบรายงานความคลาดเคลื่อนทางยา
-              </span>
+              <Breadcrumb>
+                <BreadcrumbList>
+                  {breadcrumbItems.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <BreadcrumbItem>
+                        {item.isCurrent ? (
+                          <BreadcrumbPage className="flex items-center gap-1">
+                            {item.icon}
+                            {item.label}
+                          </BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink href={item.href} className="flex items-center gap-1">
+                            {item.icon}
+                            {item.label}
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                      {index < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
+                    </React.Fragment>
+                  ))}
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
           </div>
         </header>
