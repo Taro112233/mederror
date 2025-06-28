@@ -1,14 +1,14 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Code, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Settings, User, Shield, Bell, Database } from "lucide-react";
+import Link from "next/link";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และมี role เป็น ADMIN เท่านั้นที่เข้าถึงได้
-export default async function AdminMenu() {
+export default async function AdminSettings() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session_token")?.value;
   if (!sessionToken) {
@@ -32,66 +32,75 @@ export default async function AdminMenu() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">จัดการระบบ</h2>
+        <h2 className="text-3xl font-bold tracking-tight">ตั้งค่าผู้ใช้งาน</h2>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/records">
+          <Link href="/admin/settings/profile">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                รายการ Med error
+                <User className="h-5 w-5" />
+                โปรไฟล์ผู้ใช้
               </CardTitle>
               <CardDescription>
-                ดูและจัดการรายการข้อผิดพลาดทั้งหมด
+                จัดการข้อมูลส่วนตัวและโปรไฟล์
               </CardDescription>
             </CardHeader>
           </Link>
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/user">
+          <Link href="/admin/settings/security">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                จัดการผู้ใช้
+                <Shield className="h-5 w-5" />
+                ความปลอดภัย
               </CardTitle>
               <CardDescription>
-                จัดการผู้ใช้งานและสิทธิ์การเข้าถึง
+                ตั้งค่ารหัสผ่านและการรักษาความปลอดภัย
               </CardDescription>
             </CardHeader>
           </Link>
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/developer">
+          <Link href="/admin/settings/notifications">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Code className="h-5 w-5" />
-                Developer Panel
+                <Bell className="h-5 w-5" />
+                การแจ้งเตือน
               </CardTitle>
               <CardDescription>
-                เครื่องมือสำหรับนักพัฒนา
+                จัดการการแจ้งเตือนและอีเมล
               </CardDescription>
             </CardHeader>
           </Link>
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/admin/settings">
+          <Link href="/admin/settings/system">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                ตั้งค่าผู้ใช้งาน
+                <Database className="h-5 w-5" />
+                ตั้งค่าระบบ
               </CardTitle>
               <CardDescription>
-                จัดการการตั้งค่าผู้ใช้งานระบบ
+                การตั้งค่าระบบและฐานข้อมูล
               </CardDescription>
             </CardHeader>
           </Link>
         </Card>
+      </div>
+
+      <div className="flex justify-start">
+        <Button asChild variant="secondary">
+          <Link href="/admin">
+            <Settings className="mr-2 h-4 w-4" />
+            กลับไปหน้าจัดการระบบ
+          </Link>
+        </Button>
       </div>
     </div>
   );
-}
+} 
