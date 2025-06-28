@@ -32,15 +32,17 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle>ลงทะเบียนข้อมูลผู้ใช้</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <OnboardingForm />
-        </CardContent>
-      </Card>
+    <div className="min-h-screen w-full flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>ลงทะเบียนข้อมูลผู้ใช้</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <OnboardingForm />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

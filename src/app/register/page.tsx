@@ -18,18 +18,20 @@ export default function RegisterPage() {
   }, []);
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle>สมัครสมาชิก</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <RegisterForm />
-          <div className="mt-4 text-center text-sm">
-            มีบัญชีอยู่แล้ว? <Link href="/login" className="text-primary underline">เข้าสู่ระบบ</Link>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="fixed inset-0 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>สมัครสมาชิก</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <RegisterForm />
+            <div className="mt-4 text-center text-sm">
+              มีบัญชีอยู่แล้ว? <Link href="/login" className="text-primary underline">เข้าสู่ระบบ</Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 } 

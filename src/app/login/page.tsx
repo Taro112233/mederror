@@ -18,18 +18,20 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle>เข้าสู่ระบบ</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LoginForm />
-          <div className="mt-4 text-center text-sm">
-            ยังไม่มีบัญชี? <Link href="/register" className="text-primary underline">สมัครสมาชิก</Link>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="fixed inset-0 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle>เข้าสู่ระบบ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LoginForm />
+            <div className="mt-4 text-center text-sm">
+              ยังไม่มีบัญชี? <Link href="/register" className="text-primary underline">สมัครสมาชิก</Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
