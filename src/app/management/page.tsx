@@ -7,8 +7,8 @@ import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
 
-// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และมี role เป็น ADMIN เท่านั้นที่เข้าถึงได้
-export default async function AdminMenu() {
+// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
+export default async function ManagementMenu() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("session_token")?.value;
   if (!sessionToken) {
@@ -21,12 +21,15 @@ export default async function AdminMenu() {
     redirect("/login");
   }
   const prisma = new PrismaClient();
-  const account = await prisma.account.findUnique({ where: { id: payload.id } });
+  const account = await prisma.account.findUnique({ where: { id: payload.id }, include: { organization: true, user: true } });
   if (!account) {
     redirect("/login");
   }
-  if (account.role !== "ADMIN") {
-    redirect("/");
+  if (!account.onboarded) {
+    redirect("/onboarding");
+  }
+  if (!account.role || account.role === "UNAPPROVED") {
+    redirect("/pending-approval");
   }
 
   return (
