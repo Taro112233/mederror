@@ -3,7 +3,6 @@ import React from "react";
 import SelectOrgForm from "@/components/forms/SelectOrgForm";
 import { useRouter } from "next/navigation";
 import GlobalSidebar from "@/components/GlobalSidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SelectOrganizationPage() {
   const router = useRouter();

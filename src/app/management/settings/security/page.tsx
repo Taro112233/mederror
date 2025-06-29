@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Key, Lock, Shield } from "lucide-react";
+import { ArrowLeft, Key, Lock } from "lucide-react";
 import Link from "next/link";
 
 // [SECURITY] ตรวจสอบ session token และ user permissions ในฝั่ง server

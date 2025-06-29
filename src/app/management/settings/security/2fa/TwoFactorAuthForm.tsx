@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Shield, Smartphone, Save, X } from "lucide-react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function TwoFactorAuthForm() {
   const [isEnabling2FA, setIsEnabling2FA] = useState(false);
@@ -133,10 +134,13 @@ export default function TwoFactorAuthForm() {
               <Label className="text-sm font-medium">ขั้นตอนที่ 1: สแกน QR Code</Label>
               <div className="mt-2 p-4 border rounded-lg bg-gray-50 flex justify-center">
                 {qrCodeUrl ? (
-                  <img 
-                    src={qrCodeUrl} 
-                    alt="QR Code for 2FA" 
+                  <Image
+                    src={qrCodeUrl}
+                    alt="QR Code for 2FA"
+                    width={192}
+                    height={192}
                     className="w-48 h-48 border"
+                    unoptimized
                   />
                 ) : (
                   <div className="w-48 h-48 border flex items-center justify-center text-gray-500">
