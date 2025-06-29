@@ -228,7 +228,7 @@ export default function ProfileSettings() {
         <Button asChild variant="secondary">
           <Link href="/management/settings">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            กลับไปหน้าตั้งค่า
+            ย้อนกลับ
           </Link>
         </Button>
       </div>

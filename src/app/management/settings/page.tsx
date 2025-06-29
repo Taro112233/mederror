@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, User, Shield, Bell } from "lucide-react";
+import { User, Shield, Bell, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
@@ -85,8 +85,8 @@ export default async function AdminSettings() {
       <div className="flex justify-start">
         <Button asChild variant="secondary">
           <Link href="/management">
-            <Settings className="mr-2 h-4 w-4" />
-            กลับไปหน้าตั้งค่าทั่วไป
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            ย้อนกลับ
           </Link>
         </Button>
       </div>

@@ -63,7 +63,7 @@ export default async function ChangePasswordPage() {
         <Button asChild variant="secondary">
           <Link href="/management/settings/security">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            กลับไปหน้าความปลอดภัย
+            ย้อนกลับ
           </Link>
         </Button>
       </div>

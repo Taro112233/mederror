@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Shield, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
@@ -14,13 +13,11 @@ export default function SecurityVerification() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
       const response = await fetch("/api/security/verify-password", {
@@ -31,16 +28,14 @@ export default function SecurityVerification() {
         body: JSON.stringify({ password }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
         // ไปยังหน้า security settings หลังจากยืนยันสำเร็จ
         router.push("/management/settings/security");
       } else {
-        setError(data.error || "เกิดข้อผิดพลาดในการตรวจสอบรหัสผ่าน");
+        // เพิ่มการจัดการข้อผิดพลาดที่นี่
       }
     } catch (error) {
-      setError("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      // เพิ่มการจัดการข้อผิดพลาดที่นี่
     } finally {
       setIsLoading(false);
     }
@@ -89,12 +84,6 @@ export default function SecurityVerification() {
                 </div>
               </div>
 
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
               <Button
                 type="submit"
                 className="w-full"
@@ -105,10 +94,10 @@ export default function SecurityVerification() {
             </form>
 
             <div className="mt-6 text-center">
-              <Button asChild variant="ghost" size="sm">
+              <Button asChild variant="secondary" size="sm">
                 <Link href="/management/settings">
                   <ArrowLeft className="mr-2 h-4 w-4" />
-                  กลับไปหน้าตั้งค่า
+                  ย้อนกลับ
                 </Link>
               </Button>
             </div>
