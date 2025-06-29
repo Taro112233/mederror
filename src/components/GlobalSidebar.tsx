@@ -20,7 +20,12 @@ import {
   FileText, 
   Settings,
   Home,
-  User
+  User,
+  UserCheck,
+  Code,
+  Bell,
+  Shield,
+  Key
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -61,7 +66,6 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
   // Function to get breadcrumb items based on current path
   const getBreadcrumbItems = () => {
     const items = [];
-    
     // Always add home
     items.push({
       label: "หน้าแรก",
@@ -70,7 +74,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       isCurrent: pathname === "/"
     });
 
-    // Add specific pages
+    // Dashboard
     if (pathname === "/dashboard") {
       items.push({
         label: "Dashboard",
@@ -78,29 +82,107 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
         icon: <LayoutDashboard className="h-4 w-4" />,
         isCurrent: true
       });
-    } else if (pathname === "/report/new") {
+    }
+    // Report
+    else if (pathname === "/report/new") {
       items.push({
-        label: "รายงานข้อผิดพลาด",
+        label: "รายงานข้อผิดพลาดใหม่",
         href: "/report/new",
         icon: <FileText className="h-4 w-4" />,
         isCurrent: true
       });
-    } else if (pathname.startsWith("/management")) {
+    }
+    // Management
+    else if (pathname.startsWith("/management")) {
       items.push({
         label: "ตั้งค่าทั่วไป",
         href: "/management",
         icon: <Settings className="h-4 w-4" />,
-        isCurrent: true
+        isCurrent: pathname === "/management"
       });
-    } else if (pathname === "/") {
-      items.push({
-        label: "หน้าหลัก",
-        href: "/",
-        icon: null,
-        isCurrent: true
-      });
+      // Management subpages
+      if (pathname === "/management/my-records") {
+        items.push({
+          label: "รายการ Med error ที่ส่งไป",
+          href: "/management/my-records",
+          icon: <UserCheck className="h-4 w-4" />,
+          isCurrent: true
+        });
+      } else if (pathname === "/management/records") {
+        items.push({
+          label: "รายการ Med error ทั้งหมด",
+          href: "/management/records",
+          icon: <FileText className="h-4 w-4" />,
+          isCurrent: true
+        });
+      } else if (pathname === "/management/user") {
+        items.push({
+          label: "รายชื่อผู้ใช้งานระบบ",
+          href: "/management/user",
+          icon: <User className="h-4 w-4" />,
+          isCurrent: true
+        });
+      } else if (pathname === "/management/developer") {
+        items.push({
+          label: "Developer Panel",
+          href: "/management/developer",
+          icon: <Code className="h-4 w-4" />,
+          isCurrent: true
+        });
+      } else if (pathname.startsWith("/management/settings")) {
+        items.push({
+          label: "ตั้งค่าผู้ใช้งาน",
+          href: "/management/settings",
+          icon: <Settings className="h-4 w-4" />,
+          isCurrent: pathname === "/management/settings"
+        });
+        // Management/settings subpages
+        if (pathname === "/management/settings/profile") {
+          items.push({
+            label: "โปรไฟล์ผู้ใช้",
+            href: "/management/settings/profile",
+            icon: <User className="h-4 w-4" />,
+            isCurrent: true
+          });
+        } else if (pathname.startsWith("/management/settings/security")) {
+          items.push({
+            label: "ความปลอดภัย",
+            href: "/management/settings/security",
+            icon: <Shield className="h-4 w-4" />,
+            isCurrent: pathname === "/management/settings/security"
+          });
+          if (pathname === "/management/settings/security/change-password") {
+            items.push({
+              label: "เปลี่ยนรหัสผ่าน",
+              href: "/management/settings/security/change-password",
+              icon: <Key className="h-4 w-4" />,
+              isCurrent: true
+            });
+          } else if (pathname === "/management/settings/security/2fa") {
+            items.push({
+              label: "2FA",
+              href: "/management/settings/security/2fa",
+              icon: <Shield className="h-4 w-4" />,
+              isCurrent: true
+            });
+          } else if (pathname === "/management/settings/security/verify") {
+            items.push({
+              label: "ยืนยันรหัสผ่าน",
+              href: "/management/settings/security/verify",
+              icon: <Shield className="h-4 w-4" />,
+              isCurrent: true
+            });
+          }
+        } else if (pathname === "/management/settings/notifications") {
+          items.push({
+            label: "การแจ้งเตือน",
+            href: "/management/settings/notifications",
+            icon: <Bell className="h-4 w-4" />,
+            isCurrent: true
+          });
+        }
+      }
     }
-
     return items;
   };
 
