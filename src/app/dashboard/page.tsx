@@ -44,6 +44,7 @@ interface DashboardData {
   monthlyData: ChartData[];
   weeklyData: ChartData[];
   dailyData: ChartData[];
+  dailyData30?: ChartData[];
   recentErrors: MedError[];
   filteredErrors: MedError[];
 }
@@ -104,7 +105,7 @@ export default function DashboardPage() {
       case "year":
         return data.monthlyData;
       case "month":
-        return data.weeklyData;
+        return data.dailyData30 || data.weeklyData;
       case "week":
         return data.dailyData;
       default:
@@ -115,11 +116,11 @@ export default function DashboardPage() {
   const getChartTitle = () => {
     switch (selectedPeriod) {
       case "year":
-        return "แนวโน้มรายเดือน (12 เดือนล่าสุด)";
+        return "แนวโน้มรายเดือน";
       case "month":
-        return "แนวโน้มรายสัปดาห์ (30 วันล่าสุด)";
+        return "แนวโน้มรายสัปดาห์";
       case "week":
-        return "แนวโน้มรายวัน (7 วันล่าสุด)";
+        return "แนวโน้มรายวัน";
       default:
         return "แนวโน้มการรายงานข้อผิดพลาด";
     }
@@ -165,14 +166,14 @@ export default function DashboardPage() {
                 <div>
                   <CardTitle>{getChartTitle()}</CardTitle>
                   <CardDescription>
-                    คลิกที่แท่งเพื่อกรองข้อมูลในตารางด้านล่าง
+                    จำนวน Medication Error
                   </CardDescription>
                 </div>
                 <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}> 
                   <TabsList>
-                    <TabsTrigger value="year">ปี</TabsTrigger>
-                    <TabsTrigger value="month">เดือน</TabsTrigger>
-                    <TabsTrigger value="week">สัปดาห์</TabsTrigger>
+                    <TabsTrigger value="year" className="min-w-[80px] flex-1">ปี</TabsTrigger>
+                    <TabsTrigger value="month" className="min-w-[80px] flex-1">เดือน</TabsTrigger>
+                    <TabsTrigger value="week" className="min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
                   </TabsList>
                 </Tabs>
               </div>

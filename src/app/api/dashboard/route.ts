@@ -51,7 +51,10 @@ export async function GET(request: NextRequest) {
       recentErrors,
       monthlyData,
       weeklyData,
-      dailyData
+      dailyData,
+      dailyData30,
+      // Group by severity
+      severityGroup
     ] = await Promise.all([
       // Total errors in organization
       prisma.medError.count({
@@ -136,6 +139,25 @@ export async function GET(request: NextRequest) {
             gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
           }
         }
+      }),
+      
+      // Daily data for the last 30 days
+      prisma.medError.groupBy({
+        by: ["eventDate"],
+        _count: { id: true },
+        where: {
+          reporterOrganizationId: organizationId,
+          eventDate: {
+            gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          }
+        }
+      }),
+      
+      // Group by severity
+      prisma.medError.groupBy({
+        by: ["severityId"],
+        _count: { id: true },
+        where: { reporterOrganizationId: organizationId }
       })
     ]);
 
@@ -147,6 +169,18 @@ export async function GET(request: NextRequest) {
     
     // Process daily data
     const dailyChartData = processDailyData(dailyData);
+    // Process 30 days data
+    const dailyChartData30 = processDailyData30(dailyData30);
+
+    // Group by severity
+    const severityChartData = severityGroup.map(g => {
+      const found = severities.find(s => s.id === g.severityId);
+      return {
+        name: found ? found.label : "Unknown",
+        value: g._count.id,
+        code: found ? found.code : "Unknown"
+      };
+    });
 
     return NextResponse.json({
       totalErrors,
@@ -158,7 +192,9 @@ export async function GET(request: NextRequest) {
       monthlyData: monthlyChartData,
       weeklyData: weeklyChartData,
       dailyData: dailyChartData,
-      filteredErrors: recentErrors
+      dailyData30: dailyChartData30,
+      filteredErrors: recentErrors,
+      severityChartData
     });
 
   } catch (error) {
@@ -257,5 +293,26 @@ function processDailyData(data: GroupByResult[]) {
     }
   });
 
+  return days;
+}
+
+function processDailyData30(data: GroupByResult[]) {
+  const days: { name: string; value: number; date: string }[] = [];
+  const now = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    days.push({
+      name: date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }),
+      value: 0,
+      date: date.toISOString()
+    });
+  }
+  data.forEach(item => {
+    const itemDate = new Date(item.eventDate);
+    const dayIndex = Math.floor((now.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000));
+    if (dayIndex >= 0 && dayIndex < 30) {
+      days[29 - dayIndex].value += item._count.id;
+    }
+  });
   return days;
 } 
