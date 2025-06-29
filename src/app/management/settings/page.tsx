@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Settings, User, Shield, Bell, Database } from "lucide-react";
+import { Settings, User, Shield, Bell } from "lucide-react";
 import Link from "next/link";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
@@ -76,20 +76,6 @@ export default async function AdminSettings() {
               </CardTitle>
               <CardDescription>
                 จัดการการแจ้งเตือนและอีเมล
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
-
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/settings/system">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                ตั้งค่าระบบ
-              </CardTitle>
-              <CardDescription>
-                การตั้งค่าระบบและฐานข้อมูล
               </CardDescription>
             </CardHeader>
           </Link>
