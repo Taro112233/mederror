@@ -161,6 +161,18 @@ export async function GET(request: NextRequest) {
       })
     ]);
 
+    // ดึง label severity
+    const severities = await prisma.severity.findMany({ orderBy: { code: "asc" } });
+    // Group by severity - แสดงทุกระดับแม้ไม่มีข้อมูล
+    const severityChartData = severities.map(severity => {
+      const found = severityGroup.find(g => g.severityId === severity.id);
+      return {
+        name: severity.code,
+        value: found ? found._count.id : 0,
+        code: severity.code
+      };
+    });
+
     // Process monthly data
     const monthlyChartData = processMonthlyData(monthlyData);
     
@@ -171,16 +183,6 @@ export async function GET(request: NextRequest) {
     const dailyChartData = processDailyData(dailyData);
     // Process 30 days data
     const dailyChartData30 = processDailyData30(dailyData30);
-
-    // Group by severity
-    const severityChartData = severityGroup.map(g => {
-      const found = severities.find(s => s.id === g.severityId);
-      return {
-        name: found ? found.label : "Unknown",
-        value: g._count.id,
-        code: found ? found.code : "Unknown"
-      };
-    });
 
     return NextResponse.json({
       totalErrors,

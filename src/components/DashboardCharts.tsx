@@ -37,9 +37,10 @@ interface DashboardChartsProps {
   type: "line" | "pie" | "bar"
   data: ChartData[]
   config: ChartConfig
+  layout?: "horizontal" | "vertical"
 }
 
-export function DashboardCharts({ type, data, config }: DashboardChartsProps) {
+export function DashboardCharts({ type, data, config, layout }: DashboardChartsProps) {
   if (type === "line") {
     return (
       <ChartContainer config={config}>
@@ -73,19 +74,38 @@ export function DashboardCharts({ type, data, config }: DashboardChartsProps) {
   if (type === "bar") {
     return (
       <ChartContainer config={config}>
-        <BarChart data={data}>
+        <BarChart data={data} layout={layout === "vertical" ? "vertical" : "horizontal"}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis 
-            dataKey="name" 
-            tick={{ fontSize: 12 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis 
-            tick={{ fontSize: 12 }}
-            axisLine={false}
-            tickLine={false}
-          />
+          {layout === "vertical" ? (
+            <YAxis 
+              dataKey="name" 
+              type="category"
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+          ) : (
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+          )}
+          {layout === "vertical" ? (
+            <XAxis 
+              type="number"
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+          ) : (
+            <YAxis 
+              tick={{ fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+            />
+          )}
           <ChartTooltip content={<ChartTooltipContent />} />
           <Bar
             dataKey="value"

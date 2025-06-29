@@ -47,6 +47,7 @@ interface DashboardData {
   dailyData30?: ChartData[];
   recentErrors: MedError[];
   filteredErrors: MedError[];
+  severityChartData?: ChartData[];
 }
 
 export default function DashboardPage() {
@@ -156,46 +157,98 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Main Content: Chart (left) & Stats Cards (right) */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Chart Section (Left) */}
-        <div className="lg:w-2/3 w-full">
-          <Card className="h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>{getChartTitle()}</CardTitle>
-                  <CardDescription>
-                    จำนวน Medication Error
-                  </CardDescription>
-                </div>
-                <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}> 
-                  <TabsList>
-                    <TabsTrigger value="year" className="min-w-[80px] flex-1">ปี</TabsTrigger>
-                    <TabsTrigger value="month" className="min-w-[80px] flex-1">เดือน</TabsTrigger>
-                    <TabsTrigger value="week" className="min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
-                  </TabsList>
-                </Tabs>
+      {/* Stats Cards (Top Row) */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ข้อผิดพลาดทั้งหมด</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.totalErrors}</div>
+            <p className="text-xs text-muted-foreground">
+              รายงานข้อผิดพลาดทางการแพทย์
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ผู้ใช้ทั้งหมด</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.totalUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              ผู้ใช้ในองค์กร
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ข้อผิดพลาดเดือนนี้</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.errorsThisMonth}</div>
+            <p className="text-xs text-muted-foreground">
+              รายงานในเดือนปัจจุบัน
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">ข้อผิดพลาดสัปดาห์นี้</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{data.errorsThisWeek}</div>
+            <p className="text-xs text-muted-foreground">
+              รายงานในสัปดาห์ปัจจุบัน
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* กราฟแนวโน้ม */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{getChartTitle()}</CardTitle>
+                <CardDescription>
+                  จำนวน Medication Error
+                </CardDescription>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div 
-                className="cursor-pointer"
-                onClick={(e) => {
-                  const target = e.target as HTMLElement;
-                  const barElement = target.closest('.recharts-bar-rectangle');
-                  if (barElement) {
-                    const dataKey = barElement.getAttribute('data-key');
-                    if (dataKey) {
-                      const chartData = getChartData();
-                      const clickedData = chartData.find(item => item.name === dataKey);
-                      if (clickedData) {
-                        handleBarClick(clickedData);
-                      }
+              <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}> 
+                <TabsList>
+                  <TabsTrigger value="year" className="min-w-[80px] flex-1">ปี</TabsTrigger>
+                  <TabsTrigger value="month" className="min-w-[80px] flex-1">เดือน</TabsTrigger>
+                  <TabsTrigger value="week" className="min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div 
+              className="cursor-pointer"
+              onClick={(e) => {
+                const target = e.target as HTMLElement;
+                const barElement = target.closest('.recharts-bar-rectangle');
+                if (barElement) {
+                  const dataKey = barElement.getAttribute('data-key');
+                  if (dataKey) {
+                    const chartData = getChartData();
+                    const clickedData = chartData.find(item => item.name === dataKey);
+                    if (clickedData) {
+                      handleBarClick(clickedData);
                     }
                   }
-                }}
-              >
+                }
+              }}
+            >
+              <div className="h-96">
                 <DashboardCharts 
                   type="bar"
                   data={getChartData()}
@@ -207,79 +260,48 @@ export default function DashboardPage() {
                   }}
                 />
               </div>
-              {selectedBar && (
-                <div className="mt-4 p-3 bg-muted rounded-lg flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span className="text-sm">
-                    กรองข้อมูล: {selectedBar} 
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="ml-2 h-6 px-2"
-                      onClick={() => {
-                        setSelectedBar(null);
-                        setData(prev => prev ? { ...prev, filteredErrors: prev.recentErrors } : null);
-                      }}
-                    >
-                      ล้างตัวกรอง
-                    </Button>
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-        {/* Stats Cards (Right) */}
-        <div className="lg:w-1/3 w-full flex flex-col gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">ข้อผิดพลาดทั้งหมด</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.totalErrors}</div>
-              <p className="text-xs text-muted-foreground">
-                รายงานข้อผิดพลาดทางการแพทย์
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">ผู้ใช้ทั้งหมด</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.totalUsers}</div>
-              <p className="text-xs text-muted-foreground">
-                ผู้ใช้ในองค์กร
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">ข้อผิดพลาดเดือนนี้</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.errorsThisMonth}</div>
-              <p className="text-xs text-muted-foreground">
-                รายงานในเดือนปัจจุบัน
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">ข้อผิดพลาดสัปดาห์นี้</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{data.errorsThisWeek}</div>
-              <p className="text-xs text-muted-foreground">
-                รายงานในสัปดาห์ปัจจุบัน
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            {selectedBar && (
+              <div className="mt-4 p-3 bg-muted rounded-lg flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span className="text-sm">
+                  กรองข้อมูล: {selectedBar} 
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="ml-2 h-6 px-2"
+                    onClick={() => {
+                      setSelectedBar(null);
+                      setData(prev => prev ? { ...prev, filteredErrors: prev.recentErrors } : null);
+                    }}
+                  >
+                    ล้างตัวกรอง
+                  </Button>
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* กราฟ Bar แนวนอนแสดงจำนวนแต่ละระดับความรุนแรง */}
+        <Card>
+          <CardHeader>
+            <CardTitle>จำนวนข้อผิดพลาดแยกตามระดับความรุนแรง</CardTitle>
+            <CardDescription>
+              แสดงจำนวนข้อผิดพลาดในแต่ละระดับความรุนแรง
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-96">
+              <DashboardCharts
+                type="bar"
+                data={data.severityChartData || []}
+                config={{ value: { label: "จำนวน", color: "hsl(var(--destructive))" } }}
+                layout={"vertical"}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Data Table (Full Width) */}
