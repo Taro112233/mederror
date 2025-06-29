@@ -8,38 +8,48 @@ import OrganizationSelectForm from "./OrganizationSelectForm";
 export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [organization, setOrganization] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleOrganizationSelect = (value: string) => {
+    if (isLoading) return;
     setOrganization(value);
     setStep(2);
   };
 
   const handleRegister = async (username: string, password: string) => {
-    const res = await fetch("/api/register", {
-      method: "POST",
-      body: JSON.stringify({ organizationId: organization, username, password }),
-      headers: { "Content-Type": "application/json" },
-    });
-    if (res.ok) {
-      toast.success("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
-      router.push("/");
-    } else {
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        data = { error: "เกิดข้อผิดพลาดที่ไม่คาดคิด (Invalid JSON response)" };
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        body: JSON.stringify({ organizationId: organization, username, password }),
+        headers: { "Content-Type": "application/json" },
+      });
+      if (res.ok) {
+        toast.success("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
+        router.push("/");
+      } else {
+        let data;
+        try {
+          data = await res.json();
+        } catch {
+          data = { error: "เกิดข้อผิดพลาดที่ไม่คาดคิด (Invalid JSON response)" };
+        }
+        toast.error(data.error || "สมัครสมาชิกไม่สำเร็จ");
       }
-      toast.error(data.error || "สมัครสมาชิกไม่สำเร็จ");
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาด");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div>
-      {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} />}
+      {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} disabled={isLoading} />}
       {step === 2 && (
-        <RegisterCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} />
+        <RegisterCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} disabled={isLoading} />
       )}
     </div>
   );

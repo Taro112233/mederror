@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect } from "react";
 import {
   Form,
   FormField,
@@ -8,37 +9,52 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { OrganizationSelectSchema, OrganizationSelectSchemaType } from "@/lib/zodSchemas";
-import { useEffect, useState } from "react";
 
-export default function OrganizationSelectForm({ onSelect }: { onSelect: (s: string) => void }) {
+export default function OrganizationSelectForm({ 
+  onSelect,
+  disabled = false
+}: { 
+  onSelect: (s: string) => void;
+  disabled?: boolean;
+}) {
+  const [loading, setLoading] = useState(true);
+  const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
   const form = useForm<OrganizationSelectSchemaType>({
     resolver: zodResolver(OrganizationSelectSchema),
     defaultValues: { organization: "" },
   });
 
-  const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    fetch("/api/organizations")
-      .then((res) => res.json())
-      .then((data) => setOrgs(data))
-      .finally(() => setLoading(false));
+    const fetchOrgs = async () => {
+      try {
+        const res = await fetch("/api/organizations");
+        if (res.ok) {
+          const data = await res.json();
+          setOrgs(data);
+        }
+      } catch (error) {
+        console.error("Error fetching organizations:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrgs();
   }, []);
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((values) => {
+          if (disabled) return;
           onSelect(values.organization);
         })}
         className="space-y-4"
@@ -50,7 +66,7 @@ export default function OrganizationSelectForm({ onSelect }: { onSelect: (s: str
             <FormItem>
               <FormLabel>เลือกองค์กร</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value} required disabled={loading || orgs.length === 0}>
+                <Select onValueChange={field.onChange} value={field.value} required disabled={loading || orgs.length === 0 || disabled}>
                   <SelectTrigger>
                     <SelectValue placeholder={loading ? "กำลังโหลด..." : "--เลือก--"} />
                   </SelectTrigger>
@@ -68,7 +84,9 @@ export default function OrganizationSelectForm({ onSelect }: { onSelect: (s: str
         <div className="flex flex-row justify-between items-center">
           <div className="w-30" />
           <div className="flex-1" />
-          <Button type="submit" disabled={loading || orgs.length === 0} className="w-30">ถัดไป</Button>
+          <Button type="submit" disabled={loading || orgs.length === 0 || disabled} className="w-30">
+            {disabled ? "กำลังประมวลผล..." : "ถัดไป"}
+          </Button>
         </div>
       </form>
     </Form>

@@ -1,6 +1,7 @@
 'use client';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import {
   Form,
   FormField,
@@ -16,6 +17,7 @@ import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/button/LogoutButton";
 
 export default function OnboardingForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const form = useForm<OnboardingFormSchemaType>({
     resolver: zodResolver(OnboardingFormSchema),
     defaultValues: { name: "", phone: "", position: "" },
@@ -23,12 +25,20 @@ export default function OnboardingForm() {
   const router = useRouter();
 
   const handleSubmit = async (data: { name: string; phone: string; position: string }) => {
-    await fetch("/api/onboarding", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    router.push("/");
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      router.push("/");
+    } catch (error) {
+      console.error("Error during onboarding:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,7 +54,7 @@ export default function OnboardingForm() {
             <FormItem>
               <FormLabel>ชื่อ-นามสกุล</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -57,7 +67,7 @@ export default function OnboardingForm() {
             <FormItem>
               <FormLabel>เบอร์โทร</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -70,17 +80,17 @@ export default function OnboardingForm() {
             <FormItem>
               <FormLabel>ตำแหน่ง</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="flex flex-row justify-between items-center">
-          <LogoutButton className="w-30" variant="secondary" />
+          <LogoutButton className="w-30" variant="secondary" disabled={isLoading} />
           <div className="flex-1" />
-          <Button type="submit" className="w-30">
-            บันทึกข้อมูล
+          <Button type="submit" className="w-30" disabled={isLoading}>
+            {isLoading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </Button>
         </div>
       </form>

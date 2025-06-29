@@ -16,10 +16,12 @@ export default function RegisterCredentialForm({
   onSubmit,
   onBack,
   submitLabel = "สมัครสมาชิก",
+  disabled = false,
 }: {
   onSubmit: (username: string, password: string) => void;
   onBack: () => void;
   submitLabel?: string;
+  disabled?: boolean;
 }) {
   const form = useForm<RegisterCredentialSchemaType>({
     resolver: zodResolver(RegisterCredentialSchema),
@@ -30,6 +32,7 @@ export default function RegisterCredentialForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((values) => {
+          if (disabled) return;
           onSubmit(values.username, values.password);
         })}
         className="space-y-4"
@@ -41,7 +44,7 @@ export default function RegisterCredentialForm({
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -54,7 +57,7 @@ export default function RegisterCredentialForm({
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -67,18 +70,20 @@ export default function RegisterCredentialForm({
             <FormItem>
               <FormLabel>ยืนยันรหัสผ่าน</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} disabled={disabled} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="flex flex-row justify-between items-center">
-          <Button type="button" variant="outline" onClick={onBack} className="w-30">
+          <Button type="button" variant="outline" onClick={onBack} className="w-30" disabled={disabled}>
             ย้อนกลับ
           </Button>
           <div className="flex-1" />
-          <Button type="submit" className="w-30">{submitLabel}</Button>
+          <Button type="submit" className="w-30" disabled={disabled}>
+            {disabled ? "กำลังสมัครสมาชิก..." : submitLabel}
+          </Button>
         </div>
       </form>
     </Form>

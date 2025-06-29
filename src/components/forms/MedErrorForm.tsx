@@ -81,22 +81,24 @@ export function ReporterInfoCard({
 }
 
 export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [units, setUnits] = useState<{ id: string; code: string; label: string }[]>([]);
+  const [severities, setSeverities] = useState<Severity[]>([]);
+  const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
+  const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
+  const router = useRouter();
   const form = useForm<FormValues>({
     resolver: zodResolver(MedErrorFormSchema),
     defaultValues: {
       eventDate: "",
+      unit: "",
       description: "",
       severity: "",
       errorType: "",
       subErrorType: "",
-      image: undefined,
+      image: [],
     },
   });
-  const router = useRouter();
-  const [severities, setSeverities] = useState<Severity[]>([]);
-  const [errorTypes, setErrorTypes] = useState<ErrorType[]>([]);
-  const [filteredSubErrorTypes, setFilteredSubErrorTypes] = useState<SubErrorType[]>([]);
-  const [units, setUnits] = useState<{ id: string; code: string; label: string }[]>([]);
 
   const maxSizeMB = 5;
   const maxSize = maxSizeMB * 1024 * 1024;
@@ -156,6 +158,8 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
   }, [watchedErrorType, errorTypes]);
 
   const onSubmit = async (values: FormValues) => {
+    if (isLoading) return;
+    setIsLoading(true);
     try {
       // ดึงข้อมูลผู้ใช้จาก API
       const userResponse = await fetch("/api/users/me");
@@ -211,6 +215,8 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       } else {
         toast.error("เกิดข้อผิดพลาด");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -224,7 +230,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
             <FormItem>
               <FormLabel>วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์<FormMessage /></FormLabel>
               <FormControl>
-                <Input type="datetime-local" {...field} />
+                <Input type="datetime-local" {...field} disabled={isLoading} />
               </FormControl>
             </FormItem>
           )}
@@ -240,6 +246,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   value={field.value}
                   onValueChange={field.onChange}
                   defaultValue=""
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="-- เลือก --" />
@@ -263,7 +270,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
             <FormItem>
               <FormLabel>รายละเอียดเหตุการณ์<FormMessage /></FormLabel>
               <FormControl>
-                <Textarea rows={4} {...field} />
+                <Textarea rows={4} {...field} disabled={isLoading} />
               </FormControl>
             </FormItem>
           )}
@@ -279,6 +286,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   value={field.value}
                   onValueChange={field.onChange}
                   defaultValue=""
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="-- เลือก --" />
@@ -306,6 +314,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   value={field.value}
                   onValueChange={field.onChange}
                   defaultValue=""
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="-- เลือก --" />
@@ -333,6 +342,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                   value={field.value}
                   onValueChange={field.onChange}
                   defaultValue=""
+                  disabled={isLoading}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="-- เลือก --" />
@@ -369,6 +379,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                     {...getInputProps()}
                     className="sr-only"
                     aria-label="Upload image file"
+                    disabled={isLoading}
                   />
                   {files.length > 0 ? (
                     <div className="flex w-full flex-col gap-3">
@@ -380,7 +391,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                           variant="outline"
                           size="sm"
                           onClick={openFileDialog}
-                          disabled={files.length >= maxFiles}
+                          disabled={files.length >= maxFiles || isLoading}
                           type="button"
                         >
                           <UploadIcon className="-ms-0.5 size-3.5 opacity-60" aria-hidden="true" />
@@ -404,6 +415,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                               className="border-background focus-visible:border-background absolute -top-2 -right-2 size-6 rounded-full border-2 shadow-none"
                               aria-label="Remove image"
                               type="button"
+                              disabled={isLoading}
                             >
                               <XIcon className="size-3.5" />
                             </Button>
@@ -423,7 +435,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                       <p className="text-muted-foreground text-xs">
                         SVG, PNG, JPG หรือ GIF (สูงสุด {maxSizeMB}MB)
                       </p>
-                      <Button variant="outline" className="mt-4" onClick={openFileDialog} type="button">
+                      <Button variant="outline" className="mt-4" onClick={openFileDialog} type="button" disabled={isLoading}>
                         <UploadIcon className="-ms-1 opacity-60" aria-hidden="true" />
                         เลือกรูปภาพ
                       </Button>
@@ -445,8 +457,8 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full mt-2">
-          ส่งรายงาน
+        <Button type="submit" className="w-full mt-2" disabled={isLoading}>
+          {isLoading ? "กำลังส่งรายงาน..." : "ส่งรายงาน"}
         </Button>
       </form>
     </Form>

@@ -1,44 +1,66 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+'use client';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import LogoutButton from "../../components/button/LogoutButton";
-import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role เป็น UNAPPROVED เท่านั้นที่เข้าถึงได้
-export default async function PendingApprovalPage() {
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get("session_token")?.value;
-  if (!sessionToken) {
-    redirect("/login");
-  }
-  let payload: jwt.JwtPayload;
-  try {
-    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
-  } catch {
-    redirect("/login");
-  }
-  if (!payload.onboarded) {
-    redirect("/onboarding");
-  }
-  // เช็ค role จาก database
-  const prisma = new PrismaClient();
-  const account = await prisma.account.findUnique({ where: { id: payload.id } });
-  if (account?.role !== "UNAPPROVED") {
-    redirect("http://localhost:3000");
-  }
+export default function PendingApprovalPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<{ name: string; phone: string; position: string } | null>(null);
+  const router = useRouter();
 
   // Fetch user info from DB
-  let user = null;
-  try {
-    user = await prisma.user.findUnique({
-      where: { accountId: payload.id },
-      select: { name: true, phone: true, position: true },
-    });
-  } catch {
-    // fallback: user stays null
-  }
+  const fetchUserInfo = async () => {
+    try {
+      const res = await fetch("/api/users/me");
+      if (res.ok) {
+        const userData = await res.json();
+        setUser({
+          name: userData.name || '-',
+          phone: userData.phone || '-',
+          position: userData.position || '-'
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+    }
+  };
+
+  // Load user info on component mount
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  // Handle refresh button click - redirect to home page
+  const handleRefresh = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      // Check if user is still UNAPPROVED
+      const res = await fetch("/api/users/me");
+      if (res.ok) {
+        const userData = await res.json();
+        // If user is no longer UNAPPROVED, redirect to home
+        if (userData.role !== "UNAPPROVED") {
+          router.replace("http://localhost:3000");
+        } else {
+          // If still UNAPPROVED, just refresh the page
+          window.location.reload();
+        }
+      } else {
+        // If API call fails, redirect to home
+        router.replace("http://localhost:3000");
+      }
+    } catch (error) {
+      console.error("Error checking user status:", error);
+      // If error occurs, redirect to home
+      router.replace("http://localhost:3000");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4">
@@ -68,12 +90,16 @@ export default async function PendingApprovalPage() {
             </ul>
             <div className="flex flex-row justify-between items-center">
               <div className="w-30">
-                <LogoutButton className="w-30" variant="secondary" />
+                <LogoutButton className="w-30" variant="secondary" disabled={isLoading} />
               </div>
               <div className="flex-1" />
-              <form action="" method="get" className="w-30">
-                <Button type="submit" className="w-30">รีเฟรช</Button>
-              </form>
+              <Button 
+                onClick={handleRefresh} 
+                className="w-30" 
+                disabled={isLoading}
+              >
+                {isLoading ? "กำลังตรวจสอบ..." : "รีเฟรช"}
+              </Button>
             </div>
           </CardContent>
         </Card>

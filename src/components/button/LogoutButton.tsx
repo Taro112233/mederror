@@ -1,16 +1,41 @@
 'use client';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 
-export default function LogoutButton({ className = "", variant = "default" }: { className?: string, variant?: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link" }) {
+export default function LogoutButton({ 
+  className = "", 
+  variant = "default",
+  disabled = false
+}: { 
+  className?: string, 
+  variant?: "default" | "secondary" | "destructive" | "outline" | "ghost" | "link",
+  disabled?: boolean
+}) {
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  
   const handleLogout = async () => {
-    await fetch('/api/logout', { method: 'POST' });
-    router.replace('/login');
+    if (isLoading || disabled) return;
+    setIsLoading(true);
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      router.replace('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
   return (
-    <Button variant={variant} onClick={handleLogout} className={`w-full ${className}`}>
-      ออกจากระบบ
+    <Button 
+      variant={variant} 
+      onClick={handleLogout} 
+      className={`w-full ${className}`}
+      disabled={isLoading || disabled}
+    >
+      {isLoading ? "กำลังออกจากระบบ..." : "ออกจากระบบ"}
     </Button>
   );
 } 
