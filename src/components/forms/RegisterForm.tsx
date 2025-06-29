@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import RegisterCredentialForm from "./RegisterCredentialForm";
 import OrganizationSelectForm from "./OrganizationSelectForm";
 
@@ -21,7 +22,7 @@ export default function RegisterForm() {
       headers: { "Content-Type": "application/json" },
     });
     if (res.ok) {
-      alert("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
+      toast.success("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
       router.push("/");
     } else {
       let data;
@@ -30,7 +31,7 @@ export default function RegisterForm() {
       } catch {
         data = { error: "เกิดข้อผิดพลาดที่ไม่คาดคิด (Invalid JSON response)" };
       }
-      alert(data.error || "สมัครสมาชิกไม่สำเร็จ");
+      toast.error(data.error || "สมัครสมาชิกไม่สำเร็จ");
     }
   };
 

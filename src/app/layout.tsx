@@ -31,8 +31,8 @@ export default function RootLayout({
       >
         <SidebarProvider>
           {children}
+          <Toaster />
         </SidebarProvider>
-        <Toaster />
       </body>
     </html>
   );

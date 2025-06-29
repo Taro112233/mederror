@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import LoginCredentialForm from "./LoginCredentialForm";
 import OrganizationSelectForm from "./OrganizationSelectForm";
 
@@ -23,7 +24,7 @@ export default function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "เข้าสู่ระบบไม่สำเร็จ");
+        toast.error(data.error || "เข้าสู่ระบบไม่สำเร็จ");
         return;
       }
       // สำเร็จ: redirect ตามสถานะ
@@ -35,7 +36,7 @@ export default function LoginForm() {
         router.replace("/");
       }
     } catch {
-      alert("เกิดข้อผิดพลาด");
+      toast.error("เกิดข้อผิดพลาด");
     }
   };
 
