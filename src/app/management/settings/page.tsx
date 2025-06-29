@@ -54,7 +54,7 @@ export default async function AdminSettings() {
         </Card>
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/settings/security">
+          <Link href="/management/settings/security/verify">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />

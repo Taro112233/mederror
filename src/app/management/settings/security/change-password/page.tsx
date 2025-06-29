@@ -1,74 +1,42 @@
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, Key, Eye, EyeOff, Save, X } from "lucide-react";
+import { ArrowLeft, Key } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
+import ChangePasswordForm from "./ChangePasswordForm";
 
-export default function ChangePasswordPage() {
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const router = useRouter();
+// [SECURITY] ตรวจสอบ security token ในฝั่ง server
+export default async function ChangePasswordPage() {
+  const cookieStore = await cookies();
+  const securityToken = cookieStore.get("security_token")?.value;
 
-  const handlePasswordChange = (field: string, value: string) => {
-    setPasswordForm(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  if (!securityToken) {
+    redirect("/management/settings/security/verify");
+  }
 
-  const handleChangePassword = async () => {
-    // Validate passwords
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("รหัสผ่านใหม่ไม่ตรงกัน");
-      return;
-    }
+  let securityPayload: jwt.JwtPayload;
+  try {
+    securityPayload = jwt.verify(securityToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
+    redirect("/management/settings/security/verify");
+  }
 
-    if (passwordForm.newPassword.length < 6) {
-      toast.error("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร");
-      return;
-    }
+  // ตรวจสอบว่า token มี securityVerified และยังไม่หมดอายุ
+  if (!securityPayload.securityVerified) {
+    redirect("/management/settings/security/verify");
+  }
 
-    setIsChangingPassword(true);
-    try {
-      // TODO: Implement password change API call
-      // const response = await fetch("/api/users/change-password", {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     currentPassword: passwordForm.currentPassword,
-      //     newPassword: passwordForm.newPassword,
-      //   }),
-      // });
+  // ตรวจสอบว่า token ยังไม่หมดอายุ (15 นาที)
+  const verifiedAt = new Date(securityPayload.verifiedAt);
+  const now = new Date();
+  const timeDiff = now.getTime() - verifiedAt.getTime();
+  const minutesDiff = timeDiff / (1000 * 60);
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast.success("เปลี่ยนรหัสผ่านสำเร็จ");
-      router.push("/management/settings/security");
-    } catch (error) {
-      console.error("Error changing password:", error);
-      toast.error("เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน");
-    } finally {
-      setIsChangingPassword(false);
-    }
-  };
-
-  const handleCancel = () => {
-    router.push("/management/settings/security");
-  };
+  if (minutesDiff > 15) {
+    redirect("/management/settings/security/verify");
+  }
 
   return (
     <div className="space-y-6">
@@ -86,108 +54,8 @@ export default function ChangePasswordPage() {
             กรุณากรอกรหัสผ่านปัจจุบันและรหัสผ่านใหม่เพื่อความปลอดภัย
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-1">
-            <div>
-              <Label htmlFor="currentPassword">รหัสผ่านปัจจุบัน</Label>
-              <div className="relative">
-                <Input
-                  id="currentPassword"
-                  type={showCurrentPassword ? "text" : "password"}
-                  value={passwordForm.currentPassword}
-                  onChange={(e) => handlePasswordChange("currentPassword", e.target.value)}
-                  className="mt-1 pr-10"
-                  placeholder="กรอกรหัสผ่านปัจจุบัน"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="newPassword">รหัสผ่านใหม่</Label>
-              <div className="relative">
-                <Input
-                  id="newPassword"
-                  type={showNewPassword ? "text" : "password"}
-                  value={passwordForm.newPassword}
-                  onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
-                  className="mt-1 pr-10"
-                  placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) => handlePasswordChange("confirmPassword", e.target.value)}
-                  className="mt-1 pr-10"
-                  placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleChangePassword} 
-              disabled={isChangingPassword || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
-              className="flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isChangingPassword ? "กำลังเปลี่ยนรหัสผ่าน..." : "เปลี่ยนรหัสผ่าน"}
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-              className="flex items-center gap-2"
-            >
-              <X className="h-4 w-4" />
-              ยกเลิก
-            </Button>
-          </div>
+        <CardContent>
+          <ChangePasswordForm />
         </CardContent>
       </Card>
 
