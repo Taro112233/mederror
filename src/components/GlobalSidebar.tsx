@@ -6,7 +6,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
@@ -19,9 +18,7 @@ import LogoutButton from "@/components/button/LogoutButton";
 import { 
   LayoutDashboard, 
   FileText, 
-  Users, 
   Settings,
-  BarChart3,
   Home,
   User
 } from "lucide-react";
@@ -90,7 +87,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       });
     } else if (pathname.startsWith("/management")) {
       items.push({
-        label: "ศูนย์จัดการ",
+        label: "ตั้งค่าทั่วไป",
         href: "/management",
         icon: <Settings className="h-4 w-4" />,
         isCurrent: true
@@ -156,7 +153,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                 <SidebarMenuButton asChild isActive={pathname.startsWith("/management")}>
                   <Link href="/management">
                     <Settings />
-                    <span>ศูนย์จัดการ</span>
+                    <span>ตั้งค่าทั่วไป</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

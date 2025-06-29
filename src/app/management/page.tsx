@@ -39,7 +39,7 @@ export default async function ManagementMenu() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">ศูนย์จัดการ</h2>
+        <h2 className="text-3xl font-bold tracking-tight">ตั้งค่าทั่วไป</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8">
         {/* 1. รายการ Med error ที่ส่งไป (ทุก role เห็น) */}
