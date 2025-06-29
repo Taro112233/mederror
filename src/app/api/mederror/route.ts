@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
     }
 
     // สร้าง where condition
-    const whereCondition: any = {
+    const whereCondition: Record<string, unknown> = {
       reporterOrganizationId: organizationId,
     };
 

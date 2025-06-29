@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       prisma.medError.count({
         where: {
           reporterOrganizationId: organizationId,
-          createdAt: { gte: startOfMonth }
+          eventDate: { gte: startOfMonth }
         }
       }),
       
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       prisma.medError.count({
         where: {
           reporterOrganizationId: organizationId,
-          createdAt: { gte: startOfWeek }
+          eventDate: { gte: startOfWeek }
         }
       }),
       
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       prisma.medError.count({
         where: {
           reporterOrganizationId: organizationId,
-          createdAt: { gte: startOfDay }
+          eventDate: { gte: startOfDay }
         }
       }),
       
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
       prisma.medError.findMany({
         where: { reporterOrganizationId: organizationId },
         take: 50,
-        orderBy: { createdAt: "desc" },
+        orderBy: { eventDate: "desc" },
         include: {
           errorType: true,
           severity: true,
@@ -104,11 +104,11 @@ export async function GET(request: NextRequest) {
       
       // Monthly data for the last 12 months
       prisma.medError.groupBy({
-        by: ["createdAt"],
+        by: ["eventDate"],
         _count: { id: true },
         where: {
           reporterOrganizationId: organizationId,
-          createdAt: {
+          eventDate: {
             gte: new Date(now.getFullYear(), now.getMonth() - 11, 1)
           }
         }
@@ -116,11 +116,11 @@ export async function GET(request: NextRequest) {
       
       // Weekly data for the last 30 days
       prisma.medError.groupBy({
-        by: ["createdAt"],
+        by: ["eventDate"],
         _count: { id: true },
         where: {
           reporterOrganizationId: organizationId,
-          createdAt: {
+          eventDate: {
             gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
           }
         }
@@ -128,11 +128,11 @@ export async function GET(request: NextRequest) {
       
       // Daily data for the last 7 days
       prisma.medError.groupBy({
-        by: ["createdAt"],
+        by: ["eventDate"],
         _count: { id: true },
         where: {
           reporterOrganizationId: organizationId,
-          createdAt: {
+          eventDate: {
             gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
           }
         }
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
 }
 
 interface GroupByResult {
-  createdAt: Date;
+  eventDate: Date;
   _count: { id: number };
 }
 
@@ -188,7 +188,7 @@ function processMonthlyData(data: GroupByResult[]) {
 
   // Fill in actual data
   data.forEach(item => {
-    const itemDate = new Date(item.createdAt);
+    const itemDate = new Date(item.eventDate);
     const monthIndex = months.findIndex(month => {
       const monthDate = new Date(month.date);
       return monthDate.getMonth() === itemDate.getMonth() && 
@@ -222,7 +222,7 @@ function processWeeklyData(data: GroupByResult[]) {
 
   // Fill in actual data
   data.forEach(item => {
-    const itemDate = new Date(item.createdAt);
+    const itemDate = new Date(item.eventDate);
     const weekIndex = Math.floor((now.getTime() - itemDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
     
     if (weekIndex >= 0 && weekIndex < 4) {
@@ -249,7 +249,7 @@ function processDailyData(data: GroupByResult[]) {
 
   // Fill in actual data
   data.forEach(item => {
-    const itemDate = new Date(item.createdAt);
+    const itemDate = new Date(item.eventDate);
     const dayIndex = Math.floor((now.getTime() - itemDate.getTime()) / (24 * 60 * 60 * 1000));
     
     if (dayIndex >= 0 && dayIndex < 7) {

@@ -36,7 +36,7 @@ export default function SecurityVerification() {
       } else {
         setErrorMessage("รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
       }
-    } catch (error) {
+    } catch {
       setErrorMessage("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);

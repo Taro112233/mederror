@@ -30,15 +30,9 @@ export default function RegisterForm() {
         toast.success("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
         router.push("/");
       } else {
-        let data;
-        try {
-          data = await res.json();
-        } catch {
-          data = { error: "เกิดข้อผิดพลาดที่ไม่คาดคิด (Invalid JSON response)" };
-        }
-        toast.error(data.error || "สมัครสมาชิกไม่สำเร็จ");
+        toast.error("สมัครสมาชิกไม่สำเร็จ");
       }
-    } catch (error) {
+    } catch {
       toast.error("เกิดข้อผิดพลาด");
     } finally {
       setIsLoading(false);

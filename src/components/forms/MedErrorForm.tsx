@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { ImageIcon, UploadIcon, XIcon, AlertCircleIcon, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
 
 type FormValues = MedErrorFormSchemaType;
 
@@ -404,10 +405,14 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
                             key={file.id}
                             className="bg-accent relative aspect-square rounded-md"
                           >
-                            <img
-                              src={file.preview}
-                              alt={file.file.name}
+                            <Image
+                              src={file.preview || ""}
+                              alt={file.file.name || ""}
                               className="size-full rounded-[inherit] object-cover"
+                              width={300}
+                              height={300}
+                              unoptimized
+                              priority
                             />
                             <Button
                               onClick={() => removeFile(file.id)}
