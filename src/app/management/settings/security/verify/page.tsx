@@ -13,11 +13,13 @@ export default function SecurityVerification() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage("");
 
     try {
       const response = await fetch("/api/security/verify-password", {
@@ -32,10 +34,10 @@ export default function SecurityVerification() {
         // ไปยังหน้า security settings หลังจากยืนยันสำเร็จ
         router.push("/management/settings/security");
       } else {
-        // เพิ่มการจัดการข้อผิดพลาดที่นี่
+        setErrorMessage("รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
       }
     } catch (error) {
-      // เพิ่มการจัดการข้อผิดพลาดที่นี่
+      setErrorMessage("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsLoading(false);
     }
@@ -82,6 +84,9 @@ export default function SecurityVerification() {
                     )}
                   </Button>
                 </div>
+                {errorMessage && (
+                  <p className="mt-2 text-sm text-red-600">{errorMessage}</p>
+                )}
               </div>
 
               <Button
