@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/sidebar";
 import LogoutButton from "@/components/button/LogoutButton";
 import { 
-  LayoutDashboard, 
   FileText, 
   Settings,
   Home,
@@ -25,7 +24,8 @@ import {
   Code,
   Bell,
   Shield,
-  Key
+  Key,
+  BarChart3
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -79,7 +79,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       items.push({
         label: "Dashboard",
         href: "/dashboard",
-        icon: <LayoutDashboard className="h-4 w-4" />,
+        icon: <BarChart3 className="h-4 w-4" />,
         isCurrent: true
       });
     }
@@ -218,7 +218,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
                   <Link href="/dashboard">
-                    <LayoutDashboard />
+                    <BarChart3 />
                     <span>Dashboard</span>
                   </Link>
                 </SidebarMenuButton>

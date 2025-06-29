@@ -13,7 +13,8 @@ import {
   Calendar,
   Plus,
   Eye,
-  Filter
+  Filter,
+  BarChart3
 } from "lucide-react";
 import Link from "next/link";
 import { DashboardCharts } from "@/components/DashboardCharts";
@@ -146,7 +147,10 @@ export default function DashboardPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-8 w-8 text-primary" />
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        </div>
         <div className="flex items-center space-x-2">
           <Link href="/report/new">
             <Button>
