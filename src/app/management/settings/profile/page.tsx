@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { User, ArrowLeft, Edit, Save, X } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface Account {
   id: string;
@@ -23,6 +25,8 @@ interface Account {
 export default function ProfileSettings() {
   const [account, setAccount] = useState<Account | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
     name: "",
@@ -41,10 +45,6 @@ export default function ProfileSettings() {
           return;
         }
         const data = await response.json();
-        if (data.role !== "ADMIN") {
-          router.push("/");
-          return;
-        }
         setAccount(data);
         setFormData({
           username: data.username || "",
@@ -78,9 +78,41 @@ export default function ProfileSettings() {
   };
 
   const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log("Saving data:", formData);
-    setIsEditing(false);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmSave = async () => {
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/users/${account?.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          name: formData.name,
+          position: formData.position,
+          phone: formData.phone,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      toast.success("แก้ไขข้อมูลสำเร็จ รอการอนุมัติจากผู้ดูแล");
+      setShowConfirmDialog(false);
+      setIsEditing(false);
+      
+      // Redirect to pending approval page
+      router.push("/pending-approval");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("เกิดข้อผิดพลาดในการแก้ไขข้อมูล");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -200,6 +232,26 @@ export default function ProfileSettings() {
           </Link>
         </Button>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>ยืนยันการแก้ไขข้อมูล</DialogTitle>
+            <DialogDescription>
+              หากแก้ไขข้อมูล จำเป็นต้องได้รับการยืนยันจากผู้ดูแลอีกครั้ง
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              ยกเลิก
+            </Button>
+            <Button onClick={handleConfirmSave} disabled={isSaving}>
+              {isSaving ? "กำลังบันทึก..." : "ยืนยันแก้ไขข้อมูล"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

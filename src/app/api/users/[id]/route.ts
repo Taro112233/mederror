@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-// PATCH: เปลี่ยน role
+// PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
 export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
@@ -14,14 +14,56 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
     } catch {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
-    const { role } = await req.json();
-    if (!role) return NextResponse.json({ error: "Missing role" }, { status: 400 });
+    
+    const body = await req.json();
     const { params } = await context;
-    const updated = await prisma.account.update({
-      where: { id: params.id },
-      data: { role },
+    
+    // ถ้ามี role ใน body = อัปเดต role (สำหรับ admin)
+    if (body.role) {
+      const updated = await prisma.account.update({
+        where: { id: params.id },
+        data: { role: body.role },
+      });
+      return NextResponse.json({ success: true, role: updated.role });
+    }
+    
+    // ถ้าไม่มี role = อัปเดตข้อมูลโปรไฟล์ (สำหรับ user เอง)
+    const { username, name, position, phone } = body;
+    
+    // ตรวจสอบว่ามี username หรือไม่
+    if (!username) {
+      return NextResponse.json({ error: "Missing username" }, { status: 400 });
+    }
+    
+    // ใช้ transaction เพื่ออัปเดตทั้ง account และ user
+    const result = await prisma.$transaction(async (tx) => {
+      // อัปเดต account (username และ role เป็น UNAPPROVED)
+      const updatedAccount = await tx.account.update({
+        where: { id: params.id },
+        data: { 
+          username,
+          role: "UNAPPROVED" // เปลี่ยน role เป็น UNAPPROVED
+        },
+      });
+      
+      // อัปเดต user (name, position, phone)
+      const updatedUser = await tx.user.update({
+        where: { accountId: params.id },
+        data: { 
+          name: name || null,
+          position: position || null,
+          phone: phone || null,
+        },
+      });
+      
+      return { account: updatedAccount, user: updatedUser };
     });
-    return NextResponse.json({ success: true, role: updated.role });
+    
+    return NextResponse.json({ 
+      success: true, 
+      account: result.account,
+      user: result.user
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
