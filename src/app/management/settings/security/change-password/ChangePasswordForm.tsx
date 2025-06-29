@@ -28,32 +28,31 @@ export default function ChangePasswordForm() {
   };
 
   const handleChangePassword = async () => {
-    // Validate passwords
+    // Validate passwords (client-side)
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       toast.error("รหัสผ่านใหม่ไม่ตรงกัน");
       return;
     }
-
     if (passwordForm.newPassword.length < 6) {
       toast.error("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร");
       return;
     }
-
     setIsChangingPassword(true);
     try {
-      // TODO: Implement password change API call
-      // const response = await fetch("/api/users/change-password", {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({
-      //     currentPassword: passwordForm.currentPassword,
-      //     newPassword: passwordForm.newPassword,
-      //   }),
-      // });
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
+      const response = await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+          confirmPassword: passwordForm.confirmPassword,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        toast.error(data.error || "เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน");
+        return;
+      }
       toast.success("เปลี่ยนรหัสผ่านสำเร็จ");
       router.push("/management/settings/security");
     } catch (error) {
