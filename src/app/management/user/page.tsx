@@ -14,6 +14,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export type UserRow = {
@@ -257,70 +258,90 @@ export default function AdminUserPage() {
         </CardContent>
       </Card>
 
-      {/* Modal รายละเอียด */}
-      {showDetailId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl relative mx-4 max-h-full overflow-y-auto flex flex-col box-border">
-            <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b pt-0 pb-3" style={{padding: 20}}>
-              <h2 className="text-lg font-bold text-black text-center flex-1">รายละเอียดผู้ใช้</h2>
-              <button className="btn btn-xs ml-2" onClick={() => setShowDetailId(null)}>❌</button>
-            </div>
-            <div className="flex-1 w-full" style={{padding: 32}}>
-              {(() => {
-                const user = users.find(u => u.id === showDetailId);
-                if (!user) return <div>ไม่พบข้อมูล</div>;
-                return (
-                  <div className="flex flex-col gap-3 pb-2 mt-2">
-                    <div>
-                      <span className="font-bold text-black">Username:</span><br />
-                      <span className="text-blue-700">{user.username}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-black">ชื่อ-นามสกุล:</span><br />
-                      <span className="text-blue-700">{user.name}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-black">ตำแหน่ง:</span><br />
-                      <span className="text-blue-700">{user.position}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-black">เบอร์โทร:</span><br />
-                      <span className="text-blue-700">{user.phone}</span>
-                    </div>
-                    <div>
-                      <span className="font-bold text-black">Role:</span><br />
-                      <span className="text-blue-700">{user.role}</span>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Dialog รายละเอียด */}
+      <Dialog open={!!showDetailId} onOpenChange={(open) => !open && setShowDetailId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>รายละเอียดผู้ใช้</DialogTitle>
+            <DialogDescription>
+              ข้อมูลรายละเอียดของผู้ใช้
+            </DialogDescription>
+          </DialogHeader>
+          {showDetailId && (() => {
+            const user = users.find(u => u.id === showDetailId);
+            if (!user) return <div>ไม่พบข้อมูล</div>;
+            return (
+              <div className="space-y-3">
+                <div>
+                  <span className="font-bold text-black">Username:</span><br />
+                  <span className="text-blue-700">{user.username}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">ชื่อ-นามสกุล:</span><br />
+                  <span className="text-blue-700">{user.name}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">ตำแหน่ง:</span><br />
+                  <span className="text-blue-700">{user.position}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">เบอร์โทร:</span><br />
+                  <span className="text-blue-700">{user.phone}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">Role:</span><br />
+                  <span className="text-blue-700">{user.role}</span>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button onClick={() => setShowDetailId(null)}>
+              ปิด
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {/* Modal ยืนยันการลบ */}
-      {deleteUserId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl relative mx-4 max-h-full overflow-y-auto p-8 box-border">
-            <button className="absolute top-4 right-4 btn btn-xs" onClick={() => setDeleteUserId(null)}>❌</button>
-            <h2 className="text-lg font-bold mb-4 text-red-600">ยืนยันการลบผู้ใช้</h2>
-            <div className="mb-3">
-              <b>ชื่อ-นามสกุล:</b> {users.find(u => u.id === deleteUserId)?.name}
-            </div>
-            <div className="mb-3">
-              <b>ตำแหน่ง:</b> {users.find(u => u.id === deleteUserId)?.position}
-            </div>
-            <div className="mb-3">
-              <b>เบอร์โทร:</b> {users.find(u => u.id === deleteUserId)?.phone}
-            </div>
-            <div className="flex gap-4 mt-6 justify-end">
-              <button className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300" onClick={() => setDeleteUserId(null)}>ยกเลิก</button>
-              <button className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600" onClick={() => handleDelete(deleteUserId)}>ยืนยันลบ</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Dialog ยืนยันการลบ */}
+      <Dialog open={!!deleteUserId} onOpenChange={(open) => !open && setDeleteUserId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-red-600">ยืนยันการลบผู้ใช้</DialogTitle>
+            <DialogDescription>
+              การลบผู้ใช้นี้จะไม่สามารถกู้คืนได้
+            </DialogDescription>
+          </DialogHeader>
+          {deleteUserId && (() => {
+            const user = users.find(u => u.id === deleteUserId);
+            if (!user) return <div>ไม่พบข้อมูล</div>;
+            return (
+              <div className="space-y-3">
+                <div>
+                  <span className="font-bold text-black">ชื่อ-นามสกุล:</span> <span className="text-blue-700">{user.name}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">ตำแหน่ง:</span> <span className="text-blue-700">{user.position}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">เบอร์โทร:</span> <span className="text-blue-700">{user.phone}</span>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteUserId(null)}>
+              ยกเลิก
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={() => handleDelete(deleteUserId!)}
+            >
+              ยืนยันลบ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

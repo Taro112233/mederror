@@ -16,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Image from "next/image";
 import { toast } from "sonner";
 
@@ -273,122 +274,122 @@ export default function MyRecordsPage() {
         </CardContent>
       </Card>
 
-      {/* Modal รายละเอียด */}
-      {showDetailId && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl relative mx-4 max-h-full overflow-y-auto flex flex-col box-border">
-            {/* Sticky Header */}
-            <div className="sticky top-0 z-20 bg-white flex items-center justify-between border-b pt-0 pb-3" style={{padding: 20}}>
-              <h2 className="text-lg font-bold text-black text-center flex-1">รายละเอียด Med error</h2>
-              <div className="flex items-center gap-4 ml-2">
-                <button
-                  className="btn btn-xs"
-                  title="คัดลอกข้อมูลทั้งหมด"
-                  aria-label="คัดลอกข้อมูลทั้งหมด"
-                  onClick={() => {
-                    const record = records.find(r => r.id === showDetailId);
-                    if (!record) return;
-                    const text = [
-                      `errorID: ${record.id}`,
-                      `วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์: ${record.eventDate}`,
-                      `หน่วยงาน/แผนก: ${record.unit.label}`,
-                      `รายละเอียดเหตุการณ์: ${record.description}`,
-                      `ระดับความรุนแรง: ${record.severity.label}`,
-                      `ประเภทความคลาดเคลื่อน: ${record.errorType.label}`,
-                      `ชนิดความคลาดเคลื่อน: ${record.subErrorType.label}`,
-                      record.images && record.images.length > 0 ? `รูปภาพ: ${record.images.map(img => img.url).join(", ")}` : null,
-                      `ชื่อ-นามสกุล: ${record.reporterName || '-'}`,
-                      `ตำแหน่ง: ${record.reporterPosition || '-'}`,
-                      `เบอร์โทร: ${record.reporterPhone || '-'}`,
-                      `เวลาบันทึก: ${record.createdAt}`,
-                    ].filter(Boolean).join('\n');
-                    navigator.clipboard.writeText(text);
-                    toast.success('คัดลอกข้อมูลเรียบร้อย');
-                  }}
-                >
-                  <CopyIcon className="size-4" />
-                </button>
-                <button className="btn btn-xs" onClick={() => setShowDetailId(null)}>❌</button>
+      {/* Dialog รายละเอียด */}
+      <Dialog open={!!showDetailId} onOpenChange={(open) => !open && setShowDetailId(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              รายละเอียด Med error
+            </DialogTitle>
+            <DialogDescription>
+              ข้อมูลรายละเอียดของ Med error
+            </DialogDescription>
+          </DialogHeader>
+          {showDetailId && (() => {
+            const record = records.find(r => r.id === showDetailId);
+            if (!record) return <div>ไม่พบข้อมูล</div>;
+            return (
+              <div className="space-y-4">
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <span className="font-bold text-black">errorID:</span><br />
+                    <span className="text-blue-700">{record.id}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-black">วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์:</span><br />
+                    <span className="text-blue-700">{record.eventDate}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-black">หน่วยงาน/แผนก:</span><br />
+                    <span className="text-blue-700">{record.unit.label}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-black">รายละเอียดเหตุการณ์:</span><br />
+                    <span className="text-blue-700">{record.description}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-black">ระดับความรุนแรง:</span><br />
+                    <span className="text-blue-700">{record.severity.label}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-black">ประเภทความคลาดเคลื่อน:</span><br />
+                    <span className="text-blue-700">{record.errorType.label}</span>
+                  </div>
+                  <div>
+                    <span className="font-bold text-black">ชนิดความคลาดเคลื่อน:</span><br />
+                    <span className="text-blue-700">{record.subErrorType.label}</span>
+                  </div>
+                  {record.images && record.images.length > 0 && (
+                    <div>
+                      <span className="font-bold text-black">รูปภาพ:</span>
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        {record.images.map((image, index) => (
+                          <Image
+                            key={index}
+                            src={image.url}
+                            alt={`รูปภาพ ${index + 1}`}
+                            width={300}
+                            height={128}
+                            className="w-full h-32 object-cover rounded"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* ข้อมูลผู้รายงาน */}
+                <div className="border rounded-lg bg-gray-50 p-4">
+                  <div className="font-semibold mb-2 text-gray-700">ข้อมูลผู้รายงาน</div>
+                  <div className="mb-1">
+                    <span className="font-bold text-black">ชื่อ-นามสกุล:</span> <span className="text-blue-700">{record.reporterName || '-'}</span>
+                  </div>
+                  <div className="mb-1">
+                    <span className="font-bold text-black">ตำแหน่ง:</span> <span className="text-blue-700">{record.reporterPosition || '-'}</span>
+                  </div>
+                  <div className="mb-1">
+                    <span className="font-bold text-black">เบอร์โทร:</span> <span className="text-blue-700">{record.reporterPhone || '-'}</span>
+                  </div>
+                  <div className="mb-1">
+                    <span className="font-bold text-black">เวลาบันทึก:</span> <span className="text-blue-700">{record.createdAt}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex-1 w-full" style={{padding: 32}}>
-              {(() => {
+            );
+          })()}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
                 const record = records.find(r => r.id === showDetailId);
-                if (!record) return <div>ไม่พบข้อมูล</div>;
-                return (
-                  <>
-                    <div className="flex flex-col gap-3 pb-2">
-                      <div>
-                        <span className="font-bold text-black">errorID:</span><br />
-                        <span className="text-blue-700">{record.id}</span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-black">วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์:</span><br />
-                        <span className="text-blue-700">{record.eventDate}</span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-black">หน่วยงาน/แผนก:</span><br />
-                        <span className="text-blue-700">{record.unit.label}</span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-black">รายละเอียดเหตุการณ์:</span><br />
-                        <span className="text-blue-700">{record.description}</span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-black">ระดับความรุนแรง:</span><br />
-                        <span className="text-blue-700">{record.severity.label}</span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-black">ประเภทความคลาดเคลื่อน:</span><br />
-                        <span className="text-blue-700">{record.errorType.label}</span>
-                      </div>
-                      <div>
-                        <span className="font-bold text-black">ชนิดความคลาดเคลื่อน:</span><br />
-                        <span className="text-blue-700">{record.subErrorType.label}</span>
-                      </div>
-                      {record.images && record.images.length > 0 && (
-                        <div>
-                          <span className="font-bold text-black">รูปภาพ:</span>
-                          <div className="mt-2 grid grid-cols-2 gap-2">
-                            {record.images.map((image, index) => (
-                              <Image
-                                key={index}
-                                src={image.url}
-                                alt={`รูปภาพ ${index + 1}`}
-                                width={300}
-                                height={128}
-                                className="w-full h-32 object-cover rounded"
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {/* ข้อมูลผู้รายงาน */}
-                    <div className="mt-4 mb-2">
-                      <div className="border rounded-lg bg-gray-50 p-4">
-                        <div className="font-semibold mb-2 text-gray-700">ข้อมูลผู้รายงาน</div>
-                        <div className="mb-1">
-                          <span className="font-bold text-black">ชื่อ-นามสกุล:</span> <span className="text-blue-700">{record.reporterName || '-'}</span>
-                        </div>
-                        <div className="mb-1">
-                          <span className="font-bold text-black">ตำแหน่ง:</span> <span className="text-blue-700">{record.reporterPosition || '-'}</span>
-                        </div>
-                        <div className="mb-1">
-                          <span className="font-bold text-black">เบอร์โทร:</span> <span className="text-blue-700">{record.reporterPhone || '-'}</span>
-                        </div>
-                        <div className="mb-1">
-                          <span className="font-bold text-black">เวลาบันทึก:</span> <span className="text-blue-700">{record.createdAt}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
+                if (!record) return;
+                const text = [
+                  `errorID: ${record.id}`,
+                  `วัน/เดือน/ปี และเวลา ที่เกิดเหตุการณ์: ${record.eventDate}`,
+                  `หน่วยงาน/แผนก: ${record.unit.label}`,
+                  `รายละเอียดเหตุการณ์: ${record.description}`,
+                  `ระดับความรุนแรง: ${record.severity.label}`,
+                  `ประเภทความคลาดเคลื่อน: ${record.errorType.label}`,
+                  `ชนิดความคลาดเคลื่อน: ${record.subErrorType.label}`,
+                  record.images && record.images.length > 0 ? `รูปภาพ: ${record.images.map(img => img.url).join(", ")}` : null,
+                  `ชื่อ-นามสกุล: ${record.reporterName || '-'}`,
+                  `ตำแหน่ง: ${record.reporterPosition || '-'}`,
+                  `เบอร์โทร: ${record.reporterPhone || '-'}`,
+                  `เวลาบันทึก: ${record.createdAt}`,
+                ].filter(Boolean).join('\n');
+                navigator.clipboard.writeText(text);
+                toast.success('คัดลอกข้อมูลเรียบร้อย');
+              }}
+              className="flex items-center gap-2"
+            >
+              <CopyIcon className="h-4 w-4" />
+              คัดลอกข้อมูล
+            </Button>
+            <Button onClick={() => setShowDetailId(null)}>
+              ปิด
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
