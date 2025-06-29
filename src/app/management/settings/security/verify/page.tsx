@@ -97,17 +97,16 @@ export default function SecurityVerification() {
                 {isLoading ? "กำลังตรวจสอบ..." : "ยืนยัน"}
               </Button>
             </form>
-
-            <div className="mt-6 text-center">
-              <Button asChild variant="secondary" size="sm">
-                <Link href="/management/settings">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  ย้อนกลับ
-                </Link>
-              </Button>
-            </div>
           </CardContent>
         </Card>
+        <div className="mt-6 flex justify-start">
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/management/settings">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              ย้อนกลับ
+            </Link>
+          </Button>
+        </div>
       </div>
     </div>
   );
