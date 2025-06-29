@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Key, Lock, Shield } from "lucide-react";
 import Link from "next/link";
@@ -65,51 +65,43 @@ export default async function SecuritySettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">ความปลอดภัย</h2>
-        </div>
+        <h2 className="text-3xl font-bold tracking-tight">ความปลอดภัย</h2>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
-              เปลี่ยนรหัสผ่าน
-            </CardTitle>
-            <CardDescription>
-              อัปเดตรหัสผ่านของคุณเพื่อความปลอดภัย
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/management/settings/security/change-password">
-                เปลี่ยนรหัสผ่าน
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+      {/* การตั้งค่าความปลอดภัย */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-gray-800">การตั้งค่าความปลอดภัย</h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/settings/security/change-password">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  เปลี่ยนรหัสผ่าน
+                </CardTitle>
+                <CardDescription>
+                  อัปเดตรหัสผ่านของคุณเพื่อความปลอดภัย
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              การยืนยันตัวตน
-            </CardTitle>
-            <CardDescription>
-              ตั้งค่าการยืนยันตัวตนแบบสองขั้นตอน
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/management/settings/security/2fa">
-                เปิดใช้งาน 2FA
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <Link href="/management/settings/security/2fa">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  การยืนยันตัวตน
+                </CardTitle>
+                <CardDescription>
+                  ตั้งค่าการยืนยันตัวตนแบบสองขั้นตอน
+                </CardDescription>
+              </CardHeader>
+            </Link>
+          </Card>
+        </div>
       </div>
 
       <div className="flex justify-start">
