@@ -2,10 +2,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Shield, Bell, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import CardButton from "@/components/CardButton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function AdminSettings() {
@@ -39,47 +40,41 @@ export default async function AdminSettings() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/settings/profile">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                โปรไฟล์ผู้ใช้
-              </CardTitle>
-              <CardDescription>
-                จัดการข้อมูลส่วนตัวและโปรไฟล์
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/management/settings/profile">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              โปรไฟล์ผู้ใช้
+            </CardTitle>
+            <CardDescription>
+              จัดการข้อมูลส่วนตัวและโปรไฟล์
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/settings/security/verify">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                ความปลอดภัย
-              </CardTitle>
-              <CardDescription>
-                ตั้งค่ารหัสผ่านและการรักษาความปลอดภัย
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/management/settings/security/verify">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              ความปลอดภัย
+            </CardTitle>
+            <CardDescription>
+              ตั้งค่ารหัสผ่านและการรักษาความปลอดภัย
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/settings/notifications">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                การแจ้งเตือน
-              </CardTitle>
-              <CardDescription>
-                จัดการการแจ้งเตือนและอีเมล
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/management/settings/notifications">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              การแจ้งเตือน
+            </CardTitle>
+            <CardDescription>
+              จัดการการแจ้งเตือนและอีเมล
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
       </div>
 
       <div className="flex justify-start">

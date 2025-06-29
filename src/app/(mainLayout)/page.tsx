@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
@@ -6,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Shield, Settings } from "lucide-react";
+import CardButton from "@/components/CardButton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function HomePage() {
@@ -87,47 +87,41 @@ export default async function HomePage() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/dashboard">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Dashboard
-              </CardTitle>
-              <CardDescription>
-                ดูสถิติและข้อมูลสรุป
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/dashboard">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Dashboard
+            </CardTitle>
+            <CardDescription>
+              ดูสถิติและข้อมูลสรุป
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/report/new">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                รายงานข้อผิดพลาด
-              </CardTitle>
-              <CardDescription>
-                สร้างรายงานข้อผิดพลาดใหม่
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/report/new">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              รายงานข้อผิดพลาด
+            </CardTitle>
+            <CardDescription>
+              สร้างรายงานข้อผิดพลาดใหม่
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                ตั้งค่าทั่วไป
-              </CardTitle>
-              <CardDescription>
-                จัดการผู้ใช้และระบบ
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/management">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              ตั้งค่าทั่วไป
+            </CardTitle>
+            <CardDescription>
+              จัดการผู้ใช้และระบบ
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
       </div>
 
       <div className="text-xs text-muted-foreground text-center">

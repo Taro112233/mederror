@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import CardButton from "@/components/CardButton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function ManagementMenu() {
@@ -43,90 +43,80 @@ export default async function ManagementMenu() {
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8">
         {/* 1. รายการ Med error ที่ส่งไป (ทุก role เห็น) */}
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/my-records">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-5 w-5" />
-                รายการ Med error ที่ส่งไป
-              </CardTitle>
-              <CardDescription>
-                ดูรายการข้อผิดพลาดที่คุณรายงาน
-              </CardDescription>
-            </CardHeader>
-          </Link>
-        </Card>
+        <CardButton href="/management/my-records">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5" />
+              รายการ Med error ที่ส่งไป
+            </CardTitle>
+            <CardDescription>
+              ดูรายการข้อผิดพลาดที่คุณรายงาน
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
         {/* 2. รายการ Med error ทั้งหมด (ADMIN, DEVELOPER) */}
         {(isAdmin || isDeveloper) && (
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <Link href="/management/records">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    รายการ Med error ทั้งหมด
-                  </CardTitle>
-                  <Badge variant="destructive">ADMIN</Badge>
-                </div>
-                <CardDescription>
-                  ดูและจัดการรายการข้อผิดพลาดทั้งหมด
-                </CardDescription>
-              </CardHeader>
-            </Link>
-          </Card>
+          <CardButton href="/management/records">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  รายการ Med error ทั้งหมด
+                </CardTitle>
+                <Badge variant="destructive">ADMIN</Badge>
+              </div>
+              <CardDescription>
+                ดูและจัดการรายการข้อผิดพลาดทั้งหมด
+              </CardDescription>
+            </CardHeader>
+          </CardButton>
         )}
         {/* 3. รายชื่อผู้ใช้งานในระบบ (ADMIN, DEVELOPER) */}
         {(isAdmin || isDeveloper) && (
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <Link href="/management/user">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    รายชื่อผู้ใช้งานระบบ
-                  </CardTitle>
-                  <Badge variant="destructive">ADMIN</Badge>
-                </div>
-                <CardDescription>
-                  จัดการผู้ใช้งานและสิทธิ์การเข้าถึง
-                </CardDescription>
-              </CardHeader>
-            </Link>
-          </Card>
+          <CardButton href="/management/user">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  รายชื่อผู้ใช้งานระบบ
+                </CardTitle>
+                <Badge variant="destructive">ADMIN</Badge>
+              </div>
+              <CardDescription>
+                จัดการผู้ใช้งานและสิทธิ์การเข้าถึง
+              </CardDescription>
+            </CardHeader>
+          </CardButton>
         )}
         {/* 4. Developer Panel (DEVELOPER) */}
         {isDeveloper && (
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
-            <Link href="/management/developer">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="flex items-center gap-2">
-                    <Code className="h-5 w-5" />
-                    Developer Panel
-                  </CardTitle>
-                  <Badge className="bg-purple-600 text-white">DEVELOPER</Badge>
-                </div>
-                <CardDescription>
-                  เครื่องมือสำหรับนักพัฒนา
-                </CardDescription>
-              </CardHeader>
-            </Link>
-          </Card>
-        )}
-        {/* 5. ตั้งค่า (ทุก role เห็น) */}
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
-          <Link href="/management/settings">
+          <CardButton href="/management/developer">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                ตั้งค่า
-              </CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Developer Panel
+                </CardTitle>
+                <Badge className="bg-purple-600 text-white">DEVELOPER</Badge>
+              </div>
               <CardDescription>
-                จัดการการตั้งค่าผู้ใช้งานระบบ
+                เครื่องมือสำหรับนักพัฒนา
               </CardDescription>
             </CardHeader>
-          </Link>
-        </Card>
+          </CardButton>
+        )}
+        {/* 5. ตั้งค่า (ทุก role เห็น) */}
+        <CardButton href="/management/settings">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              ตั้งค่า
+            </CardTitle>
+            <CardDescription>
+              จัดการการตั้งค่าผู้ใช้งานระบบ
+            </CardDescription>
+          </CardHeader>
+        </CardButton>
       </div>
     </div>
   );
