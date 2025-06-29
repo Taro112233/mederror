@@ -72,12 +72,12 @@ export default async function HomePage() {
               <div>
                 <Badge variant={
                   account.role === "ADMIN" ? "destructive" :
-                  account.role === "DEVELOPER" ? "secondary" :
+                  account.role === "DEVELOPER" ? "purple" :
                   "outline"
                 }>
-                  {account.role === "ADMIN" ? "ผู้ดูแลระบบ" :
-                   account.role === "DEVELOPER" ? "ผู้พัฒนา" :
-                   "ผู้ใช้งาน"}
+                  {account.role === "ADMIN" ? "ADMIN" :
+                   account.role === "DEVELOPER" ? "DEVELOPER" :
+                   "USER"}
                 </Badge>
               </div>
             </div>
