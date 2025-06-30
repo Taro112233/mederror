@@ -261,7 +261,9 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             )}
             <SidebarMenu>
               <SidebarMenuItem>
-                <LogoutButton className="w-full justify-start" variant="ghost" />
+                <div className="flex justify-center items-center w-full mt-4">
+                  <LogoutButton className="w-40" variant="destructive" />
+                </div>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
