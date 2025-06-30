@@ -2,20 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { 
-  AlertTriangle, 
-  Users, 
-  TrendingUp, 
-  Calendar,
-  Plus,
-  Eye,
-  Filter,
-  BarChart3
-} from "lucide-react";
+import { AlertTriangle, Users, TrendingUp, Calendar, Plus, Filter } from "lucide-react";
 import Link from "next/link";
 import { DashboardCharts } from "@/components/DashboardCharts";
 
@@ -61,6 +50,36 @@ export default function DashboardPage() {
     fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    if (!data) return;
+    const now = new Date();
+    let filtered: MedError[] = [];
+    if (selectedPeriod === "year") {
+      filtered = data.recentErrors.filter(error => {
+        const d = new Date(error.eventDate);
+        return d.getFullYear() === now.getFullYear();
+      });
+    } else if (selectedPeriod === "month") {
+      filtered = data.recentErrors.filter(error => {
+        const d = new Date(error.eventDate);
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      });
+    } else if (selectedPeriod === "week") {
+      const firstDayOfWeek = new Date(now);
+      firstDayOfWeek.setDate(now.getDate() - now.getDay());
+      firstDayOfWeek.setHours(0,0,0,0);
+      const lastDayOfWeek = new Date(firstDayOfWeek);
+      lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+      lastDayOfWeek.setHours(23,59,59,999);
+      filtered = data.recentErrors.filter(error => {
+        const d = new Date(error.eventDate);
+        return d >= firstDayOfWeek && d <= lastDayOfWeek;
+      });
+    }
+    setSelectedBar(null);
+    setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
+  }, [selectedPeriod, data?.recentErrors]);
+
   const fetchDashboardData = async () => {
     try {
       const response = await fetch('/api/dashboard');
@@ -78,19 +97,42 @@ export default function DashboardPage() {
   const handleBarClick = (clickedData: ChartData) => {
     if (selectedBar === clickedData.name) {
       setSelectedBar(null);
-      setData(prev => prev ? { ...prev, filteredErrors: prev.recentErrors } : null);
+      if (data) {
+        const now = new Date();
+        let filtered: MedError[] = [];
+        if (selectedPeriod === "year") {
+          filtered = data.recentErrors.filter(error => {
+            const d = new Date(error.eventDate);
+            return d.getFullYear() === now.getFullYear();
+          });
+        } else if (selectedPeriod === "month") {
+          filtered = data.recentErrors.filter(error => {
+            const d = new Date(error.eventDate);
+            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+          });
+        } else if (selectedPeriod === "week") {
+          const firstDayOfWeek = new Date(now);
+          firstDayOfWeek.setDate(now.getDate() - now.getDay());
+          firstDayOfWeek.setHours(0,0,0,0);
+          const lastDayOfWeek = new Date(firstDayOfWeek);
+          lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+          lastDayOfWeek.setHours(23,59,59,999);
+          filtered = data.recentErrors.filter(error => {
+            const d = new Date(error.eventDate);
+            return d >= firstDayOfWeek && d <= lastDayOfWeek;
+          });
+        }
+        setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
+      }
     } else {
       setSelectedBar(clickedData.name);
-      // Filter errors based on selected bar
       if (clickedData && clickedData.date && data) {
         const selectedDate = new Date(clickedData.date);
-        const filtered = data.recentErrors.filter((error: MedError) => {
-          const errorDate = new Date(error.createdAt);
+        const filtered = data.filteredErrors.filter((error: MedError) => {
+          const errorDate = new Date(error.eventDate);
           if (selectedPeriod === "year") {
             return errorDate.getMonth() === selectedDate.getMonth() && 
                    errorDate.getFullYear() === selectedDate.getFullYear();
-          } else if (selectedPeriod === "month") {
-            return errorDate.toDateString() === selectedDate.toDateString();
           } else {
             return errorDate.toDateString() === selectedDate.toDateString();
           }
@@ -102,7 +144,6 @@ export default function DashboardPage() {
 
   const getChartData = () => {
     if (!data) return [];
-    
     switch (selectedPeriod) {
       case "year":
         return data.monthlyData;
@@ -128,6 +169,26 @@ export default function DashboardPage() {
     }
   };
 
+  // ฟังก์ชันสำหรับกรองข้อมูล severityChartData ตามช่วงเวลา
+  const getFilteredSeverityChartData = () => {
+    if (!data) return [];
+    // สร้าง map ของ severity label
+    const severityLabels: Record<string, number> = {};
+    data.filteredErrors.forEach(error => {
+      severityLabels[error.severity.label] = 0;
+    });
+    // นับจำนวนแต่ละ severity
+    data.filteredErrors.forEach(error => {
+      severityLabels[error.severity.label] = (severityLabels[error.severity.label] || 0) + 1;
+    });
+    // คืนค่าในรูปแบบที่ DashboardCharts ต้องการ
+    return Object.keys(severityLabels).map(label => ({
+      name: label,
+      value: severityLabels[label],
+      code: label
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -148,7 +209,6 @@ export default function DashboardPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between space-y-2">
         <div className="flex items-center gap-2">
-          <BarChart3 className="h-8 w-8 text-primary" />
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
         <div className="flex items-center space-x-2">
@@ -276,7 +336,33 @@ export default function DashboardPage() {
                     className="ml-2 h-6 px-2"
                     onClick={() => {
                       setSelectedBar(null);
-                      setData(prev => prev ? { ...prev, filteredErrors: prev.recentErrors } : null);
+                      if (data) {
+                        const now = new Date();
+                        let filtered: MedError[] = [];
+                        if (selectedPeriod === "year") {
+                          filtered = data.recentErrors.filter(error => {
+                            const d = new Date(error.eventDate);
+                            return d.getFullYear() === now.getFullYear();
+                          });
+                        } else if (selectedPeriod === "month") {
+                          filtered = data.recentErrors.filter(error => {
+                            const d = new Date(error.eventDate);
+                            return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+                          });
+                        } else if (selectedPeriod === "week") {
+                          const firstDayOfWeek = new Date(now);
+                          firstDayOfWeek.setDate(now.getDate() - now.getDay());
+                          firstDayOfWeek.setHours(0,0,0,0);
+                          const lastDayOfWeek = new Date(firstDayOfWeek);
+                          lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+                          lastDayOfWeek.setHours(23,59,59,999);
+                          filtered = data.recentErrors.filter(error => {
+                            const d = new Date(error.eventDate);
+                            return d >= firstDayOfWeek && d <= lastDayOfWeek;
+                          });
+                        }
+                        setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
+                      }
                     }}
                   >
                     ล้างตัวกรอง
@@ -299,7 +385,7 @@ export default function DashboardPage() {
             <div className="h-96">
               <DashboardCharts
                 type="bar"
-                data={data.severityChartData || []}
+                data={getFilteredSeverityChartData()}
                 config={{ value: { label: "จำนวน", color: "hsl(var(--destructive))" } }}
                 layout={"vertical"}
               />
@@ -307,61 +393,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Data Table (Full Width) */}
-      <Card>
-        <CardHeader>
-          <CardTitle>รายละเอียดข้อผิดพลาด</CardTitle>
-          <CardDescription>
-            {selectedBar ? `ข้อมูลสำหรับ: ${selectedBar}` : 'ข้อผิดพลาดทั้งหมด'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>วันที่เกิดเหตุการณ์</TableHead>
-                <TableHead>ประเภทข้อผิดพลาด</TableHead>
-                <TableHead>ระดับความรุนแรง</TableHead>
-                <TableHead>หน่วยงาน</TableHead>
-                <TableHead>ผู้รายงาน</TableHead>
-                <TableHead>รายละเอียด</TableHead>
-                <TableHead>การดำเนินการ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(selectedBar ? data.filteredErrors : data.recentErrors).map((error) => (
-                <TableRow key={error.id}>
-                  <TableCell>
-                    {new Date(error.eventDate).toLocaleDateString('th-TH')}
-                  </TableCell>
-                  <TableCell>{error.errorType.label}</TableCell>
-                  <TableCell>
-                    <Badge variant={
-                      error.severity.label === "Critical" ? "destructive" :
-                      error.severity.label === "High" ? "destructive" :
-                      error.severity.label === "Medium" ? "secondary" :
-                      "outline"
-                    }>
-                      {error.severity.label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{error.unit.label}</TableCell>
-                  <TableCell>{error.reporterName}</TableCell>
-                  <TableCell className="max-w-xs truncate">
-                    {error.description}
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="sm">
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 }
