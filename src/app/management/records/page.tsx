@@ -2,7 +2,6 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import {
-  ColumnDef,
   ColumnFiltersState,
   SortingState,
   getCoreRowModel,
@@ -11,7 +10,7 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon, CopyIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, CopyIcon, EyeIcon, Trash2Icon, RefreshCwIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Image from "next/image";
 import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
@@ -50,56 +50,6 @@ export type MedErrorRecord = {
   onShowDetail?: (id: string) => void;
 };
 
-// columns สำหรับ TanStack Table
-const columns: ColumnDef<MedErrorRecord>[] = [
-  {
-    header: "วันที่ เวลา",
-    accessorKey: "eventDate",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "หน่วยงาน/แผนก",
-    accessorKey: "unit.label",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "ระดับ",
-    accessorKey: "severity.label",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "ประเภท",
-    accessorKey: "errorType.label",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "ชนิด",
-    accessorKey: "subErrorType.label",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "ผู้รายงาน",
-    accessorKey: "reporterName",
-    meta: { filterVariant: "text" },
-  },
-  {
-    header: "จัดการ",
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex gap-1 justify-end">
-        <Button size="sm" variant="secondary" onClick={() => row.original.onShowDetail?.(row.original.id)}>ดูรายละเอียด</Button>
-        <button
-          onClick={() => row.original.onDelete?.(row.original.id)}
-          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          ลบ
-        </button>
-      </div>
-    ),
-    enableSorting: false,
-  },
-];
-
 export default function AdminRecordsPage() {
   const [records, setRecords] = useState<MedErrorRecord[]>([]);
   const [showDetailId, setShowDetailId] = useState<string | null>(null);
@@ -108,9 +58,11 @@ export default function AdminRecordsPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
 
-  // ดึง organizationId ของผู้ใช้ปัจจุบัน
+  // Fetch organizationId on mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -118,6 +70,8 @@ export default function AdminRecordsPage() {
         if (res.ok) {
           const user = await res.json();
           setOrganizationId(user.organizationId || null);
+        } else {
+          setOrganizationId(null);
         }
       } catch {
         setOrganizationId(null);
@@ -126,39 +80,41 @@ export default function AdminRecordsPage() {
     fetchUser();
   }, []);
 
-  // ดึงข้อมูล MedError จากฐานข้อมูล เมื่อได้ organizationId จริง
-  useEffect(() => {
-    if (!organizationId) return;
-    const fetchMedErrors = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/mederror?organizationId=${organizationId}`);
-        if (response.ok) {
-          const data = await response.json();
-          const formattedData: MedErrorRecord[] = data.map((item: any) => ({
-            id: item.id,
-            eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
-            createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
-            unit: item.unit,
-            severity: item.severity,
-            errorType: item.errorType,
-            subErrorType: item.subErrorType,
-            reporterName: item.reporterName,
-            description: item.description,
-            reporterUsername: item.reporterUsername,
-            reporterPosition: item.reporterPosition,
-            reporterPhone: item.reporterPhone,
-            images: item.images,
-          }));
-          setRecords(formattedData);
-        }
-      } catch (error) {
-        console.error("Error fetching med errors:", error);
-      } finally {
-        setLoading(false);
+  // Fetch MedError records when organizationId is available
+  const fetchMedErrors = async (orgId: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/mederror?organizationId=${orgId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const formattedData: MedErrorRecord[] = data.map((item: any) => ({
+          id: item.id,
+          eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
+          createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
+          unit: item.unit,
+          severity: item.severity,
+          errorType: item.errorType,
+          subErrorType: item.subErrorType,
+          reporterName: item.reporterName,
+          description: item.description,
+          reporterUsername: item.reporterUsername,
+          reporterPosition: item.reporterPosition,
+          reporterPhone: item.reporterPhone,
+          images: item.images,
+        }));
+        setRecords(formattedData);
       }
-    };
-    fetchMedErrors();
+    } catch (error) {
+      console.error("Error fetching med errors:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (organizationId) {
+      fetchMedErrors(organizationId);
+    }
   }, [organizationId]);
 
   // inject action handlers to each row
@@ -169,6 +125,12 @@ export default function AdminRecordsPage() {
       onShowDetail: (id: string) => setShowDetailId(id),
     })),
     [records]
+  );
+
+  // Pagination logic
+  const paginatedData = useMemo(
+    () => data.slice(page * pageSize, (page + 1) * pageSize),
+    [data, page, pageSize]
   );
 
   const handleDelete = async (id: string) => {
@@ -191,7 +153,6 @@ export default function AdminRecordsPage() {
   function globalStringFilter(row: any, _columnId: string, filterValue: string) {
     if (!filterValue) return true;
     const lower = filterValue.toLowerCase();
-    // ตรวจสอบทุกฟิลด์ string ใน row.original
     return Object.values(row.original).some((value: any) => {
       if (typeof value === "string") return value.toLowerCase().includes(lower);
       if (typeof value === "object" && value?.label) return value.label.toLowerCase().includes(lower);
@@ -201,7 +162,125 @@ export default function AdminRecordsPage() {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: [
+      {
+        header: "วันที่ เวลา",
+        accessorKey: "eventDate",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "หน่วยงาน/แผนก",
+        accessorKey: "unit.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ระดับ",
+        accessorKey: "severity.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[80px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ประเภท",
+        accessorKey: "errorType.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ชนิด",
+        accessorKey: "subErrorType.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ผู้รายงาน",
+        accessorKey: "reporterName",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "จัดการ",
+        id: "actions",
+        cell: ({ row }) => (
+          <div className="flex gap-2 justify-end">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={() => row.original.onShowDetail?.(row.original.id)}>
+                    <EyeIcon size={18} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>ดูรายละเอียด</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="destructive" onClick={() => row.original.onDelete?.(row.original.id)}>
+                    <Trash2Icon size={18} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>ลบ</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        ),
+        enableSorting: false,
+      },
+    ],
     state: { sorting, columnFilters, globalFilter },
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
@@ -215,10 +294,22 @@ export default function AdminRecordsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-3xl font-bold tracking-tight">รายการข้อผิดพลาด</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">พบ {records.length} รายการ</span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => organizationId && fetchMedErrors(organizationId)}
+            className="flex items-center gap-2"
+            disabled={loading}
+          >
+            <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
+            รีเฟรช
+          </Button>
+        </div>
       </div>
-
       <Card>
         <CardHeader>
           <CardTitle>รายการ Med Error ทั้งหมด</CardTitle>
@@ -230,74 +321,89 @@ export default function AdminRecordsPage() {
             <Input
               placeholder="ค้นหาทุกคอลัมน์..."
               value={globalFilter}
-              onChange={e => setGlobalFilter(e.target.value)}
+              onChange={e => { setGlobalFilter(e.target.value); setPage(0); }}
               className="w-64"
             />
           </div>
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id} className="bg-muted/50">
-                  {headerGroup.headers.map(header => (
-                    <TableHead
-                      key={header.id}
-                      className="relative h-10 border-t select-none text-center"
-                      aria-sort={
-                        header.column.getIsSorted() === "asc"
-                          ? "ascending"
-                          : header.column.getIsSorted() === "desc"
-                          ? "descending"
-                          : "none"
-                      }
-                    >
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <div
-                          className="flex h-full cursor-pointer items-center justify-between gap-2 select-none"
-                          onClick={header.column.getToggleSortingHandler()}
-                          tabIndex={header.column.getCanSort() ? 0 : undefined}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
-                            desc: <ChevronDownIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
-                          }[header.column.getIsSorted() as string] ?? (
-                            <span className="size-4" aria-hidden="true" />
-                          )}
-                        </div>
-                      ) : (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    กำลังโหลดข้อมูล...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map(row => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-white shadow">
+                {table.getHeaderGroups().map(headerGroup => (
+                  <TableRow key={headerGroup.id} className="bg-muted/50">
+                    {headerGroup.headers.map(header => (
+                      <TableHead
+                        key={header.id}
+                        className="relative h-10 border-t select-none text-center"
+                        aria-sort={
+                          header.column.getIsSorted() === "asc"
+                            ? "ascending"
+                            : header.column.getIsSorted() === "desc"
+                            ? "descending"
+                            : "none"
+                        }
+                      >
+                        {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                          <div
+                            className="flex h-full cursor-pointer items-center justify-between gap-2 select-none"
+                            onClick={header.column.getToggleSortingHandler()}
+                            tabIndex={header.column.getCanSort() ? 0 : undefined}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
+                              desc: <ChevronDownIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
+                            }[header.column.getIsSorted() as string] ?? (
+                              <span className="size-4" aria-hidden="true" />
+                            )}
+                          </div>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    ไม่พบข้อมูล
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                      กำลังโหลดข้อมูล...
+                    </TableCell>
+                  </TableRow>
+                ) : paginatedData.length ? (
+                  paginatedData.map((_, idx) => {
+                    const row = table.getRowModel().rows[page * pageSize + idx];
+                    if (!row) return null;
+                    return (
+                      <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell: any) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                      ไม่พบข้อมูล
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          {/* Pagination Controls */}
+          <div className="flex justify-end items-center gap-2 mt-2">
+            <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>ก่อนหน้า</Button>
+            <span className="text-sm">หน้า {page + 1} / {Math.max(1, Math.ceil(data.length / pageSize))}</span>
+            <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * pageSize >= data.length}>ถัดไป</Button>
+            <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }} className="ml-2 border rounded px-2 py-1 text-sm">
+              {[10, 20, 50].map(size => <option key={size} value={size}>{size} ต่อหน้า</option>)}
+            </select>
+          </div>
         </CardContent>
       </Card>
 
