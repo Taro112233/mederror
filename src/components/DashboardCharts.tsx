@@ -38,9 +38,10 @@ interface DashboardChartsProps {
   data: ChartData[]
   config: ChartConfig
   layout?: "horizontal" | "vertical"
+  chartMargin?: object
 }
 
-export function DashboardCharts({ type, data, config, layout }: DashboardChartsProps) {
+export function DashboardCharts({ type, data, config, layout, chartMargin }: DashboardChartsProps) {
   if (type === "line") {
     return (
       <ChartContainer config={config}>
@@ -74,7 +75,7 @@ export function DashboardCharts({ type, data, config, layout }: DashboardChartsP
   if (type === "bar") {
     return (
       <ChartContainer config={config}>
-        <BarChart data={data} layout={layout === "vertical" ? "vertical" : "horizontal"}>
+        <BarChart data={data} layout={layout === "vertical" ? "vertical" : "horizontal"} margin={chartMargin}>
           <CartesianGrid strokeDasharray="3 3" />
           {layout === "vertical" ? (
             <YAxis 

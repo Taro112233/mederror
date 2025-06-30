@@ -211,68 +211,16 @@ export default function DashboardPage() {
         <div className="flex items-center space-x-2">
           <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}>
             <TabsList>
-              <TabsTrigger value="year" className="min-w-[80px] flex-1">ปี</TabsTrigger>
-              <TabsTrigger value="month" className="min-w-[80px] flex-1">เดือน</TabsTrigger>
-              <TabsTrigger value="week" className="min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
+              <TabsTrigger value="year" className="md:min-w-[80px]  flex-1">ปี</TabsTrigger>
+              <TabsTrigger value="month" className="md:min-w-[80px] flex-1">เดือน</TabsTrigger>
+              <TabsTrigger value="week" className="md:min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </div>
 
-      {/* Stats Cards (Top Row) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <div className="flex items-center justify-between px-6 pt-3 pb-2">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <AlertTriangle className="h-5 w-5 text-muted-foreground mr-1" />
-                <span className="text-base font-semibold">ข้อผิดพลาดทั้งหมด</span>
-              </div>
-              <span className="text-sm text-muted-foreground">รายงานข้อผิดพลาดทางการแพทย์</span>
-            </div>
-            <div className="text-3xl font-bold text-right">{data.totalErrors}</div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-center justify-between px-6 pt-3 pb-2">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <Users className="h-5 w-5 text-muted-foreground mr-1" />
-                <span className="text-base font-semibold">ผู้ใช้ทั้งหมด</span>
-              </div>
-              <span className="text-sm text-muted-foreground">ผู้ใช้ในองค์กร</span>
-            </div>
-            <div className="text-3xl font-bold text-right">{data.totalUsers}</div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-center justify-between px-6 pt-3 pb-2">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <Calendar className="h-5 w-5 text-muted-foreground mr-1" />
-                <span className="text-base font-semibold">ข้อผิดพลาดเดือนนี้</span>
-              </div>
-              <span className="text-sm text-muted-foreground">รายงานในเดือนปัจจุบัน</span>
-            </div>
-            <div className="text-3xl font-bold text-right">{data.errorsThisMonth}</div>
-          </div>
-        </Card>
-        <Card>
-          <div className="flex items-center justify-between px-6 pt-3 pb-2">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-5 w-5 text-muted-foreground mr-1" />
-                <span className="text-base font-semibold">ข้อผิดพลาดสัปดาห์นี้</span>
-              </div>
-              <span className="text-sm text-muted-foreground">รายงานในสัปดาห์ปัจจุบัน</span>
-            </div>
-            <div className="text-3xl font-bold text-right">{data.errorsThisWeek}</div>
-          </div>
-        </Card>
-      </div>
-
       {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2">
         {/* กราฟแนวโน้ม */}
         <Card>
           <CardHeader>
@@ -309,10 +257,11 @@ export default function DashboardPage() {
                   data={getChartData()}
                   config={{
                     value: {
-                      label: "จำนวนข้อผิดพลาด",
+                      label: "จำนวน",
                       color: "hsl(var(--primary))"
                     }
                   }}
+                  chartMargin={{ top: 40 }}
                 />
               </div>
             </div>
@@ -382,6 +331,58 @@ export default function DashboardPage() {
               />
             </div>
           </CardContent>
+        </Card>
+      </div>
+
+      {/* Stats Cards (Top Row) */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <div className="flex items-center justify-between px-6 pt-3 pb-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <AlertTriangle className="h-5 w-5 text-muted-foreground mr-1" />
+                <span className="text-base font-semibold">ข้อผิดพลาดทั้งหมด</span>
+              </div>
+              <span className="text-sm text-muted-foreground">รายงานข้อผิดพลาดทางการแพทย์</span>
+            </div>
+            <div className="text-3xl font-bold text-right">{data.totalErrors}</div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center justify-between px-6 pt-3 pb-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <Users className="h-5 w-5 text-muted-foreground mr-1" />
+                <span className="text-base font-semibold">ผู้ใช้ทั้งหมด</span>
+              </div>
+              <span className="text-sm text-muted-foreground">ผู้ใช้ในองค์กร</span>
+            </div>
+            <div className="text-3xl font-bold text-right">{data.totalUsers}</div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center justify-between px-6 pt-3 pb-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-5 w-5 text-muted-foreground mr-1" />
+                <span className="text-base font-semibold">ข้อผิดพลาดเดือนนี้</span>
+              </div>
+              <span className="text-sm text-muted-foreground">รายงานในเดือนปัจจุบัน</span>
+            </div>
+            <div className="text-3xl font-bold text-right">{data.errorsThisMonth}</div>
+          </div>
+        </Card>
+        <Card>
+          <div className="flex items-center justify-between px-6 pt-3 pb-2">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-5 w-5 text-muted-foreground mr-1" />
+                <span className="text-base font-semibold">ข้อผิดพลาดสัปดาห์นี้</span>
+              </div>
+              <span className="text-sm text-muted-foreground">รายงานในสัปดาห์ปัจจุบัน</span>
+            </div>
+            <div className="text-3xl font-bold text-right">{data.errorsThisWeek}</div>
+          </div>
         </Card>
       </div>
     </div>
