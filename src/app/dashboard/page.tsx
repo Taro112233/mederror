@@ -169,23 +169,21 @@ export default function DashboardPage() {
     }
   };
 
+  // Severity codes ที่ต้องการแสดงในกราฟเสมอ (A-I)
+  const severityCodes = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+
   // ฟังก์ชันสำหรับกรองข้อมูล severityChartData ตามช่วงเวลา
   const getFilteredSeverityChartData = () => {
     if (!data) return [];
-    // สร้าง map ของ severity label
-    const severityLabels: Record<string, number> = {};
+    const counts: Record<string, number> = {};
     data.filteredErrors.forEach(error => {
-      severityLabels[error.severity.label] = 0;
+      const code = error.severity.code;
+      counts[code] = (counts[code] || 0) + 1;
     });
-    // นับจำนวนแต่ละ severity
-    data.filteredErrors.forEach(error => {
-      severityLabels[error.severity.label] = (severityLabels[error.severity.label] || 0) + 1;
-    });
-    // คืนค่าในรูปแบบที่ DashboardCharts ต้องการ
-    return Object.keys(severityLabels).map(label => ({
-      name: label,
-      value: severityLabels[label],
-      code: label
+    return severityCodes.map(code => ({
+      name: code,
+      value: counts[code] || 0,
+      code
     }));
   };
 
