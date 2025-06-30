@@ -127,7 +127,7 @@ export default function DashboardPage() {
       setSelectedBar(clickedData.name);
       if (clickedData && clickedData.date && data) {
         const selectedDate = new Date(clickedData.date);
-        const filtered = data.filteredErrors.filter((error: MedError) => {
+        const filtered = data.recentErrors.filter((error: MedError) => {
           const errorDate = new Date(error.eventDate);
           if (selectedPeriod === "year") {
             return errorDate.getMonth() === selectedDate.getMonth() && 
@@ -141,19 +141,120 @@ export default function DashboardPage() {
     }
   };
 
-  const getChartData = () => {
-    if (!data) return [];
-    switch (selectedPeriod) {
-      case "year":
-        return data.monthlyData;
-      case "month":
-        return data.dailyData30 || data.weeklyData;
-      case "week":
-        return data.dailyData;
-      default:
-        return data.monthlyData;
+  // ฟังก์ชันช่วยสำหรับสร้าง array ของวันที่ย้อนหลัง n วัน
+  const getLastNDates = (n: number) => {
+    const dates = [];
+    const today = new Date();
+    for (let i = n - 1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      dates.push(new Date(d));
     }
+    return dates;
   };
+
+  // ฟังก์ชันช่วยสำหรับสร้าง array ของเดือนย้อนหลัง n เดือน
+  const getLastNMonths = (n: number) => {
+    const months = [];
+    const today = new Date();
+    for (let i = n - 1; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      months.push(new Date(d));
+    }
+    return months;
+  };
+
+  // กรองข้อมูลแนวโน้มตามช่วงที่เลือก
+  const getTrendChartData = () => {
+    if (!data) return [];
+    if (selectedPeriod === "year") {
+      // 12 เดือนล่าสุด
+      const months = getLastNMonths(12);
+      return months.map(month => {
+        const count = data.recentErrors.filter(error => {
+          const d = new Date(error.eventDate);
+          return d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth();
+        }).length;
+        return {
+          name: `${month.getFullYear()}-${(month.getMonth() + 1).toString().padStart(2, "0")}`,
+          value: count,
+          date: month.toISOString(),
+        };
+      });
+    } else if (selectedPeriod === "month") {
+      // 30 วันล่าสุด
+      const days = getLastNDates(30);
+      return days.map(day => {
+        const count = data.recentErrors.filter(error => {
+          const d = new Date(error.eventDate);
+          return d.toDateString() === day.toDateString();
+        }).length;
+        return {
+          name: `${day.getMonth() + 1}/${day.getDate()}`,
+          value: count,
+          date: day.toISOString(),
+        };
+      });
+    } else if (selectedPeriod === "week") {
+      // 7 วันล่าสุด
+      const days = getLastNDates(7);
+      return days.map(day => {
+        const count = data.recentErrors.filter(error => {
+          const d = new Date(error.eventDate);
+          return d.toDateString() === day.toDateString();
+        }).length;
+        return {
+          name: `${day.getMonth() + 1}/${day.getDate()}`,
+          value: count,
+          date: day.toISOString(),
+        };
+      });
+    }
+    return [];
+  };
+
+  // ฟังก์ชันกรองข้อมูลความรุนแรงตามช่วงที่เลือก
+  const getFilteredSeverityChartData = () => {
+    if (!data) return [];
+    let filteredErrors: MedError[] = [];
+    if (selectedPeriod === "year") {
+      // 12 เดือนล่าสุด
+      const months = getLastNMonths(12);
+      const monthSet = new Set(months.map(m => m.getFullYear() + '-' + m.getMonth()));
+      filteredErrors = data.recentErrors.filter(error => {
+        const d = new Date(error.eventDate);
+        return monthSet.has(d.getFullYear() + '-' + d.getMonth());
+      });
+    } else if (selectedPeriod === "month") {
+      // 30 วันล่าสุด
+      const days = getLastNDates(30).map(d => d.toDateString());
+      filteredErrors = data.recentErrors.filter(error => {
+        const d = new Date(error.eventDate);
+        return days.includes(d.toDateString());
+      });
+    } else if (selectedPeriod === "week") {
+      // 7 วันล่าสุด
+      const days = getLastNDates(7).map(d => d.toDateString());
+      filteredErrors = data.recentErrors.filter(error => {
+        const d = new Date(error.eventDate);
+        return days.includes(d.toDateString());
+      });
+    }
+    const counts: Record<string, number> = {};
+    filteredErrors.forEach(error => {
+      const code = error.severity.code;
+      counts[code] = (counts[code] || 0) + 1;
+    });
+    return severityCodes.map(code => ({
+      name: code,
+      value: counts[code] || 0,
+      code
+    }));
+  };
+
+  // ปรับ getChartData ให้ใช้ getTrendChartData
+  const getChartData = getTrendChartData;
 
   const getChartTitle = () => {
     switch (selectedPeriod) {
@@ -170,21 +271,6 @@ export default function DashboardPage() {
 
   // Severity codes ที่ต้องการแสดงในกราฟเสมอ (A-I)
   const severityCodes = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
-
-  // ฟังก์ชันสำหรับกรองข้อมูล severityChartData ตามช่วงเวลา
-  const getFilteredSeverityChartData = () => {
-    if (!data) return [];
-    const counts: Record<string, number> = {};
-    data.filteredErrors.forEach(error => {
-      const code = error.severity.code;
-      counts[code] = (counts[code] || 0) + 1;
-    });
-    return severityCodes.map(code => ({
-      name: code,
-      value: counts[code] || 0,
-      code
-    }));
-  };
 
   if (loading) {
     return (

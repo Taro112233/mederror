@@ -4,6 +4,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
 import { PanelLeftIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -53,7 +54,7 @@ function useSidebar() {
 }
 
 function SidebarProvider({
-  defaultOpen = true,
+  defaultOpen = false,
   open: openProp,
   onOpenChange: setOpenProp,
   className,
@@ -67,9 +68,6 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile()
   const [openMobile, setOpenMobile] = React.useState(false)
-
-  // This is the internal state of the sidebar.
-  // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
   const open = openProp ?? _open
   const setOpen = React.useCallback(
@@ -80,12 +78,17 @@ function SidebarProvider({
       } else {
         _setOpen(openState)
       }
-
-      // This sets the cookie to keep the sidebar state.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     },
     [setOpenProp, open]
   )
+
+  // ปิด sidebar ทุกครั้งที่ route เปลี่ยน
+  const pathname = usePathname()
+  React.useEffect(() => {
+    setOpen(false)
+    setOpenMobile(false)
+  }, [pathname])
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
@@ -164,21 +167,23 @@ function Sidebar({
   const showSidebar = isMobile ? openMobile : open
   const closeSidebar = isMobile ? () => setOpenMobile(false) : () => setOpen(false)
 
-  if (!showSidebar) return null
-
   return (
     <>
       {/* Overlay background for closing sidebar when clicking outside */}
-      <div
-        className="fixed inset-0 z-40 bg-black/30"
-        onClick={closeSidebar}
-        aria-hidden="true"
-      />
+      {showSidebar && (
+        <div
+          className="fixed inset-0 z-40 bg-black/30 transition-opacity duration-300"
+          onClick={closeSidebar}
+          aria-hidden="true"
+        />
+      )}
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-50 h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear flex bg-sidebar text-sidebar-foreground",
-          side === "left" ? "left-0" : "right-0",
+          "fixed inset-y-0 z-50 h-svh w-(--sidebar-width) flex bg-sidebar text-sidebar-foreground transition-transform duration-300 ease-in-out",
+          side === "left"
+            ? (showSidebar ? "translate-x-0 left-0" : "-translate-x-full left-0")
+            : (showSidebar ? "translate-x-0 right-0" : "translate-x-full right-0"),
           className
         )}
         {...props}
