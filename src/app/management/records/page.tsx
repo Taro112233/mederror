@@ -11,7 +11,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon, CopyIcon, EyeIcon, Trash2Icon, RefreshCwIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +50,16 @@ export type MedErrorRecord = {
   onShowDetail?: (id: string) => void;
 };
 
+// Simple debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 export default function AdminRecordsPage() {
   const [records, setRecords] = useState<MedErrorRecord[]>([]);
   const [showDetailId, setShowDetailId] = useState<string | null>(null);
@@ -61,6 +71,9 @@ export default function AdminRecordsPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
+  // For debounced search
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 1000);
 
   // Fetch organizationId on mount
   useEffect(() => {
@@ -292,38 +305,47 @@ export default function AdminRecordsPage() {
     globalFilterFn: globalStringFilter,
   });
 
+  // Update globalFilter when debouncedSearch changes
+  useEffect(() => {
+    setGlobalFilter(debouncedSearch);
+    setPage(0);
+  }, [debouncedSearch]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-3xl font-bold tracking-tight">รายการข้อผิดพลาด</h2>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">พบ {records.length} รายการ</span>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => organizationId && fetchMedErrors(organizationId)}
-            className="flex items-center gap-2"
-            disabled={loading}
-          >
-            <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
-            รีเฟรช
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => organizationId && fetchMedErrors(organizationId)}
+          className="flex items-center gap-2"
+          disabled={loading}
+        >
+          <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
+          รีเฟรช
+        </Button>
       </div>
       <Card>
-        <CardHeader>
-          <CardTitle>รายการ Med Error ทั้งหมด</CardTitle>
-        </CardHeader>
         <CardContent>
           {/* Global Search Only */}
-          <div className="mb-4 flex items-center gap-3">
-            <div className="font-semibold whitespace-nowrap">ค้นหา</div>
-            <Input
-              placeholder="ค้นหาทุกคอลัมน์..."
-              value={globalFilter}
-              onChange={e => { setGlobalFilter(e.target.value); setPage(0); }}
-              className="w-64"
-            />
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="font-semibold whitespace-nowrap">ค้นหา</div>
+              <Input
+                placeholder="ค้นหาทุกคอลัมน์..."
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                className="w-32 sm:w-32 md:w-64"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {table.getFilteredRowModel().rows.length !== records.length
+                  ? `พบ ${table.getFilteredRowModel().rows.length} รายการ`
+                  : `พบ ${records.length} รายการ`}
+              </span>
+            </div>
           </div>
           <div className="overflow-x-auto">
             <Table>
