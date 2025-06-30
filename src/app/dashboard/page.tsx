@@ -15,7 +15,7 @@ interface MedError {
   createdAt: string;
   reporterName: string;
   errorType: { label: string };
-  severity: { label: string };
+  severity: { code: string; label: string };
   unit: { label: string };
 }
 
