@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Users, TrendingUp, Calendar, Plus, Filter } from "lucide-react";
-import Link from "next/link";
+import { AlertTriangle, Users, TrendingUp, Calendar, Filter } from "lucide-react";
 import { DashboardCharts } from "@/components/DashboardCharts";
 
 interface MedError {
@@ -210,12 +209,13 @@ export default function DashboardPage() {
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
         <div className="flex items-center space-x-2">
-          <Link href="/report/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              รายงานข้อผิดพลาดใหม่
-            </Button>
-          </Link>
+          <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}>
+            <TabsList>
+              <TabsTrigger value="year" className="min-w-[80px] flex-1">ปี</TabsTrigger>
+              <TabsTrigger value="month" className="min-w-[80px] flex-1">เดือน</TabsTrigger>
+              <TabsTrigger value="week" className="min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 
@@ -283,13 +283,6 @@ export default function DashboardPage() {
                   จำนวน Medication Error
                 </CardDescription>
               </div>
-              <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}> 
-                <TabsList>
-                  <TabsTrigger value="year" className="min-w-[80px] flex-1">ปี</TabsTrigger>
-                  <TabsTrigger value="month" className="min-w-[80px] flex-1">เดือน</TabsTrigger>
-                  <TabsTrigger value="week" className="min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
-                </TabsList>
-              </Tabs>
             </div>
           </CardHeader>
           <CardContent>
