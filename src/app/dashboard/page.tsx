@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Users, TrendingUp, Calendar, Filter } from "lucide-react";
+import { AlertTriangle, Users, TrendingUp, Calendar, Filter, Sparkles } from "lucide-react";
 import { DashboardCharts } from "@/components/DashboardCharts";
 
 interface MedError {
@@ -290,18 +290,22 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between space-y-2">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-y-2 md:gap-y-0 space-y-2 md:space-y-0">
+        <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-row items-center space-x-2 w-full md:w-auto">
           <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}>
-            <TabsList>
-              <TabsTrigger value="year" className="md:min-w-[80px]  flex-1">ปี</TabsTrigger>
+            <TabsList className="w-full md:w-auto">
+              <TabsTrigger value="year" className="md:min-w-[80px] flex-1">ปี</TabsTrigger>
               <TabsTrigger value="month" className="md:min-w-[80px] flex-1">เดือน</TabsTrigger>
               <TabsTrigger value="week" className="md:min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
             </TabsList>
           </Tabs>
+          <Button variant="outline" className="ml-auto">
+            <Sparkles className="w-4 h-4 mr-2 text-blue-500 animate-pulse" />
+            วิเคราะห์ด้วย AI
+          </Button>
         </div>
       </div>
 
