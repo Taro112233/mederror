@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { Severity } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -104,83 +105,43 @@ export async function GET(request: NextRequest) {
       }),
       
       // Monthly data for the last 12 months
-      prisma.medError.groupBy({
-        by: ["eventDate"],
-        _count: { id: true },
-        where: {
-          reporterOrganizationId: organizationId,
-          eventDate: {
-            gte: new Date(now.getFullYear(), now.getMonth() - 11, 1)
-          }
-        }
-      }),
+      prisma.$queryRaw`SELECT DATE_TRUNC('month', "eventDate") AS eventDate, COUNT(*) AS count FROM "MedError" WHERE "reporterOrganizationId" = ${organizationId} AND "eventDate" >= ${new Date(now.getFullYear(), now.getMonth() - 11, 1)} GROUP BY eventDate ORDER BY eventDate ASC`,
       
       // Weekly data for the last 30 days
-      prisma.medError.groupBy({
-        by: ["eventDate"],
-        _count: { id: true },
-        where: {
-          reporterOrganizationId: organizationId,
-          eventDate: {
-            gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          }
-        }
-      }),
+      prisma.$queryRaw`SELECT DATE_TRUNC('week', "eventDate") AS eventDate, COUNT(*) AS count FROM "MedError" WHERE "reporterOrganizationId" = ${organizationId} AND "eventDate" >= ${new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)} GROUP BY eventDate ORDER BY eventDate ASC`,
       
       // Daily data for the last 7 days
-      prisma.medError.groupBy({
-        by: ["eventDate"],
-        _count: { id: true },
-        where: {
-          reporterOrganizationId: organizationId,
-          eventDate: {
-            gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-          }
-        }
-      }),
+      prisma.$queryRaw`SELECT DATE_TRUNC('day', "eventDate") AS eventDate, COUNT(*) AS count FROM "MedError" WHERE "reporterOrganizationId" = ${organizationId} AND "eventDate" >= ${new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)} GROUP BY eventDate ORDER BY eventDate ASC`,
       
       // Daily data for the last 30 days
-      prisma.medError.groupBy({
-        by: ["eventDate"],
-        _count: { id: true },
-        where: {
-          reporterOrganizationId: organizationId,
-          eventDate: {
-            gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-          }
-        }
-      }),
+      prisma.$queryRaw`SELECT DATE_TRUNC('day', "eventDate") AS eventDate, COUNT(*) AS count FROM "MedError" WHERE "reporterOrganizationId" = ${organizationId} AND "eventDate" >= ${new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)} GROUP BY eventDate ORDER BY eventDate ASC`,
       
       // Group by severity
-      prisma.medError.groupBy({
-        by: ["severityId"],
-        _count: { id: true },
-        where: { reporterOrganizationId: organizationId }
-      })
+      prisma.$queryRaw`SELECT "severityId", COUNT(*) AS count FROM "MedError" WHERE "reporterOrganizationId" = ${organizationId} GROUP BY "severityId"`
     ]);
 
     // ดึง label severity
     const severities = await prisma.severity.findMany({ orderBy: { code: "asc" } });
     // Group by severity - แสดงทุกระดับแม้ไม่มีข้อมูล
-    const severityChartData = severities.map(severity => {
-      const found = severityGroup.find(g => g.severityId === severity.id);
+    const severityChartData = severities.map((severity: Severity) => {
+      const found = (severityGroup as { severityId: string; count: number }[]).find(g => g.severityId === severity.id);
       return {
         name: severity.code,
-        value: found ? found._count.id : 0,
+        value: found ? Number(found.count) : 0,
         code: severity.code
       };
     });
 
     // Process monthly data
-    const monthlyChartData = processMonthlyData(monthlyData);
+    const monthlyChartData = processMonthlyData(monthlyData as GroupByResult[]);
     
     // Process weekly data
-    const weeklyChartData = processWeeklyData(weeklyData);
+    const weeklyChartData = processWeeklyData(weeklyData as GroupByResult[]);
     
     // Process daily data
-    const dailyChartData = processDailyData(dailyData);
+    const dailyChartData = processDailyData(dailyData as GroupByResult[]);
     // Process 30 days data
-    const dailyChartData30 = processDailyData30(dailyData30);
+    const dailyChartData30 = processDailyData30(dailyData30 as GroupByResult[]);
 
     return NextResponse.json({
       totalErrors,
