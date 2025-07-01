@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
 export async function PATCH(req: NextRequest) {
@@ -32,7 +33,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Missing username" }, { status: 400 });
     }
     // ใช้ transaction เพื่ออัปเดต account และ user
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
       // อัปเดต account (username และ role เป็น UNAPPROVED)
       const updatedAccount = await tx.account.update({
         where: { id },
@@ -79,7 +80,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "User id is required" }, { status: 400 });
     }
     // ใช้ transaction เพื่อให้แน่ใจว่าการลบทั้งสองตารางจะสำเร็จหรือล้มเหลวพร้อมกัน
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
       // ลบ user ก่อน (ถ้ามี) - ใช้ delete() แทน deleteMany() เพราะเป็น one-to-one relationship
       try {
         await tx.user.delete({ where: { accountId: id } });
