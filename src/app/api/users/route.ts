@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "asc" },
     });
     // map ข้อมูลให้เหมาะกับ frontend
-    const users = accounts.map(acc => ({
+    const users = accounts.map((acc: any) => ({
       id: acc.id,
       username: acc.username,
       role: acc.role,
