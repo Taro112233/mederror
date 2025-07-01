@@ -140,39 +140,6 @@ export default function AdminRecordsPage() {
     [records]
   );
 
-  // Pagination logic
-  const paginatedData = useMemo(
-    () => data.slice(page * pageSize, (page + 1) * pageSize),
-    [data, page, pageSize]
-  );
-
-  const handleDelete = async (id: string) => {
-    try {
-      const res = await fetch(`/api/mederror?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('ลบข้อมูลไม่สำเร็จ');
-      setRecords(prev => prev.filter(x => x.id !== id));
-      setDeleteRecordId(null);
-      toast.success('ลบข้อมูลเรียบร้อย');
-    } catch (e: any) {
-      if (e instanceof Error && (e as any).code === 'P2025') {
-        toast.success('ข้อมูลถูกลบไปแล้ว');
-      } else {
-        toast.error('เกิดข้อผิดพลาดในการลบข้อมูล');
-      }
-    }
-  };
-
-  // Custom global filter function: match if any string field contains the filter value
-  function globalStringFilter(row: any, _columnId: string, filterValue: string) {
-    if (!filterValue) return true;
-    const lower = filterValue.toLowerCase();
-    return Object.values(row.original).some((value: any) => {
-      if (typeof value === "string") return value.toLowerCase().includes(lower);
-      if (typeof value === "object" && value?.label) return value.label.toLowerCase().includes(lower);
-      return false;
-    });
-  }
-
   const table = useReactTable({
     data,
     columns: [
@@ -305,6 +272,40 @@ export default function AdminRecordsPage() {
     globalFilterFn: globalStringFilter,
   });
 
+  // Pagination logic (use filtered rows)
+  const filteredRows = table.getFilteredRowModel().rows;
+  const paginatedData = useMemo(
+    () => filteredRows.slice(page * pageSize, (page + 1) * pageSize),
+    [filteredRows, page, pageSize]
+  );
+
+  const handleDelete = async (id: string) => {
+    try {
+      const res = await fetch(`/api/mederror?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('ลบข้อมูลไม่สำเร็จ');
+      setRecords(prev => prev.filter(x => x.id !== id));
+      setDeleteRecordId(null);
+      toast.success('ลบข้อมูลเรียบร้อย');
+    } catch (e: any) {
+      if (e instanceof Error && (e as any).code === 'P2025') {
+        toast.success('ข้อมูลถูกลบไปแล้ว');
+      } else {
+        toast.error('เกิดข้อผิดพลาดในการลบข้อมูล');
+      }
+    }
+  };
+
+  // Custom global filter function: match if any string field contains the filter value
+  function globalStringFilter(row: any, _columnId: string, filterValue: string) {
+    if (!filterValue) return true;
+    const lower = filterValue.toLowerCase();
+    return Object.values(row.original).some((value: any) => {
+      if (typeof value === "string") return value.toLowerCase().includes(lower);
+      if (typeof value === "object" && value?.label) return value.label.toLowerCase().includes(lower);
+      return false;
+    });
+  }
+
   // Update globalFilter when debouncedSearch changes
   useEffect(() => {
     setGlobalFilter(debouncedSearch);
@@ -420,8 +421,8 @@ export default function AdminRecordsPage() {
           {/* Pagination Controls */}
           <div className="flex justify-end items-center gap-2 mt-2">
             <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>ก่อนหน้า</Button>
-            <span className="text-sm">หน้า {page + 1} / {Math.max(1, Math.ceil(data.length / pageSize))}</span>
-            <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * pageSize >= data.length}>ถัดไป</Button>
+            <span className="text-sm">หน้า {page + 1} / {Math.max(1, Math.ceil(filteredRows.length / pageSize))}</span>
+            <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * pageSize >= filteredRows.length}>ถัดไป</Button>
             <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }} className="ml-2 border rounded px-2 py-1 text-sm">
               {[10, 20, 50].map(size => <option key={size} value={size}>{size} ต่อหน้า</option>)}
             </select>
