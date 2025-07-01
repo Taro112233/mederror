@@ -83,7 +83,7 @@ export default function DashboardPage() {
     ) {
       setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
     }
-  }, [selectedPeriod]);
+  }, [selectedPeriod, data]);
 
   const fetchDashboardData = async () => {
     try {
