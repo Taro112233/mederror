@@ -31,8 +31,10 @@ export async function GET(req: NextRequest) {
       },
       orderBy: { createdAt: "asc" },
     });
+    // กำหนด type ให้กับ account ที่รวม user
+    type AccountWithUser = typeof accounts[number];
     // map ข้อมูลให้เหมาะกับ frontend
-    const users = accounts.map((acc: any) => ({
+    const users = accounts.map((acc: AccountWithUser) => ({
       id: acc.id,
       username: acc.username,
       role: acc.role,
