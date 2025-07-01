@@ -76,20 +76,8 @@ export async function DELETE(req: NextRequest) {
     if (!id) {
       return NextResponse.json({ error: "User id is required" }, { status: 400 });
     }
-    
-    // ใช้ transaction เพื่อให้แน่ใจว่าการลบทั้งสองตารางจะสำเร็จหรือล้มเหลวพร้อมกัน
-    await prisma.$transaction(async (tx) => {
-      // ลบ user ก่อน (ถ้ามี) - ใช้ delete() แทน deleteMany() เพราะเป็น one-to-one relationship
-      try {
-        await tx.user.delete({ where: { accountId: id } });
-      } catch {
-        // ถ้าไม่มี user ให้ข้ามไป (ไม่ใช่ error)
-        console.log(`No user found for account ${id}`);
-      }
-      // ลบ account
-      await tx.account.delete({ where: { id } });
-    });
-    
+    // ลบ account อย่างเดียว
+    await prisma.account.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Error deleting user/account:", e);
