@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Settings, FileText, BarChart3 } from "lucide-react";
 import CardButton from "@/components/CardButton";
+import prisma from "@/lib/prisma";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function HomePage() {
@@ -21,7 +21,6 @@ export default async function HomePage() {
   } catch {
     redirect("/login");
   }
-  const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: payload.id }, include: { organization: true, user: true } });
   if (!account) {
     redirect("/login");
