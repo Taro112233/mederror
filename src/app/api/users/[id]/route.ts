@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import { Prisma } from "@prisma/client";
+import * as Prisma from "@prisma/client";
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
 export async function PATCH(req: NextRequest) {
@@ -33,7 +33,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Missing username" }, { status: 400 });
     }
     // ใช้ transaction เพื่ออัปเดต account และ user
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const result = await prisma.$transaction(async (tx: Prisma.Prisma.TransactionClient) => {
       // อัปเดต account (username และ role เป็น UNAPPROVED)
       const updatedAccount = await tx.account.update({
         where: { id },
