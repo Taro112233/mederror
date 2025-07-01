@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
@@ -20,7 +20,7 @@ export default async function ManagementMenu() {
   } catch {
     redirect("/login");
   }
-  const prisma = new PrismaClient();
+  // const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: payload.id }, include: { organization: true, user: true } });
   if (!account) {
     redirect("/login");
