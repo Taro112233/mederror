@@ -77,7 +77,7 @@ export default function DashboardPage() {
     }
     setSelectedBar(null);
     setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
-  }, [selectedPeriod, data?.recentErrors]);
+  }, [selectedPeriod, data]);
 
   const fetchDashboardData = async () => {
     try {

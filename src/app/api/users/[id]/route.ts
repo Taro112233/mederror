@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
-export async function PATCH(req: NextRequest, context: { params: { id: string } }) {
+export async function PATCH(req: NextRequest) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
     if (!sessionToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,53 +14,48 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
     } catch {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
-    
     const body = await req.json();
-    const { params } = await context;
-    
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "User id is required" }, { status: 400 });
+    }
     // ถ้ามี role ใน body = อัปเดต role (สำหรับ admin)
     if (body.role) {
       const updated = await prisma.account.update({
-        where: { id: params.id },
+        where: { id },
         data: { role: body.role },
       });
       return NextResponse.json({ success: true, role: updated.role });
     }
-    
     // ถ้าไม่มี role = อัปเดตข้อมูลโปรไฟล์ (สำหรับ user เอง)
     const { username, name, position, phone } = body;
-    
-    // ตรวจสอบว่ามี username หรือไม่
     if (!username) {
       return NextResponse.json({ error: "Missing username" }, { status: 400 });
     }
-    
-    // ใช้ transaction เพื่ออัปเดตทั้ง account และ user
+    // ใช้ transaction เพื่ออัปเดต account และ user
     const result = await prisma.$transaction(async (tx) => {
       // อัปเดต account (username และ role เป็น UNAPPROVED)
       const updatedAccount = await tx.account.update({
-        where: { id: params.id },
-        data: { 
+        where: { id },
+        data: {
           username,
-          role: "UNAPPROVED" // เปลี่ยน role เป็น UNAPPROVED
+          role: "UNAPPROVED"
         },
       });
-      
       // อัปเดต user (name, position, phone)
       const updatedUser = await tx.user.update({
-        where: { accountId: params.id },
-        data: { 
+        where: { accountId: id },
+        data: {
           name: name || null,
           position: position || null,
           phone: phone || null,
         },
       });
-      
       return { account: updatedAccount, user: updatedUser };
     });
-    
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       account: result.account,
       user: result.user
     });
@@ -71,7 +66,7 @@ export async function PATCH(req: NextRequest, context: { params: { id: string } 
 }
 
 // DELETE: ลบ account และ user
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
     if (!sessionToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -80,22 +75,23 @@ export async function DELETE(req: NextRequest, context: { params: { id: string }
     } catch {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
-    const { params } = await context;
-    
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) {
+      return NextResponse.json({ error: "User id is required" }, { status: 400 });
+    }
     // ใช้ transaction เพื่อให้แน่ใจว่าการลบทั้งสองตารางจะสำเร็จหรือล้มเหลวพร้อมกัน
     await prisma.$transaction(async (tx) => {
       // ลบ user ก่อน (ถ้ามี) - ใช้ delete() แทน deleteMany() เพราะเป็น one-to-one relationship
       try {
-        await tx.user.delete({ where: { accountId: params.id } });
+        await tx.user.delete({ where: { accountId: id } });
       } catch {
         // ถ้าไม่มี user ให้ข้ามไป (ไม่ใช่ error)
-        console.log(`No user found for account ${params.id}`);
+        console.log(`No user found for account ${id}`);
       }
-      
       // ลบ account
-      await tx.account.delete({ where: { id: params.id } });
+      await tx.account.delete({ where: { id } });
     });
-    
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("Error deleting user/account:", e);
