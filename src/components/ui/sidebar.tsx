@@ -83,12 +83,14 @@ function SidebarProvider({
     [setOpenProp, open]
   )
 
-  // ปิด sidebar ทุกครั้งที่ route เปลี่ยน
+  // ปิด sidebar เฉพาะ mobile ทุกครั้งที่ route เปลี่ยน
   const pathname = usePathname()
   React.useEffect(() => {
-    setOpen(false)
-    setOpenMobile(false)
-  }, [pathname, setOpen, setOpenMobile])
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+    // ถ้าอยากปิด desktop ด้วย ให้เพิ่ม setOpen(false) กลับมา
+  }, [pathname, setOpenMobile, isMobile])
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
