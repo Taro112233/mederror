@@ -2,6 +2,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import MedErrorForm, { ReporterInfoCard } from "@/components/forms/MedErrorForm";
 import { useState, useEffect } from "react";
+import { AlertCircleIcon } from "lucide-react";
 
 export default function ReportNewPage() {
   const [userInfo, setUserInfo] = useState<
@@ -40,7 +41,11 @@ export default function ReportNewPage() {
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>รายงาน Med error</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircleIcon className="h-5 w-5" />
+                รายงาน Med error
+              </CardTitle>
+              <p className="text-muted-foreground text-sm mt-1">กรุณากรอกรายละเอียดเหตุการณ์ความคลาดเคลื่อนทางยาให้ครบถ้วน</p>
             </CardHeader>
             <CardContent>
               <MedErrorForm />
@@ -58,7 +63,11 @@ export default function ReportNewPage() {
       <div className="lg:hidden space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>รายงาน Med error</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <AlertCircleIcon className="h-5 w-5" />
+              รายงาน Med error
+            </CardTitle>
+            <p className="text-muted-foreground text-sm mt-1">กรุณากรอกรายละเอียดเหตุการณ์ความคลาดเคลื่อนทางยาให้ครบถ้วน</p>
           </CardHeader>
           <CardContent>
             <MedErrorForm />

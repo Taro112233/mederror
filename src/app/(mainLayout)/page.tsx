@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Shield, Settings } from "lucide-react";
+import { User, Settings, FileText, BarChart3 } from "lucide-react";
 import CardButton from "@/components/CardButton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
@@ -90,7 +90,7 @@ export default async function HomePage() {
         <CardButton href="/dashboard">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
+              <BarChart3 className="h-5 w-5" />
               Dashboard
             </CardTitle>
             <CardDescription>
@@ -102,7 +102,7 @@ export default async function HomePage() {
         <CardButton href="/report/new">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+              <FileText className="h-5 w-5" />
               รายงานข้อผิดพลาด
             </CardTitle>
             <CardDescription>
