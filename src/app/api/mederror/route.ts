@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client/edge";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
 import fs from "fs/promises";
