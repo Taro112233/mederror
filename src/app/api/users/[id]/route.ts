@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
-type TransactionClient = Parameters<PrismaClient["$transaction"]>[0];
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
 export async function PATCH(req: NextRequest) {
@@ -97,4 +95,4 @@ export async function DELETE(req: NextRequest) {
     console.error("Error deleting user/account:", e);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-} 
+}
