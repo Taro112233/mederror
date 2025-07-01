@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import OnboardingForm from "@/components/forms/OnboardingForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import jwt from "jsonwebtoken";
@@ -25,7 +25,6 @@ export default async function OnboardingPage() {
   if (!accountId) {
     redirect("/login");
   }
-  const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: accountId } });
   if (!account) {
     redirect("/login");

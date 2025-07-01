@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ export default async function AdminSettings() {
   } catch {
     redirect("/login");
   }
-  const prisma = new PrismaClient();
   const account = await prisma.account.findUnique({ where: { id: payload.id } });
   if (!account) {
     redirect("/login");
