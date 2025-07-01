@@ -76,8 +76,14 @@ export default function DashboardPage() {
       });
     }
     setSelectedBar(null);
-    setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
-  }, [selectedPeriod, data]);
+    if (
+      !data.filteredErrors ||
+      data.filteredErrors.length !== filtered.length ||
+      !data.filteredErrors.every((e, i) => e.id === filtered[i]?.id)
+    ) {
+      setData(prev => prev ? { ...prev, filteredErrors: filtered } : null);
+    }
+  }, [selectedPeriod]);
 
   const fetchDashboardData = async () => {
     try {
