@@ -31,31 +31,27 @@ export async function PATCH(req: NextRequest) {
     if (!username) {
       return NextResponse.json({ error: "Missing username" }, { status: 400 });
     }
-    // ใช้ transaction เพื่ออัปเดต account และ user
-    const result = await prisma.$transaction(async (tx) => {
-      // อัปเดต account (username และ role เป็น UNAPPROVED)
-      const updatedAccount = await tx.account.update({
-        where: { id },
-        data: {
-          username,
-          role: "UNAPPROVED"
-        },
-      });
-      // อัปเดต user (name, position, phone)
-      const updatedUser = await tx.user.update({
-        where: { accountId: id },
-        data: {
-          name: name || null,
-          position: position || null,
-          phone: phone || null,
-        },
-      });
-      return { account: updatedAccount, user: updatedUser };
+    // อัปเดต account (username และ role เป็น UNAPPROVED)
+    const updatedAccount = await prisma.account.update({
+      where: { id },
+      data: {
+        username,
+        role: "UNAPPROVED"
+      },
+    });
+    // อัปเดต user (name, position, phone)
+    const updatedUser = await prisma.user.update({
+      where: { accountId: id },
+      data: {
+        name: name || null,
+        position: position || null,
+        phone: phone || null,
+      },
     });
     return NextResponse.json({
       success: true,
-      account: result.account,
-      user: result.user
+      account: updatedAccount,
+      user: updatedUser
     });
   } catch (e) {
     console.error(e);
