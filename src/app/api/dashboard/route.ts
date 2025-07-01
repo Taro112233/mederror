@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import { Severity } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -123,7 +122,7 @@ export async function GET(request: NextRequest) {
     // ดึง label severity
     const severities = await prisma.severity.findMany({ orderBy: { code: "asc" } });
     // Group by severity - แสดงทุกระดับแม้ไม่มีข้อมูล
-    const severityChartData = severities.map((severity: Severity) => {
+    const severityChartData = severities.map((severity: { id: string; code: string }) => {
       const found = (severityGroup as { severityId: string; count: number }[]).find(g => g.severityId === severity.id);
       return {
         name: severity.code,
