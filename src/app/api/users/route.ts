@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
 
 // GET: ดึง users ที่ onboarded แล้วและอยู่ใน organization เดียวกับผู้ใช้ปัจจุบัน
 export async function GET(req: NextRequest) {
