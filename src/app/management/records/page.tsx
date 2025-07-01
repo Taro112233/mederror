@@ -19,6 +19,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import Image from "next/image";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import * as XLSX from "xlsx";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
@@ -312,20 +313,57 @@ export default function AdminRecordsPage() {
     setPage(0);
   }, [debouncedSearch]);
 
+  // ฟังก์ชัน export ข้อมูล filteredRows เป็น Excel
+  const exportFilteredToExcel = () => {
+    // เตรียมข้อมูลสำหรับ export (เฉพาะ field ที่ต้องการ)
+    const exportData = filteredRows.map(row => {
+      const r = row.original;
+      return {
+        errorID: r.id,
+        eventDate: r.eventDate,
+        unit: r.unit.label,
+        description: r.description,
+        severity: r.severity.label,
+        errorType: r.errorType.label,
+        subErrorType: r.subErrorType.label,
+        reporterName: r.reporterName,
+        reporterPosition: r.reporterPosition,
+        reporterPhone: r.reporterPhone,
+        createdAt: r.createdAt,
+        images: r.images && r.images.length > 0 ? r.images.map(img => img.url).join(", ") : ""
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "MedErrorRecords");
+    XLSX.writeFile(wb, "mederror-records.xlsx");
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-3xl font-bold tracking-tight">รายการข้อผิดพลาด</h2>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => organizationId && fetchMedErrors(organizationId)}
-          className="flex items-center gap-2"
-          disabled={loading}
-        >
-          <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
-          รีเฟรช
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => organizationId && fetchMedErrors(organizationId)}
+            className="flex items-center gap-2"
+            disabled={loading}
+          >
+            <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
+            รีเฟรช
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={exportFilteredToExcel}
+            className="flex items-center gap-2"
+            disabled={filteredRows.length === 0}
+          >
+            Export Excel
+          </Button>
+        </div>
       </div>
       <Card>
         <CardContent>
