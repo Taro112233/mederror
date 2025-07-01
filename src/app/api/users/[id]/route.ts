@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
 export async function PATCH(req: NextRequest) {
