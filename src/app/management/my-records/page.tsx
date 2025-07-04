@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  ColumnDef,
   ColumnFiltersState,
   SortingState,
   getCoreRowModel,
@@ -12,7 +11,7 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon, CopyIcon, EyeIcon, RefreshCwIcon } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,103 +50,7 @@ export type MedErrorRecord = {
   onShowDetail?: (id: string) => void;
 };
 
-// columns สำหรับ TanStack Table
-const columns: ColumnDef<MedErrorRecord>[] = [
-  {
-    header: "วันที่ เวลา",
-    accessorKey: "eventDate",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[120px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "หน่วยงาน/แผนก",
-    accessorKey: "unit.label",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[120px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "ระดับ",
-    accessorKey: "severity.label",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[80px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "ประเภท",
-    accessorKey: "errorType.label",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[100px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "ชนิด",
-    accessorKey: "subErrorType.label",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[100px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "จัดการ",
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" onClick={() => row.original.onShowDetail?.(row.original.id)}>
-                <EyeIcon size={18} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>ดูรายละเอียด</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-    ),
-    enableSorting: false,
-  },
-];
+
 
 // Simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -192,7 +95,7 @@ export default function MyRecordsPage() {
   }, []);
 
   // ดึงข้อมูล MedError ของผู้ใช้ปัจจุบัน
-  const fetchMyMedErrors = async () => {
+  const fetchMyMedErrors = useCallback(async () => {
     if (!organizationId || !currentUserId) return;
     setLoading(true);
     try {
@@ -221,10 +124,10 @@ export default function MyRecordsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [organizationId, currentUserId]);
   useEffect(() => {
     fetchMyMedErrors();
-  }, [organizationId, currentUserId]);
+  }, [organizationId, currentUserId, fetchMyMedErrors]);
 
   // inject action handlers to each row
   const data: MedErrorRecord[] = useMemo(() =>

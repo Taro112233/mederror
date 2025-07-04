@@ -1,7 +1,6 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import {
-  ColumnDef,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
@@ -12,7 +11,7 @@ import {
 import { ChevronDownIcon, ChevronUpIcon, EyeIcon, RefreshCwIcon, CopyIcon } from "lucide-react";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -38,108 +37,7 @@ const ROLE_OPTIONS = [
   { value: "DEVELOPER", label: "Developer" },
 ];
 
-const columns: ColumnDef<UserRow>[] = [
-  {
-    header: "Username",
-    accessorKey: "username",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[120px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "ชื่อ-นามสกุล",
-    accessorKey: "name",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[120px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "ตำแหน่ง",
-    accessorKey: "position",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[100px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "เบอร์โทร",
-    accessorKey: "phone",
-    meta: { filterVariant: "text" },
-    cell: ({ getValue }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="truncate max-w-[100px] block">{getValue() as string}</span>
-          </TooltipTrigger>
-          <TooltipContent>{getValue() as string}</TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
-  },
-  {
-    header: "สถานะ",
-    accessorKey: "role",
-    cell: ({ row, getValue }) => (
-      <select
-        value={getValue() as string}
-        onChange={e => row.original.onRoleChange?.(row.original.id, e.target.value)}
-        className="input input-bordered"
-      >
-        {ROLE_OPTIONS.map(opt => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
-    ),
-    meta: { filterVariant: "select" },
-  },
-  {
-    header: "จัดการ",
-    id: "actions",
-    cell: ({ row }) => (
-      <div className="flex justify-center gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" onClick={() => row.original.onShowDetail?.(row.original.id)}>
-                <EyeIcon size={18} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>ดูรายละเอียด</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        <button
-          onClick={() => row.original.onDelete?.(row.original.id)}
-          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          ลบ
-        </button>
-      </div>
-    ),
-  },
-];
+
 
 // Simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -477,7 +375,7 @@ export default function AdminUserPage() {
                     if (!row) return null;
                     return (
                       <TableRow key={row.id}>
-                        {row.getVisibleCells().map((cell: any) => (
+                        {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
