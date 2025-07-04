@@ -119,7 +119,7 @@ export default function AdminRecordsPage() {
         setRecords(formattedData);
       }
     } catch (error) {
-      console.error("Error fetching med errors:", error);
+      console.error("Error fetching Med Errors:", error);
     } finally {
       setLoading(false);
     }
@@ -485,10 +485,10 @@ export default function AdminRecordsPage() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              รายละเอียด Med error
+              รายละเอียด Med Error
             </DialogTitle>
             <DialogDescription>
-              ข้อมูลรายละเอียดของ Med error
+              ข้อมูลรายละเอียดของ Med Error
             </DialogDescription>
           </DialogHeader>
           {showDetailId && (() => {
@@ -601,7 +601,7 @@ export default function AdminRecordsPage() {
       <Dialog open={!!deleteRecordId} onOpenChange={(open) => !open && setDeleteRecordId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-red-600">ยืนยันการลบ Med error</DialogTitle>
+            <DialogTitle className="text-red-600">ยืนยันการลบ Med Error</DialogTitle>
             <DialogDescription>
               การลบข้อมูลนี้จะไม่สามารถกู้คืนได้
             </DialogDescription>

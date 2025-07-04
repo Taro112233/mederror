@@ -204,7 +204,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
         body: formData,
       });
       if (!res.ok) throw new Error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-      toast.success("ส่งรายงานสำเร็จ! ขอบคุณที่ส่งรายงาน Med error");
+      toast.success("ส่งรายงานสำเร็จ! ขอบคุณที่ส่งรายงาน Med Error");
       form.reset();
       if (onSuccess) onSuccess();
       setTimeout(() => {

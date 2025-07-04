@@ -43,7 +43,7 @@ export default function ReportNewPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <AlertCircleIcon className="h-5 w-5" />
-                รายงาน Med error
+                รายงาน Med Error
               </CardTitle>
               <p className="text-muted-foreground text-sm mt-1">กรุณากรอกรายละเอียดเหตุการณ์ความคลาดเคลื่อนทางยาให้ครบถ้วน</p>
             </CardHeader>
@@ -65,7 +65,7 @@ export default function ReportNewPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircleIcon className="h-5 w-5" />
-              รายงาน Med error
+              รายงาน Med Error
             </CardTitle>
             <p className="text-muted-foreground text-sm mt-1">กรุณากรอกรายละเอียดเหตุการณ์ความคลาดเคลื่อนทางยาให้ครบถ้วน</p>
           </CardHeader>

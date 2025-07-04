@@ -70,7 +70,7 @@ export default async function NotificationSettings() {
                   <label className="text-sm font-medium">การแจ้งเตือนในระบบ</label>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  แจ้งเตือนเมื่อมี Med error ใหม่
+                  แจ้งเตือนเมื่อมี Med Error ใหม่
                 </p>
               </div>
               <Switch defaultChecked />

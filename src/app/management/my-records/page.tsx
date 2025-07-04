@@ -143,7 +143,7 @@ export default function MyRecordsPage() {
           setRecords(formattedData);
         }
       } catch (error) {
-        console.error("Error fetching my med errors:", error);
+        console.error("Error fetching my Med Errors:", error);
       } finally {
         setLoading(false);
       }
@@ -279,10 +279,10 @@ export default function MyRecordsPage() {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              รายละเอียด Med error
+              รายละเอียด Med Error
             </DialogTitle>
             <DialogDescription>
-              ข้อมูลรายละเอียดของ Med error
+              ข้อมูลรายละเอียดของ Med Error
             </DialogDescription>
           </DialogHeader>
           {showDetailId && (() => {

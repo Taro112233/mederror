@@ -42,7 +42,7 @@ export default async function ManagementMenu() {
         <h2 className="text-3xl font-bold tracking-tight">ตั้งค่าทั่วไป</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8">
-        {/* 1. รายการ Med error ที่ส่งไป (ทุก role เห็น) */}
+        {/* 1. รายการ Med Error ที่ส่งไป (ทุก role เห็น) */}
         <CardButton href="/management/my-records">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export default async function ManagementMenu() {
             </CardDescription>
           </CardHeader>
         </CardButton>
-        {/* 2. รายการ Med error ทั้งหมด (ADMIN, DEVELOPER) */}
+        {/* 2. รายการ Med Error ทั้งหมด (ADMIN, DEVELOPER) */}
         {(isAdmin || isDeveloper) && (
           <CardButton href="/management/records">
             <CardHeader>
