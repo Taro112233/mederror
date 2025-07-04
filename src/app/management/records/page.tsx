@@ -103,8 +103,8 @@ export default function AdminRecordsPage() {
         const data = await response.json();
         const formattedData: MedErrorRecord[] = data.map((item: any) => ({
           id: item.id,
-          eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
-          createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
+          eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Bangkok' }),
+          createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Bangkok' }),
           unit: item.unit,
           severity: item.severity,
           errorType: item.errorType,

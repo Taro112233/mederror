@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
-export async function PATCH(req: NextRequest) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
     if (!sessionToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,8 +13,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
     const body = await req.json();
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const id = params.id;
     if (!id) {
       return NextResponse.json({ error: "User id is required" }, { status: 400 });
     }
@@ -60,7 +59,7 @@ export async function PATCH(req: NextRequest) {
 }
 
 // DELETE: ลบ account และ user
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
     if (!sessionToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -71,8 +70,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
     
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    const id = params.id;
     if (!id) {
       return NextResponse.json({ error: "User id is required" }, { status: 400 });
     }

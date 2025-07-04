@@ -58,7 +58,7 @@ const columns: ColumnDef<UserRow>[] = [
     meta: { filterVariant: "text" },
   },
   {
-    header: "Role",
+    header: "สถานะ",
     accessorKey: "role",
     cell: ({ row, getValue }) => (
       <select
@@ -97,6 +97,7 @@ export default function AdminUserPage() {
   const [showDetailId, setShowDetailId] = useState<number | null>(null);
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
   const [justDeleted, setJustDeleted] = useState(false);
+  const [pendingRoleChange, setPendingRoleChange] = useState<{ id: number; newRole: string } | null>(null);
 
   // ดึงข้อมูลสมาชิกจริง
   useEffect(() => {
@@ -132,27 +133,35 @@ export default function AdminUserPage() {
   const data: UserRow[] = useMemo(() =>
     users.map(u => ({
       ...u,
-      onRoleChange: async (id: number, newRole: string) => {
-        try {
-          const user = users.find(x => x.id === id);
-          if (!user) return;
-          const res = await fetch(`/api/users/${user.id}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ role: newRole }),
-          });
-          if (!res.ok) throw new Error("เปลี่ยน role ไม่สำเร็จ");
-          setUsers(prev => prev.map(x => x.id === id ? { ...x, role: newRole } : x));
-          toast.success("เปลี่ยน Role ผู้ใช้สำเร็จ");
-        } catch {
-          toast.error("เปลี่ยน Role ไม่สำเร็จ");
-        }
+      onRoleChange: (id: number, newRole: string) => {
+        setPendingRoleChange({ id, newRole });
       },
       onDelete: (id: number) => setDeleteUserId(id),
       onShowDetail: (id: number) => setShowDetailId(id),
     })),
     [users]
   );
+
+  const confirmRoleChange = async () => {
+    if (!pendingRoleChange) return;
+    const { id, newRole } = pendingRoleChange;
+    try {
+      const user = users.find(x => x.id === id);
+      if (!user) return;
+      const res = await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (!res.ok) throw new Error("เปลี่ยน role ไม่สำเร็จ");
+      setUsers(prev => prev.map(x => x.id === id ? { ...x, role: newRole } : x));
+      toast.success("เปลี่ยน Role ผู้ใช้สำเร็จ");
+    } catch {
+      toast.error("เปลี่ยน Role ไม่สำเร็จ");
+    } finally {
+      setPendingRoleChange(null);
+    }
+  };
 
   function globalStringFilter(row: { original: UserRow }, _columnId: string, filterValue: string) {
     if (!filterValue) return true;
@@ -289,7 +298,7 @@ export default function AdminUserPage() {
                   <span className="text-blue-700">{user.phone}</span>
                 </div>
                 <div>
-                  <span className="font-bold text-black">Role:</span><br />
+                  <span className="font-bold text-black">สถานะ:</span><br />
                   <span className="text-blue-700">{user.role}</span>
                 </div>
               </div>
@@ -338,6 +347,43 @@ export default function AdminUserPage() {
               onClick={() => handleDelete(deleteUserId!)}
             >
               ยืนยันลบ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog ยืนยันการเปลี่ยนสถานะ */}
+      <Dialog open={!!pendingRoleChange} onOpenChange={open => !open && setPendingRoleChange(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-blue-600">ยืนยันการเปลี่ยนสถานะ</DialogTitle>
+            <DialogDescription>
+              คุณต้องการเปลี่ยนสถานะของผู้ใช้นี้ใช่หรือไม่?
+            </DialogDescription>
+          </DialogHeader>
+          {pendingRoleChange && (() => {
+            const user = users.find(u => u.id === pendingRoleChange.id);
+            if (!user) return <div>ไม่พบข้อมูล</div>;
+            return (
+              <div className="space-y-3">
+                <div>
+                  <span className="font-bold text-black">ชื่อ-นามสกุล:</span> <span className="text-blue-700">{user.name}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">สถานะเดิม:</span> <span className="text-blue-700">{user.role}</span>
+                </div>
+                <div>
+                  <span className="font-bold text-black">สถานะใหม่:</span> <span className="text-blue-700">{pendingRoleChange.newRole}</span>
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingRoleChange(null)}>
+              ยกเลิก
+            </Button>
+            <Button variant="default" onClick={confirmRoleChange}>
+              ยืนยันเปลี่ยนสถานะ
             </Button>
           </DialogFooter>
         </DialogContent>
