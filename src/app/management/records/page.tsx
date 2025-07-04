@@ -238,7 +238,7 @@ export default function AdminRecordsPage() {
         header: "จัดการ",
         id: "actions",
         cell: ({ row }) => (
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-2 justify-center">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>

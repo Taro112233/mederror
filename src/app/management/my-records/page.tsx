@@ -11,7 +11,7 @@ import {
   useReactTable,
   flexRender,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon, CopyIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, CopyIcon, EyeIcon, RefreshCwIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Image from "next/image";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
@@ -55,38 +57,107 @@ const columns: ColumnDef<MedErrorRecord>[] = [
     header: "วันที่ เวลา",
     accessorKey: "eventDate",
     meta: { filterVariant: "text" },
+    cell: ({ getValue }) => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+          </TooltipTrigger>
+          <TooltipContent>{getValue() as string}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
   },
   {
     header: "หน่วยงาน/แผนก",
     accessorKey: "unit.label",
     meta: { filterVariant: "text" },
+    cell: ({ getValue }) => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+          </TooltipTrigger>
+          <TooltipContent>{getValue() as string}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
   },
   {
     header: "ระดับ",
     accessorKey: "severity.label",
     meta: { filterVariant: "text" },
+    cell: ({ getValue }) => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="truncate max-w-[80px] block">{getValue() as string}</span>
+          </TooltipTrigger>
+          <TooltipContent>{getValue() as string}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
   },
   {
     header: "ประเภท",
     accessorKey: "errorType.label",
     meta: { filterVariant: "text" },
+    cell: ({ getValue }) => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+          </TooltipTrigger>
+          <TooltipContent>{getValue() as string}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
   },
   {
     header: "ชนิด",
     accessorKey: "subErrorType.label",
     meta: { filterVariant: "text" },
+    cell: ({ getValue }) => (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+          </TooltipTrigger>
+          <TooltipContent>{getValue() as string}</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    ),
   },
   {
     header: "จัดการ",
     id: "actions",
     cell: ({ row }) => (
-      <div className="flex gap-1 justify-end">
-        <Button size="sm" variant="secondary" onClick={() => row.original.onShowDetail?.(row.original.id)}>ดูรายละเอียด</Button>
+      <div className="flex justify-center">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" onClick={() => row.original.onShowDetail?.(row.original.id)}>
+                <EyeIcon size={18} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>ดูรายละเอียด</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     ),
     enableSorting: false,
   },
 ];
+
+// Simple debounce hook
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
 
 export default function MyRecordsPage() {
   const [records, setRecords] = useState<MedErrorRecord[]>([]);
@@ -97,6 +168,10 @@ export default function MyRecordsPage() {
   const [loading, setLoading] = useState(true);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
+  const debouncedSearch = useDebounce(searchInput, 1000);
 
   // ดึง organizationId และ userId ของผู้ใช้ปัจจุบัน
   useEffect(() => {
@@ -117,37 +192,37 @@ export default function MyRecordsPage() {
   }, []);
 
   // ดึงข้อมูล MedError ของผู้ใช้ปัจจุบัน
-  useEffect(() => {
+  const fetchMyMedErrors = async () => {
     if (!organizationId || !currentUserId) return;
-    const fetchMyMedErrors = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/mederror?organizationId=${organizationId}&reporterAccountId=${currentUserId}`);
-        if (response.ok) {
-          const data = await response.json();
-          const formattedData: MedErrorRecord[] = data.map((item: any) => ({
-            id: item.id,
-            eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
-            createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
-            unit: item.unit,
-            severity: item.severity,
-            errorType: item.errorType,
-            subErrorType: item.subErrorType,
-            reporterName: item.reporterName,
-            description: item.description,
-            reporterUsername: item.reporterUsername,
-            reporterPosition: item.reporterPosition,
-            reporterPhone: item.reporterPhone,
-            images: item.images,
-          }));
-          setRecords(formattedData);
-        }
-      } catch (error) {
-        console.error("Error fetching my Med Errors:", error);
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/mederror?organizationId=${organizationId}&reporterAccountId=${currentUserId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const formattedData: MedErrorRecord[] = data.map((item: any) => ({
+          id: item.id,
+          eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
+          createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }),
+          unit: item.unit,
+          severity: item.severity,
+          errorType: item.errorType,
+          subErrorType: item.subErrorType,
+          reporterName: item.reporterName,
+          description: item.description,
+          reporterUsername: item.reporterUsername,
+          reporterPosition: item.reporterPosition,
+          reporterPhone: item.reporterPhone,
+          images: item.images,
+        }));
+        setRecords(formattedData);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching my Med Errors:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchMyMedErrors();
   }, [organizationId, currentUserId]);
 
@@ -164,7 +239,6 @@ export default function MyRecordsPage() {
   function globalStringFilter(row: any, _columnId: string, filterValue: string) {
     if (!filterValue) return true;
     const lower = filterValue.toLowerCase();
-    // ตรวจสอบทุกฟิลด์ string ใน row.original
     return Object.values(row.original).some((value: any) => {
       if (typeof value === "string") return value.toLowerCase().includes(lower);
       if (typeof value === "object" && value?.label) return value.label.toLowerCase().includes(lower);
@@ -174,7 +248,102 @@ export default function MyRecordsPage() {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: [
+      {
+        header: "วันที่ เวลา",
+        accessorKey: "eventDate",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "หน่วยงาน/แผนก",
+        accessorKey: "unit.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ระดับ",
+        accessorKey: "severity.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[80px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ประเภท",
+        accessorKey: "errorType.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "ชนิด",
+        accessorKey: "subErrorType.label",
+        meta: { filterVariant: "text" },
+        cell: ({ getValue }) => (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="truncate max-w-[100px] block">{getValue() as string}</span>
+              </TooltipTrigger>
+              <TooltipContent>{getValue() as string}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ),
+      },
+      {
+        header: "จัดการ",
+        id: "actions",
+        cell: ({ row }) => (
+          <div className="flex justify-center">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" onClick={() => row.original.onShowDetail?.(row.original.id)}>
+                    <EyeIcon size={18} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>ดูรายละเอียด</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        ),
+        enableSorting: false,
+      },
+    ],
     state: { sorting, columnFilters, globalFilter },
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
@@ -186,91 +355,182 @@ export default function MyRecordsPage() {
     globalFilterFn: globalStringFilter,
   });
 
+  // Pagination logic (use filtered rows)
+  const filteredRows = table.getFilteredRowModel().rows;
+  const paginatedData = useMemo(
+    () => filteredRows.slice(page * pageSize, (page + 1) * pageSize),
+    [filteredRows, page, pageSize]
+  );
+
+  // ฟังก์ชัน export ข้อมูล filteredRows เป็น Excel
+  const exportFilteredToExcel = () => {
+    const exportData = filteredRows.map(row => {
+      const r = row.original;
+      return {
+        errorID: r.id,
+        eventDate: r.eventDate,
+        unit: r.unit.label,
+        description: r.description,
+        severity: r.severity.label,
+        errorType: r.errorType.label,
+        subErrorType: r.subErrorType.label,
+        reporterName: r.reporterName,
+        reporterPosition: r.reporterPosition,
+        reporterPhone: r.reporterPhone,
+        createdAt: r.createdAt,
+        images: r.images && r.images.length > 0 ? r.images.map(img => img.url).join(", ") : ""
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "MedErrorRecords");
+    XLSX.writeFile(wb, "my-mederror-records.xlsx");
+  };
+
+  // Update globalFilter when debouncedSearch changes
+  useEffect(() => {
+    setGlobalFilter(debouncedSearch);
+    setPage(0);
+  }, [debouncedSearch]);
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-2">
         <h2 className="text-2xl font-bold tracking-tight">Med Error ที่ส่งไป</h2>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={fetchMyMedErrors}
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-900 hover:bg-gray-100"
+            disabled={loading}
+          >
+            <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
+            รีเฟรช
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={exportFilteredToExcel}
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-900 hover:bg-gray-100"
+            disabled={filteredRows.length === 0}
+          >
+            Export Excel
+          </Button>
+        </div>
       </div>
-
       <Card>
-        <CardHeader>
-          <CardTitle>Med Error ที่ส่งไป</CardTitle>
-        </CardHeader>
         <CardContent>
           {/* Global Search Only */}
-          <div className="mb-4 flex items-center gap-3">
-            <div className="font-semibold whitespace-nowrap">ค้นหา</div>
-            <Input
-              placeholder="ค้นหาทุกคอลัมน์..."
-              value={globalFilter}
-              onChange={e => setGlobalFilter(e.target.value)}
-              className="w-64"
-            />
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="font-semibold whitespace-nowrap">ค้นหา</div>
+              <Input
+                placeholder="ค้นหาทุกคอลัมน์..."
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                className="w-32 sm:w-32 md:w-64"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {table.getFilteredRowModel().rows.length !== records.length
+                  ? `พบ ${table.getFilteredRowModel().rows.length} รายการ`
+                  : `พบ ${records.length} รายการ`}
+              </span>
+            </div>
           </div>
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id} className="bg-muted/50">
-                  {headerGroup.headers.map(header => (
-                    <TableHead
-                      key={header.id}
-                      className="relative h-10 border-t select-none text-center"
-                      aria-sort={
-                        header.column.getIsSorted() === "asc"
-                          ? "ascending"
-                          : header.column.getIsSorted() === "desc"
-                          ? "descending"
-                          : "none"
-                      }
-                    >
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <div
-                          className="flex h-full cursor-pointer items-center justify-between gap-2 select-none"
-                          onClick={header.column.getToggleSortingHandler()}
-                          tabIndex={header.column.getCanSort() ? 0 : undefined}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
-                            desc: <ChevronDownIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
-                          }[header.column.getIsSorted() as string] ?? (
-                            <span className="size-4" aria-hidden="true" />
-                          )}
-                        </div>
-                      ) : (
-                        flexRender(header.column.columnDef.header, header.getContext())
-                      )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    กำลังโหลดข้อมูล...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows.length ? (
-                table.getRowModel().rows.map(row => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader className="sticky top-0 z-10 bg-white shadow">
+                {table.getHeaderGroups().map(headerGroup => (
+                  <TableRow key={headerGroup.id} className="bg-muted/50">
+                    {headerGroup.headers.map(header => (
+                      <TableHead
+                        key={header.id}
+                        className="relative h-10 border-t select-none text-center"
+                        aria-sort={
+                          header.column.getIsSorted() === "asc"
+                            ? "ascending"
+                            : header.column.getIsSorted() === "desc"
+                            ? "descending"
+                            : "none"
+                        }
+                      >
+                        {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                          <div
+                            className="flex h-full cursor-pointer items-center justify-between gap-2 select-none"
+                            onClick={header.column.getToggleSortingHandler()}
+                            tabIndex={header.column.getCanSort() ? 0 : undefined}
+                          >
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: <ChevronUpIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
+                              desc: <ChevronDownIcon className="shrink-0 opacity-60" size={16} aria-hidden="true" />,
+                            }[header.column.getIsSorted() as string] ?? (
+                              <span className="size-4" aria-hidden="true" />
+                            )}
+                          </div>
+                        ) : (
+                          flexRender(header.column.columnDef.header, header.getContext())
+                        )}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    ไม่พบข้อมูล
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                      กำลังโหลดข้อมูล...
+                    </TableCell>
+                  </TableRow>
+                ) : paginatedData.length ? (
+                  paginatedData.map((_, idx) => {
+                    const row = table.getRowModel().rows[page * pageSize + idx];
+                    if (!row) return null;
+                    return (
+                      <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell: any) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={table.getAllColumns().length} className="h-24 text-center">
+                      ไม่พบข้อมูล
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          {/* Pagination Controls */}
+          <div className="flex justify-between items-center gap-2 mt-2">
+            {/* Left: Page size selector */}
+            <div>
+              <select
+                value={pageSize}
+                onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }}
+                className="h-8 rounded-md px-3 text-xs border bg-background inline-flex items-center"
+              >
+                {[10, 20, 50].map(size => (
+                  <option key={size} value={size}>{size} ต่อหน้า</option>
+                ))}
+              </select>
+            </div>
+            {/* Right: Pagination */}
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>ก่อนหน้า</Button>
+              <span className="text-sm">หน้า {page + 1} / {Math.max(1, Math.ceil(filteredRows.length / pageSize))}</span>
+              <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * pageSize >= filteredRows.length}>ถัดไป</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
