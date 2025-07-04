@@ -189,12 +189,12 @@ export default function MyRecordsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">รายการข้อผิดพลาดของตนเอง</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Med Error ที่ส่งไป</h2>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>รายการ Med Error ของตนเอง</CardTitle>
+          <CardTitle>Med Error ที่ส่งไป</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Global Search Only */}

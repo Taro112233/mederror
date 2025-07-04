@@ -47,7 +47,7 @@ export default async function ManagementMenu() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="h-5 w-5" />
-              รายการ Med error ที่ส่งไป
+              Med Error ที่ส่งไป
             </CardTitle>
             <CardDescription>
               ดูรายการข้อผิดพลาดที่คุณรายงาน
@@ -61,7 +61,7 @@ export default async function ManagementMenu() {
               <div className="flex items-center gap-2">
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
-                  รายการ Med error ทั้งหมด
+                  Med Error ทั้งหมด
                 </CardTitle>
                 <Badge variant="destructive">ADMIN</Badge>
               </div>

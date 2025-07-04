@@ -342,13 +342,13 @@ export default function AdminRecordsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-3xl font-bold tracking-tight">รายการข้อผิดพลาด</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Med Error ทั้งหมด</h2>
         <div className="flex gap-2">
           <Button
             size="sm"
             variant="outline"
             onClick={() => organizationId && fetchMedErrors(organizationId)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-900 hover:bg-gray-100"
             disabled={loading}
           >
             <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
@@ -358,7 +358,7 @@ export default function AdminRecordsPage() {
             size="sm"
             variant="outline"
             onClick={exportFilteredToExcel}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-900 hover:bg-gray-100"
             disabled={filteredRows.length === 0}
           >
             Export Excel
@@ -457,13 +457,25 @@ export default function AdminRecordsPage() {
             </Table>
           </div>
           {/* Pagination Controls */}
-          <div className="flex justify-end items-center gap-2 mt-2">
-            <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>ก่อนหน้า</Button>
-            <span className="text-sm">หน้า {page + 1} / {Math.max(1, Math.ceil(filteredRows.length / pageSize))}</span>
-            <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * pageSize >= filteredRows.length}>ถัดไป</Button>
-            <select value={pageSize} onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }} className="ml-2 border rounded px-2 py-1 text-sm">
-              {[10, 20, 50].map(size => <option key={size} value={size}>{size} ต่อหน้า</option>)}
-            </select>
+          <div className="flex justify-between items-center gap-2 mt-2">
+            {/* Left: Page size selector */}
+            <div>
+              <select
+                value={pageSize}
+                onChange={e => { setPageSize(Number(e.target.value)); setPage(0); }}
+                className="h-8 rounded-md px-3 text-xs border bg-background inline-flex items-center"
+              >
+                {[10, 20, 50].map(size => (
+                  <option key={size} value={size}>{size} ต่อหน้า</option>
+                ))}
+              </select>
+            </div>
+            {/* Right: Pagination */}
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}>ก่อนหน้า</Button>
+              <span className="text-sm">หน้า {page + 1} / {Math.max(1, Math.ceil(filteredRows.length / pageSize))}</span>
+              <Button size="sm" variant="outline" onClick={() => setPage(p => p + 1)} disabled={(page + 1) * pageSize >= filteredRows.length}>ถัดไป</Button>
+            </div>
           </div>
         </CardContent>
       </Card>

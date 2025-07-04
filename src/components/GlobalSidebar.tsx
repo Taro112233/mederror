@@ -103,14 +103,14 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       // Management subpages
       if (pathname === "/management/my-records") {
         items.push({
-          label: "รายการ Med error ที่ส่งไป",
+          label: "Med Error ที่ส่งไป",
           href: "/management/my-records",
           icon: <UserCheck className="h-4 w-4" />,
           isCurrent: true
         });
       } else if (pathname === "/management/records") {
         items.push({
-          label: "รายการ Med error ทั้งหมด",
+          label: "Med Error ทั้งหมด",
           href: "/management/records",
           icon: <FileText className="h-4 w-4" />,
           isCurrent: true
