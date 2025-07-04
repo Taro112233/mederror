@@ -484,10 +484,10 @@ export default function AdminRecordsPage() {
       <Dialog open={!!showDetailId} onOpenChange={(open) => !open && setShowDetailId(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-left">
               รายละเอียด Med Error
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-left">
               ข้อมูลรายละเอียดของ Med Error
             </DialogDescription>
           </DialogHeader>
