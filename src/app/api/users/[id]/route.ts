@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 
 // PATCH: อัปเดตข้อมูลโปรไฟล์หรือเปลี่ยน role
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
     if (!sessionToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,7 +13,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
     const body = await req.json();
-    const id = params.id;
+    const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: "User id is required" }, { status: 400 });
     }
@@ -59,7 +59,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 // DELETE: ลบ account และ user
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const sessionToken = req.cookies.get("session_token")?.value;
     if (!sessionToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -70,7 +70,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
     
-    const id = params.id;
+    const { id } = await params;
     if (!id) {
       return NextResponse.json({ error: "User id is required" }, { status: 400 });
     }
