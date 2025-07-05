@@ -2,7 +2,7 @@ import React from "react";
 import jwt from "jsonwebtoken";
 import RegisterForm from "@/components/forms/RegisterForm";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AuthLayout from "@/components/ui/auth-layout";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -21,20 +21,20 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>สมัครสมาชิก</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RegisterForm />
-            <div className="mt-4 text-center text-sm">
-              มีบัญชีอยู่แล้ว? <Link href="/login" className="text-primary underline">เข้าสู่ระบบ</Link>
-            </div>
-          </CardContent>
-        </Card>
+    <AuthLayout 
+      title="สมัครสมาชิก" 
+      subtitle="สร้างบัญชีใหม่เพื่อเข้าถึงระบบ"
+    >
+      <RegisterForm />
+      <div className="mt-6 text-center text-sm">
+        มีบัญชีอยู่แล้ว?{" "}
+        <Link 
+          href="/login" 
+          className="text-primary underline hover:text-primary/80 transition-colors font-medium"
+        >
+          เข้าสู่ระบบ
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   );
 } 

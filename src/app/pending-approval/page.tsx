@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import LogoutButton from "../../components/button/LogoutButton";
 import { Button } from "@/components/ui/button";
+import AuthLayout from "@/components/ui/auth-layout";
+import { motion } from "framer-motion";
+import { Clock, User, Phone, Briefcase, AlertTriangle } from "lucide-react";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role เป็น UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default function PendingApprovalPage() {
@@ -62,48 +64,68 @@ export default function PendingApprovalPage() {
     }
   };
 
+  const userInfoItems = [
+    { icon: User, label: "ชื่อ-นามสกุล", value: user?.name || '-' },
+    { icon: Phone, label: "เบอร์โทร", value: user?.phone || '-' },
+    { icon: Briefcase, label: "ตำแหน่ง", value: user?.position || '-' },
+    { icon: AlertTriangle, label: "สถานะ", value: "รอการอนุมัติ", isStatus: true }
+  ];
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center">รอการอนุมัติ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 mb-4">
-              <li className="flex justify-between">
-                <span className="font-medium">ชื่อ-นามสกุล:</span>
-                <span>{user?.name || '-'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="font-medium">เบอร์โทร:</span>
-                <span>{user?.phone || '-'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="font-medium">ตำแหน่ง:</span>
-                <span>{user?.position || '-'}</span>
-              </li>
-              <li className="flex justify-between">
-                <span className="font-medium">สถานะ:</span>
-                <span className="text-yellow-600 font-semibold">รอการอนุมัติ</span>
-              </li>
-            </ul>
-            <div className="flex flex-row justify-between items-center">
-              <div className="w-30">
-                <LogoutButton className="w-30" variant="secondary" disabled={isLoading} />
+    <AuthLayout 
+      title="รอการอนุมัติ" 
+      subtitle="บัญชีของคุณกำลังรอการอนุมัติจากผู้ดูแลระบบ"
+      maxWidth="md"
+    >
+      <div className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.5 }}
+          className="space-y-4"
+        >
+          {userInfoItems.map((item, index) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
+              className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/50"
+            >
+              <div className="flex items-center space-x-3">
+                <item.icon className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">{item.label}:</span>
               </div>
-              <div className="flex-1" />
-              <Button 
-                onClick={handleRefresh} 
-                className="w-30" 
-                disabled={isLoading}
-              >
-                {isLoading ? "กำลังตรวจสอบ..." : "รีเฟรช"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+              <span className={`text-sm ${item.isStatus ? 'text-yellow-600 font-semibold' : 'text-foreground'}`}>
+                {item.value}
+              </span>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.8 }}
+          className="flex flex-col sm:flex-row gap-3 pt-4"
+        >
+          <div className="flex-1">
+            <LogoutButton 
+              className="w-full" 
+              variant="secondary" 
+              disabled={isLoading} 
+            />
+          </div>
+          <Button 
+            onClick={handleRefresh} 
+            className="flex-1" 
+            disabled={isLoading}
+          >
+            <Clock className="h-4 w-4 mr-2" />
+            {isLoading ? "กำลังตรวจสอบ..." : "รีเฟรช"}
+          </Button>
+        </motion.div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

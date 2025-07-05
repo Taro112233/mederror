@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OrganizationSelectSchema, OrganizationSelectSchemaType } from "@/lib/zodSchemas";
+import { motion } from "framer-motion";
+import { Building2, ArrowRight, Loader2 } from "lucide-react";
 
 export default function OrganizationSelectForm({ 
   onSelect,
@@ -51,44 +53,84 @@ export default function OrganizationSelectForm({
   }, []);
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((values) => {
-          if (disabled) return;
-          onSelect(values.organization);
-        })}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="organization"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>เลือกองค์กร</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value} required disabled={loading || orgs.length === 0 || disabled}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={loading ? "กำลังโหลด..." : "--เลือก--"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {orgs.map((org) => (
-                      <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex flex-row justify-between items-center">
-          <div className="w-30" />
-          <div className="flex-1" />
-          <Button type="submit" disabled={loading || orgs.length === 0 || disabled} className="w-30">
-            {disabled ? "กำลังประมวลผล..." : "ถัดไป"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit((values) => {
+            if (disabled) return;
+            onSelect(values.organization);
+          })}
+          className="space-y-6"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <FormField
+              control={form.control}
+              name="organization"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center space-x-2">
+                    <Building2 className="h-4 w-4" />
+                    <span>เลือกองค์กร</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value} 
+                      required 
+                      disabled={loading || orgs.length === 0 || disabled}
+                    >
+                      <SelectTrigger className="transition-all duration-200 focus:ring-2 focus:ring-primary/20">
+                        <SelectValue 
+                          placeholder={
+                            loading ? (
+                              <div className="flex items-center space-x-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>กำลังโหลด...</span>
+                              </div>
+                            ) : "--เลือกองค์กร--"
+                          } 
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {orgs.map((org) => (
+                          <SelectItem key={org.id} value={org.id}>
+                            {org.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="flex justify-end pt-4"
+          >
+            <Button 
+              type="submit" 
+              disabled={loading || orgs.length === 0 || disabled} 
+              className="w-full sm:w-auto"
+            >
+              <ArrowRight className="h-4 w-4 mr-2" />
+              {disabled ? "กำลังประมวลผล..." : "ถัดไป"}
+            </Button>
+          </motion.div>
+        </form>
+      </Form>
+    </motion.div>
   );
 }

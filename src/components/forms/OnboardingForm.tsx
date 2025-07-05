@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { OnboardingFormSchema, OnboardingFormSchemaType } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/button/LogoutButton";
+import { motion } from "framer-motion";
+import { User, Phone, Briefcase, Save, LogOut } from "lucide-react";
 
 export default function OnboardingForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,59 +43,91 @@ export default function OnboardingForm() {
     }
   };
 
+  const formFields = [
+    {
+      name: "name" as const,
+      label: "ชื่อ-นามสกุล",
+      icon: User,
+      placeholder: "กรอกชื่อ-นามสกุล"
+    },
+    {
+      name: "phone" as const,
+      label: "เบอร์โทร",
+      icon: Phone,
+      placeholder: "กรอกเบอร์โทรศัพท์"
+    },
+    {
+      name: "position" as const,
+      label: "ตำแหน่ง",
+      icon: Briefcase,
+      placeholder: "กรอกตำแหน่งงาน"
+    }
+  ];
+
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ชื่อ-นามสกุล</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>เบอร์โทร</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="position"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ตำแหน่ง</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex flex-row justify-between items-center">
-          <LogoutButton className="w-30" variant="secondary" disabled={isLoading} />
-          <div className="flex-1" />
-          <Button type="submit" className="w-30" disabled={isLoading}>
-            {isLoading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-6"
+        >
+          {formFields.map((field, index) => (
+            <motion.div
+              key={field.name}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 * index }}
+            >
+              <FormField
+                control={form.control}
+                name={field.name}
+                render={({ field: formField }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center space-x-2">
+                      <field.icon className="h-4 w-4" />
+                      <span>{field.label}</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...formField} 
+                        disabled={isLoading}
+                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                        placeholder={field.placeholder}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </motion.div>
+          ))}
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-3 pt-4"
+          >
+            <LogoutButton 
+              className="flex-1" 
+              variant="secondary" 
+              disabled={isLoading} 
+            />
+            <Button 
+              type="submit" 
+              className="flex-1" 
+              disabled={isLoading}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isLoading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
+            </Button>
+          </motion.div>
+        </form>
+      </Form>
+    </motion.div>
   );
 }

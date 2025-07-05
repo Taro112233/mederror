@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import OnboardingForm from "@/components/forms/OnboardingForm";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import AuthLayout from "@/components/ui/auth-layout";
 import jwt from "jsonwebtoken";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว และยังไม่ได้ onboarded เท่านั้นที่เข้าถึงได้
@@ -31,17 +31,12 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>ลงทะเบียนข้อมูลผู้ใช้</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <OnboardingForm />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <AuthLayout 
+      title="ลงทะเบียนข้อมูลผู้ใช้" 
+      subtitle="กรุณากรอกข้อมูลส่วนตัวเพื่อดำเนินการต่อ"
+      maxWidth="lg"
+    >
+      <OnboardingForm />
+    </AuthLayout>
   );
 }

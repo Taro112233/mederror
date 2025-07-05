@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import React from "react";
 import LoginForm from "@/components/forms/LoginForm";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import AuthLayout from "@/components/ui/auth-layout";
 
 // [AUTH] ถ้า login แล้วให้ redirect ไปหน้าหลัก
 export default async function LoginPage() {
@@ -21,20 +21,20 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle>เข้าสู่ระบบ</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LoginForm />
-            <div className="mt-4 text-center text-sm">
-              ยังไม่มีบัญชี? <Link href="/register" className="text-primary underline">สมัครสมาชิก</Link>
-            </div>
-          </CardContent>
-        </Card>
+    <AuthLayout 
+      title="เข้าสู่ระบบ" 
+      subtitle="กรุณาเลือกองค์กรและเข้าสู่ระบบ"
+    >
+      <LoginForm />
+      <div className="mt-6 text-center text-sm">
+        ยังไม่มีบัญชี?{" "}
+        <Link 
+          href="/register" 
+          className="text-primary underline hover:text-primary/80 transition-colors font-medium"
+        >
+          สมัครสมาชิก
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

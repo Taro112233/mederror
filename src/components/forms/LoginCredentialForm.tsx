@@ -11,6 +11,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoginCredentialSchema, LoginCredentialSchemaType } from "@/lib/zodSchemas";
+import { motion } from "framer-motion";
+import { ArrowLeft, LogIn, User, Lock } from "lucide-react";
 
 export default function LoginCredentialForm({
   onSubmit,
@@ -27,50 +29,103 @@ export default function LoginCredentialForm({
   });
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((values) => {
-          if (disabled) return;
-          onSubmit(values.username, values.password);
-        })}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={disabled} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} disabled={disabled} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex flex-row justify-between items-center">
-          <Button type="button" variant="outline" onClick={onBack} className="w-30" disabled={disabled}>
-            ย้อนกลับ
-          </Button>
-          <div className="flex-1" />
-          <Button type="submit" className="w-30" disabled={disabled}>
-            {disabled ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit((values) => {
+            if (disabled) return;
+            onSubmit(values.username, values.password);
+          })}
+          className="space-y-6"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center space-x-2">
+                    <User className="h-4 w-4" />
+                    <span>ชื่อผู้ใช้</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      disabled={disabled}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      placeholder="กรอกชื่อผู้ใช้"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center space-x-2">
+                    <Lock className="h-4 w-4" />
+                    <span>รหัสผ่าน</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      {...field} 
+                      disabled={disabled}
+                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                      placeholder="กรอกรหัสผ่าน"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-3 pt-4"
+          >
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onBack} 
+              className="flex-1" 
+              disabled={disabled}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              ย้อนกลับ
+            </Button>
+            <Button 
+              type="submit" 
+              className="flex-1" 
+              disabled={disabled}
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              {disabled ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+            </Button>
+          </motion.div>
+        </form>
+      </Form>
+    </motion.div>
   );
 }
