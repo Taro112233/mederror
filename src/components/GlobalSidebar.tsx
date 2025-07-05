@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { useAuth } from "@/hooks/use-auth";
 
 interface GlobalSidebarProps {
   children: ReactNode;
@@ -43,25 +44,19 @@ interface UserInfo {
 
 export default function GlobalSidebar({ children }: GlobalSidebarProps) {
   const pathname = usePathname();
+  const { user, isAdminOrDeveloper } = useAuth();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
-    // ดึงข้อมูลผู้ใช้
-    fetch("/api/users/me")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.name && data.position) {
-          setUserInfo({
-            name: data.name,
-            position: data.position,
-            organizationName: data.organizationName,
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to fetch user info:", error);
+    // ใช้ข้อมูลจาก useAuth hook แทน
+    if (user) {
+      setUserInfo({
+        name: user.name,
+        position: user.position,
+        organizationName: user.organizationName,
       });
-  }, []);
+    }
+  }, [user]);
 
   // Function to get breadcrumb items based on current path
   const getBreadcrumbItems = () => {
@@ -241,6 +236,31 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
+          
+          {/* เมนูสำหรับ Admin และ Developer เท่านั้น */}
+          {isAdminOrDeveloper && (
+            <SidebarGroup>
+              <SidebarGroupLabel>จัดการระบบ</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/management/user"}>
+                    <Link href="/management/user">
+                      <User />
+                      <span>จัดการผู้ใช้</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/management/records"}>
+                    <Link href="/management/records">
+                      <FileText />
+                      <span>ข้อมูลทั้งหมด</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
+          )}
         </SidebarContent>
         <SidebarFooter>
           <SidebarGroup>
