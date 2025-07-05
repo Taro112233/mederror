@@ -21,7 +21,6 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    // @ts-ignore
     const account = await prisma.account.findUnique({ where: { id: payload.id } });
     if (!account || account.role !== "DEVELOPER") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -37,7 +36,7 @@ export async function PUT(
     }
 
     // กรองข้อมูลที่ส่งไปให้ Prisma (ไม่รวมข้อมูลที่เกี่ยวข้อง)
-    const filterData = (data: any, tableName: string) => {
+    const filterData = (data: Record<string, unknown>, tableName: string) => {
       const filtered = { ...data };
       
       // ลบ fields ที่ไม่ควรอัปเดต
@@ -81,56 +80,48 @@ export async function PUT(
     let result;
     switch (table) {
       case 'account':
-        // @ts-ignore
         result = await prisma.account.update({ 
           where: { id }, 
           data: filterData(body, 'account') 
         });
         break;
       case 'organization':
-        // @ts-ignore
         result = await prisma.organization.update({ 
           where: { id }, 
           data: filterData(body, 'organization') 
         });
         break;
       case 'user':
-        // @ts-ignore
         result = await prisma.user.update({ 
           where: { id }, 
           data: filterData(body, 'user') 
         });
         break;
       case 'medError':
-        // @ts-ignore
         result = await prisma.medError.update({ 
           where: { id }, 
           data: filterData(body, 'medError') 
         });
         break;
       case 'severity':
-        // @ts-ignore
         result = await prisma.severity.update({ 
           where: { id }, 
           data: filterData(body, 'severity') 
         });
         break;
       case 'errorType':
-        // @ts-ignore
         result = await prisma.errorType.update({ 
           where: { id }, 
           data: filterData(body, 'errorType') 
         });
         break;
       case 'subErrorType':
-        // @ts-ignore
         result = await prisma.subErrorType.update({ 
           where: { id }, 
           data: filterData(body, 'subErrorType') 
         });
         break;
       case 'unit':
-        // @ts-ignore
         result = await prisma.unit.update({ 
           where: { id }, 
           data: filterData(body, 'unit') 
@@ -166,7 +157,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    // @ts-ignore
     const account = await prisma.account.findUnique({ where: { id: payload.id } });
     if (!account || account.role !== "DEVELOPER") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -183,35 +173,27 @@ export async function DELETE(
     // ลบข้อมูลจากตารางที่ระบุ
     switch (table) {
       case 'account':
-        // @ts-ignore
         await prisma.account.delete({ where: { id } });
         break;
       case 'organization':
-        // @ts-ignore
         await prisma.organization.delete({ where: { id } });
         break;
       case 'user':
-        // @ts-ignore
         await prisma.user.delete({ where: { id } });
         break;
       case 'medError':
-        // @ts-ignore
         await prisma.medError.delete({ where: { id } });
         break;
       case 'severity':
-        // @ts-ignore
         await prisma.severity.delete({ where: { id } });
         break;
       case 'errorType':
-        // @ts-ignore
         await prisma.errorType.delete({ where: { id } });
         break;
       case 'subErrorType':
-        // @ts-ignore
         await prisma.subErrorType.delete({ where: { id } });
         break;
       case 'unit':
-        // @ts-ignore
         await prisma.unit.delete({ where: { id } });
         break;
       default:

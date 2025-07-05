@@ -20,7 +20,6 @@ export default async function DeveloperPanel() {
   } catch {
     redirect("/login");
   }
-  // @ts-ignore
   const account = await prisma.account.findUnique({
     where: { id: payload.id },
     include: { organization: true, user: true },
@@ -41,13 +40,9 @@ export default async function DeveloperPanel() {
 
   // ดึงข้อมูลสถิติฐานข้อมูล
   const [accountsCount, organizationsCount, medErrorsCount, usersCount] = await Promise.all([
-    // @ts-ignore
     prisma.account.count(),
-    // @ts-ignore
     prisma.organization.count(),
-    // @ts-ignore
     prisma.medError.count(),
-    // @ts-ignore
     prisma.user.count(),
   ]);
 

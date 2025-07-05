@@ -16,17 +16,11 @@ import {
   Trash2, 
   Eye, 
   RefreshCw, 
-  Search,
   Users,
   Building2,
   FileText,
   AlertTriangle,
-  Shield,
-  Calendar,
-  Phone,
-  Briefcase,
   User,
-  Key,
   ChevronDownIcon,
   ChevronUpIcon,
   CopyIcon
@@ -44,17 +38,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TableData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface TableConfig {
   name: string;
   displayName: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   columns: {
     header: string;
     accessorKey: string;
-    cell?: (value: any, row: TableData) => React.ReactNode;
+    cell?: (value: unknown, row: TableData) => React.ReactNode;
   }[];
   fields: {
     name: string;
@@ -76,7 +70,7 @@ const TABLE_CONFIGS: TableConfig[] = [
       { header: "Onboarded", accessorKey: "onboarded" },
       { header: "Organization", accessorKey: "organization.name" },
       { header: "Created", accessorKey: "createdAt", 
-        cell: (value) => new Date(value).toLocaleDateString('th-TH') }
+        cell: (value) => new Date(value as string).toLocaleDateString('th-TH') }
     ],
     fields: [
       { name: 'username', label: 'Username', type: 'text', required: true },
@@ -93,7 +87,7 @@ const TABLE_CONFIGS: TableConfig[] = [
     columns: [
       { header: "Name", accessorKey: "name" },
       { header: "Created", accessorKey: "createdAt",
-        cell: (value) => new Date(value).toLocaleDateString('th-TH') }
+        cell: (value) => new Date(value as string).toLocaleDateString('th-TH') }
     ],
     fields: [
       { name: 'name', label: 'Name', type: 'text', required: true },
@@ -122,7 +116,7 @@ const TABLE_CONFIGS: TableConfig[] = [
     icon: FileText,
     columns: [
       { header: "Event Date", accessorKey: "eventDate",
-        cell: (value) => new Date(value).toLocaleDateString('th-TH') },
+        cell: (value) => new Date(value as string).toLocaleDateString('th-TH') },
       { header: "Unit", accessorKey: "unit.label" },
       { header: "Severity", accessorKey: "severity.label" },
       { header: "Error Type", accessorKey: "errorType.label" },
@@ -240,7 +234,7 @@ export default function DatabaseManager() {
       } else {
         toast.error('ไม่สามารถดึงข้อมูลได้');
       }
-    } catch (error) {
+    } catch {
       toast.error('เกิดข้อผิดพลาดในการดึงข้อมูล');
     } finally {
       setLoading(false);
@@ -249,16 +243,17 @@ export default function DatabaseManager() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTable]);
 
   // Custom global filter function
-  function globalStringFilter(row: any, _columnId: string, filterValue: string) {
+  function globalStringFilter(row: { original: TableData }, _columnId: string, filterValue: string) {
     if (!filterValue) return true;
     const lower = filterValue.toLowerCase();
-    return Object.values(row.original).some((value: any) => {
+    return Object.values(row.original).some((value: unknown) => {
       if (typeof value === "string") return value.toLowerCase().includes(lower);
-      if (typeof value === "object" && value?.label) return value.label.toLowerCase().includes(lower);
-      if (typeof value === "object" && value?.name) return value.name.toLowerCase().includes(lower);
+      if (typeof value === "object" && value && typeof value === "object" && "label" in value) return (value as { label: string }).label.toLowerCase().includes(lower);
+      if (typeof value === "object" && value && typeof value === "object" && "name" in value) return (value as { name: string }).name.toLowerCase().includes(lower);
       return false;
     });
   }
@@ -402,7 +397,7 @@ export default function DatabaseManager() {
     }
     
     // Handle date fields
-    if (formDataForEdit.eventDate) {
+    if (formDataForEdit.eventDate && typeof formDataForEdit.eventDate === 'string') {
       const date = new Date(formDataForEdit.eventDate);
       formDataForEdit.eventDate = date.toISOString().slice(0, 16); // Format for datetime-local
     }
@@ -421,8 +416,9 @@ export default function DatabaseManager() {
     setShowViewDialog(true);
   };
 
-  const renderField = (field: any) => {
-    const value = formData[field.name] || '';
+  const renderField = (field: TableConfig['fields'][0]) => {
+    const rawValue = formData[field.name];
+    const value = typeof rawValue === 'string' ? rawValue : '';
     
     switch (field.type) {
       case 'textarea':
@@ -496,7 +492,7 @@ export default function DatabaseManager() {
     ...currentTableConfig.columns.map(col => ({
       header: col.header,
       accessorKey: col.accessorKey,
-      cell: ({ getValue, row }: any) => {
+      cell: ({ getValue, row }: { getValue: () => unknown; row: { original: TableData } }) => {
         const value = getValue();
         if (col.cell) {
           return col.cell(value, row.original);
@@ -516,7 +512,7 @@ export default function DatabaseManager() {
     {
       header: "จัดการ",
       id: "actions",
-      cell: ({ row }: any) => (
+      cell: ({ row }: { row: { original: TableData } }) => (
         <div className="flex gap-1 justify-center">
           <TooltipProvider>
             <Tooltip>
@@ -675,7 +671,7 @@ export default function DatabaseManager() {
                 ) : paginatedData.length ? (
                   paginatedData.map((row) => (
                     <TableRow key={row.id}>
-                      {row.getVisibleCells().map((cell: any) => (
+                      {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>

@@ -21,7 +21,6 @@ export async function GET(
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    // @ts-ignore
     const account = await prisma.account.findUnique({ where: { id: payload.id } });
     if (!account || account.role !== "DEVELOPER") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -39,26 +38,22 @@ export async function GET(
     let data;
     switch (table) {
       case 'account':
-        // @ts-ignore
         data = await prisma.account.findMany({
           include: { organization: true, user: true },
           orderBy: { createdAt: "desc" }
         });
         break;
       case 'organization':
-        // @ts-ignore
         data = await prisma.organization.findMany({
           orderBy: { createdAt: "desc" }
         });
         break;
       case 'user':
-        // @ts-ignore
         data = await prisma.user.findMany({
           orderBy: { id: "desc" }
         });
         break;
       case 'medError':
-        // @ts-ignore
         data = await prisma.medError.findMany({
           include: {
             errorType: true,
@@ -70,27 +65,23 @@ export async function GET(
         });
         break;
       case 'severity':
-        // @ts-ignore
         data = await prisma.severity.findMany({
           orderBy: { code: "asc" }
         });
         break;
       case 'errorType':
-        // @ts-ignore
         data = await prisma.errorType.findMany({
           include: { subErrorTypes: true },
           orderBy: { code: "asc" }
         });
         break;
       case 'subErrorType':
-        // @ts-ignore
         data = await prisma.subErrorType.findMany({
           include: { errorType: true },
           orderBy: { code: "asc" }
         });
         break;
       case 'unit':
-        // @ts-ignore
         data = await prisma.unit.findMany({
           orderBy: { code: "asc" }
         });
@@ -125,7 +116,6 @@ export async function POST(
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
 
-    // @ts-ignore
     const account = await prisma.account.findUnique({ where: { id: payload.id } });
     if (!account || account.role !== "DEVELOPER") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -140,87 +130,93 @@ export async function POST(
       return NextResponse.json({ error: "Invalid table" }, { status: 400 });
     }
 
-    // กรองข้อมูลที่ส่งไปให้ Prisma (ไม่รวมข้อมูลที่เกี่ยวข้อง)
-    const filterData = (data: any, tableName: string) => {
-      const filtered = { ...data };
-      
-      // ลบ fields ที่ไม่ควรสร้าง
-      delete filtered.id;
-      delete filtered.createdAt;
-      delete filtered.updatedAt;
-      
-      // ลบข้อมูลที่เกี่ยวข้องตามตาราง
-      switch (tableName) {
-        case 'account':
-          delete filtered.organization;
-          delete filtered.user;
-          delete filtered.medErrors;
-          break;
-        case 'organization':
-          delete filtered.accounts;
-          break;
-        case 'user':
-          delete filtered.account;
-          break;
-        case 'medError':
-          delete filtered.errorType;
-          delete filtered.severity;
-          delete filtered.subErrorType;
-          delete filtered.unit;
-          delete filtered.reporterAccount;
-          delete filtered.images;
-          break;
-        case 'errorType':
-          delete filtered.subErrorTypes;
-          break;
-        case 'subErrorType':
-          delete filtered.errorType;
-          break;
-      }
-      
-      return filtered;
+    // ตรวจสอบ field ที่จำเป็นสำหรับแต่ละ table (อิงจาก schema.prisma)
+    const requiredFields: Record<string, string[]> = {
+      account: ["username", "passwordHash", "role"],
+      organization: ["name"],
+      user: ["accountId"],
+      medError: ["eventDate", "unitId", "description", "severityId", "errorTypeId", "subErrorTypeId", "reporterAccountId", "reporterUsername", "reporterName", "reporterPosition", "reporterPhone"],
+      severity: ["code", "label"],
+      errorType: ["code", "label"],
+      subErrorType: ["code", "label", "errorTypeId"],
+      unit: ["code", "label"],
     };
+    const missingFields = (requiredFields[table] || []).filter((field) => !(field in body) || body[field] === undefined || body[field] === null || body[field] === "");
+    if (missingFields.length > 0) {
+      return NextResponse.json({ error: `กรุณากรอกข้อมูลให้ครบถ้วน: ${missingFields.join(", ")}` }, { status: 400 });
+    }
 
     // เพิ่มข้อมูลในตารางที่ระบุ
     let result;
+    function buildData(table: string, body: Record<string, unknown>) {
+      const data: Record<string, unknown> = {};
+      if (table === 'medError') {
+        data.eventDate = body.eventDate;
+        data.unit = { connect: { id: body.unitId } };
+        data.description = body.description;
+        data.severity = { connect: { id: body.severityId } };
+        data.errorType = { connect: { id: body.errorTypeId } };
+        data.subErrorType = { connect: { id: body.subErrorTypeId } };
+        data.reporterAccount = { connect: { id: body.reporterAccountId } };
+        data.reporterUsername = body.reporterUsername;
+        data.reporterName = body.reporterName;
+        data.reporterPosition = body.reporterPosition;
+        data.reporterPhone = body.reporterPhone;
+        if (body.reporterOrganizationId) data.reporterOrganizationId = body.reporterOrganizationId;
+      } else if (table === 'user') {
+        data.account = { connect: { id: body.accountId } };
+        if (body.name) data.name = body.name;
+        if (body.position) data.position = body.position;
+        if (body.phone) data.phone = body.phone;
+      } else if (table === 'subErrorType') {
+        data.code = body.code;
+        data.label = body.label;
+        data.errorType = { connect: { id: body.errorTypeId } };
+      } else {
+        for (const field of requiredFields[table] || []) {
+          data[field] = body[field];
+        }
+      }
+      return data;
+    }
     switch (table) {
       case 'account':
-        // @ts-ignore
-        result = await prisma.account.create({ data: filterData(body, 'account') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.account.create({ data: buildData('account', body) as any });
         break;
       case 'organization':
-        // @ts-ignore
-        result = await prisma.organization.create({ data: filterData(body, 'organization') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.organization.create({ data: buildData('organization', body) as any });
         break;
       case 'user':
-        // @ts-ignore
-        result = await prisma.user.create({ data: filterData(body, 'user') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.user.create({ data: buildData('user', body) as any });
         break;
       case 'medError':
-        // @ts-ignore
-        result = await prisma.medError.create({ data: filterData(body, 'medError') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.medError.create({ data: buildData('medError', body) as any });
         break;
       case 'severity':
-        // @ts-ignore
-        result = await prisma.severity.create({ data: filterData(body, 'severity') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.severity.create({ data: buildData('severity', body) as any });
         break;
       case 'errorType':
-        // @ts-ignore
-        result = await prisma.errorType.create({ data: filterData(body, 'errorType') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.errorType.create({ data: buildData('errorType', body) as any });
         break;
       case 'subErrorType':
-        // @ts-ignore
-        result = await prisma.subErrorType.create({ data: filterData(body, 'subErrorType') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.subErrorType.create({ data: buildData('subErrorType', body) as any });
         break;
       case 'unit':
-        // @ts-ignore
-        result = await prisma.unit.create({ data: filterData(body, 'unit') });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.unit.create({ data: buildData('unit', body) as any });
         break;
       default:
         return NextResponse.json({ error: "Invalid table" }, { status: 400 });
     }
 
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("Database API error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

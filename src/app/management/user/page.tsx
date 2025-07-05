@@ -49,7 +49,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function AdminUserPage() {
-  const { loading, isAdminOrDeveloper, isDeveloper, isAdmin, user: currentUser } = useAuth();
+  const { loading, isAdminOrDeveloper, isDeveloper, isAdmin } = useAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -94,12 +94,12 @@ export default function AdminUserPage() {
   }, [justDeleted]);
 
   // ฟังก์ชันตรวจสอบสิทธิ์การเปลี่ยน role
-  const canChangeRole = (targetUser: UserRow) => {
+  const canChangeRole = (_targetUser: UserRow) => {
     if (isDeveloper) return true; // Developer สามารถเปลี่ยน role ได้ทุกคน
     
     if (isAdmin) {
       // Admin ไม่สามารถเปลี่ยน role ของ Developer ได้
-      if (targetUser.role === 'DEVELOPER') return false;
+      if (_targetUser.role === 'DEVELOPER') return false;
       return true;
     }
     
@@ -107,7 +107,7 @@ export default function AdminUserPage() {
   };
 
   // ฟังก์ชันสร้าง role options ตามสิทธิ์
-  const getRoleOptions = (targetUser: UserRow) => {
+  const getRoleOptions = () => {
     if (isDeveloper) {
       // Developer สามารถเลือก role ได้ทุกตัว
       return ROLE_OPTIONS;
@@ -241,7 +241,7 @@ export default function AdminUserPage() {
         cell: ({ row, getValue }) => {
           const targetUser = row.original;
           const canChange = canChangeRole(targetUser);
-          const roleOptions = getRoleOptions(targetUser);
+          const roleOptions = getRoleOptions();
           
           return (
             <div className="flex items-center gap-2">
