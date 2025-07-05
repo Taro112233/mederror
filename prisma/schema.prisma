@@ -16,7 +16,6 @@ model Account {
   organizationId String?
   createdAt      DateTime      @default(now())
   organization   Organization? @relation(fields: [organizationId], references: [id])
-  loginLogs      LoginLog[]
   medErrors      MedError[]    @relation("AccountMedErrors")
   user           User?
 
@@ -79,7 +78,7 @@ model MedError {
   reporterPhone          String
   reporterOrganizationId String?
   errorType              ErrorType       @relation(fields: [errorTypeId], references: [id])
-  reporterAccount        Account         @relation("AccountMedErrors", fields: [reporterAccountId], references: [id])
+  reporterAccount        Account         @relation("AccountMedErrors", fields: [reporterAccountId], references: [id], onDelete: Cascade)
   severity               Severity        @relation(fields: [severityId], references: [id])
   subErrorType           SubErrorType    @relation(fields: [subErrorTypeId], references: [id])
   unit                   Unit            @relation(fields: [unitId], references: [id])
@@ -94,16 +93,7 @@ model MedErrorImage {
   medError   MedError @relation(fields: [medErrorId], references: [id], onDelete: Cascade)
 }
 
-model LoginLog {
-  id             String   @id @default(uuid())
-  accountId      String
-  organizationId String
-  createdAt      DateTime @default(now())
-  expiresAt      DateTime
-  ip             String?
-  userAgent      String?
-  account        Account  @relation(fields: [accountId], references: [id])
-}
+
 
 model Unit {
   id        String     @id @default(uuid())
