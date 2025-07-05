@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "prisma db seed",
+    "seed:mock": "tsx prisma/seed.mock.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
