@@ -24,8 +24,10 @@ import * as XLSX from "xlsx";
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
   id: string;
-  eventDate: string; // เวลาที่ผู้ใช้งานกรอก
-  createdAt: string; // เวลาที่บันทึกข้อมูล
+  eventDate: string; // เวลาที่ผู้ใช้งานกรอก (formatted)
+  eventDateRaw: Date; // เวลาที่ผู้ใช้งานกรอก (raw for sorting)
+  createdAt: string; // เวลาที่บันทึกข้อมูล (formatted)
+  createdAtRaw: Date; // เวลาที่บันทึกข้อมูล (raw for sorting)
   unit: {
     label: string;
   };
@@ -104,7 +106,9 @@ export default function AdminRecordsPage() {
         const formattedData: MedErrorRecord[] = data.map((item: any) => ({
           id: item.id,
           eventDate: new Date(item.eventDate).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Bangkok' }),
+          eventDateRaw: new Date(item.eventDate),
           createdAt: new Date(item.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short', timeZone: 'Asia/Bangkok' }),
+          createdAtRaw: new Date(item.createdAt),
           unit: item.unit,
           severity: item.severity,
           errorType: item.errorType,
@@ -146,15 +150,16 @@ export default function AdminRecordsPage() {
     columns: [
       {
         header: "วันที่ เวลา",
-        accessorKey: "eventDate",
+        accessorFn: (row) => row.eventDateRaw,
+        id: "eventDate",
         meta: { filterVariant: "text" },
-        cell: ({ getValue }) => (
+        cell: ({ row }) => (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="truncate max-w-[120px] block">{getValue() as string}</span>
+                <span className="truncate max-w-[120px] block">{row.original.eventDate}</span>
               </TooltipTrigger>
-              <TooltipContent>{getValue() as string}</TooltipContent>
+              <TooltipContent>{row.original.eventDate}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ),
