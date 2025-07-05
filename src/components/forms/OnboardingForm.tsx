@@ -16,7 +16,7 @@ import { OnboardingFormSchema, OnboardingFormSchemaType } from "@/lib/zodSchemas
 import { useRouter } from "next/navigation";
 import LogoutButton from "@/components/button/LogoutButton";
 import { motion } from "framer-motion";
-import { User, Phone, Briefcase, Save, LogOut } from "lucide-react";
+import { User, Phone, Briefcase, Save } from "lucide-react";
 
 export default function OnboardingForm() {
   const [isLoading, setIsLoading] = useState(false);

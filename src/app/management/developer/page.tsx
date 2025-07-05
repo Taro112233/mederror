@@ -2,9 +2,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Database, Shield, AlertTriangle } from "lucide-react";
+import DatabaseManager from "./DatabaseManager";
 
 // [AUTH] เฉพาะผู้ใช้ที่มี role เป็น DEVELOPER เท่านั้นที่เข้าถึงได้
 export default async function DeveloperPanel() {
@@ -20,7 +20,11 @@ export default async function DeveloperPanel() {
   } catch {
     redirect("/login");
   }
-  const account = await prisma.account.findUnique({ where: { id: payload.id } });
+  // @ts-ignore
+  const account = await prisma.account.findUnique({
+    where: { id: payload.id },
+    include: { organization: true, user: true },
+  });
   if (!account) {
     redirect("/login");
   }
@@ -35,45 +39,87 @@ export default async function DeveloperPanel() {
     redirect("/management");
   }
 
+  // ดึงข้อมูลสถิติฐานข้อมูล
+  const [accountsCount, organizationsCount, medErrorsCount, usersCount] = await Promise.all([
+    // @ts-ignore
+    prisma.account.count(),
+    // @ts-ignore
+    prisma.organization.count(),
+    // @ts-ignore
+    prisma.medError.count(),
+    // @ts-ignore
+    prisma.user.count(),
+  ]);
+
+  const dbStats = {
+    accounts: accountsCount,
+    organizations: organizationsCount,
+    medErrors: medErrorsCount,
+    users: usersCount,
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Developer Panel</h2>
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Database Management</h2>
+          <p className="text-muted-foreground">
+            จัดการฐานข้อมูลระบบ - เฉพาะ Developer เท่านั้น
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="destructive" className="text-sm">
+            <Shield className="h-3 w-3 mr-1" />
+            Developer Only
+          </Badge>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>สร้าง Organization ใหม่</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              placeholder="ชื่อ Organization"
-              className="flex-1"
-              disabled
-            />
-            <Button disabled>
-              สร้าง Organization
-            </Button>
+      {/* Database Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-card border rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-blue-600" />
+            <span className="font-medium">Accounts</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            ฟีเจอร์นี้จะถูกพัฒนาในอนาคต
-          </p>
-        </CardContent>
-      </Card>
+          <p className="text-2xl font-bold text-blue-600">{dbStats.accounts}</p>
+        </div>
+        <div className="bg-card border rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-green-600" />
+            <span className="font-medium">Organizations</span>
+          </div>
+          <p className="text-2xl font-bold text-green-600">{dbStats.organizations}</p>
+        </div>
+        <div className="bg-card border rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-orange-600" />
+            <span className="font-medium">Med Errors</span>
+          </div>
+          <p className="text-2xl font-bold text-orange-600">{dbStats.medErrors}</p>
+        </div>
+        <div className="bg-card border rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-purple-600" />
+            <span className="font-medium">Users</span>
+          </div>
+          <p className="text-2xl font-bold text-purple-600">{dbStats.users}</p>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>รายการ Organization</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              ฟีเจอร์นี้จะถูกพัฒนาในอนาคต
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Warning */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+          <span className="font-medium text-yellow-800">คำเตือน</span>
+        </div>
+        <p className="text-sm text-yellow-700 mt-1">
+          คุณกำลังเข้าถึงระบบจัดการฐานข้อมูลโดยตรง การเปลี่ยนแปลงใดๆ จะส่งผลต่อข้อมูลจริงในระบบ กรุณาใช้ความระมัดระวัง
+        </p>
+      </div>
+
+      {/* Database Manager Component */}
+      <DatabaseManager />
     </div>
   );
 } 
