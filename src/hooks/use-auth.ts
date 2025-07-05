@@ -25,7 +25,7 @@ export function useAuth() {
         } else {
           setError('Unauthorized');
         }
-      } catch (err) {
+      } catch {
         setError('Failed to fetch user data');
       } finally {
         setLoading(false);

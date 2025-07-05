@@ -18,7 +18,6 @@ import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
-import AccessDenied from "@/components/AccessDenied";
 
 export type UserRow = {
   id: number;
@@ -52,7 +51,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function AdminUserPage() {
-  const { user, loading, isAdminOrDeveloper } = useAuth();
+  const { loading, isAdminOrDeveloper } = useAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -64,27 +63,6 @@ export default function AdminUserPage() {
   const [pageSize, setPageSize] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 1000);
-
-  // ตรวจสอบสิทธิ์การเข้าถึง
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">กำลังโหลด...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdminOrDeveloper) {
-    return (
-      <AccessDenied 
-        title="ไม่มีสิทธิ์เข้าถึงหน้าจัดการผู้ใช้"
-        message="เฉพาะผู้ดูแลระบบ (Admin) และนักพัฒนา (Developer) เท่านั้นที่สามารถเข้าถึงหน้านี้ได้"
-      />
-    );
-  }
 
   // ดึงข้อมูลสมาชิกจริง
   useEffect(() => {
@@ -305,6 +283,24 @@ export default function AdminUserPage() {
     setGlobalFilter(debouncedSearch);
     setPage(0);
   }, [debouncedSearch]);
+
+  // ตรวจสอบสิทธิ์การเข้าถึง - ต้องอยู่หลัง hooks ทั้งหมด
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdminOrDeveloper) {
+    // Redirect ไปหน้า management แทนที่จะแสดง AccessDenied
+    window.location.href = '/management';
+    return null;
+  }
 
   return (
     <div className="space-y-4">

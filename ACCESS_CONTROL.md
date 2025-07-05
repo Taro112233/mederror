@@ -14,26 +14,27 @@
   - ตรวจสอบ role ของผู้ใช้
   - ให้ helper functions สำหรับตรวจสอบสิทธิ์
 
-### 2. สร้าง AccessDenied Component
+### 2. สร้าง AccessDenied Component (สำรอง)
 - **ไฟล์**: `src/components/AccessDenied.tsx`
-- **หน้าที่**: แสดงหน้าเมื่อผู้ใช้ไม่มีสิทธิ์เข้าถึง
+- **หน้าที่**: แสดงหน้าเมื่อผู้ใช้ไม่มีสิทธิ์เข้าถึง (สำรองไว้)
 - **ฟีเจอร์**:
   - แสดงข้อความแจ้งเตือนที่เหมาะสม
   - มีปุ่มนำทางกลับไปหน้า Dashboard หรือหน้าแรก
   - UI ที่สวยงามและเป็นมิตรกับผู้ใช้
+- **หมายเหตุ**: ปัจจุบันใช้ redirect แทนการแสดงหน้า AccessDenied
 
 ### 3. อัปเดตหน้า User Management
 - **ไฟล์**: `src/app/management/user/page.tsx`
 - **การเปลี่ยนแปลง**:
   - เพิ่มการตรวจสอบสิทธิ์ด้วย useAuth hook
-  - แสดง AccessDenied component เมื่อไม่มีสิทธิ์
+  - Redirect ไปหน้า `/management` เมื่อไม่มีสิทธิ์
   - แสดง loading state ขณะตรวจสอบสิทธิ์
 
 ### 4. อัปเดตหน้า Records Management
 - **ไฟล์**: `src/app/management/records/page.tsx`
 - **การเปลี่ยนแปลง**:
   - เพิ่มการตรวจสอบสิทธิ์ด้วย useAuth hook
-  - แสดง AccessDenied component เมื่อไม่มีสิทธิ์
+  - Redirect ไปหน้า `/management` เมื่อไม่มีสิทธิ์
   - แสดง loading state ขณะตรวจสอบสิทธิ์
 
 ### 5. อัปเดต GlobalSidebar
@@ -81,7 +82,9 @@ function MyComponent() {
   if (loading) return <div>กำลังโหลด...</div>;
   
   if (!isAdminOrDeveloper) {
-    return <AccessDenied />;
+    // Redirect ไปหน้าอื่นแทนการแสดง AccessDenied
+    window.location.href = '/management';
+    return null;
   }
   
   return <div>เนื้อหาสำหรับ admin/developer</div>;
@@ -104,7 +107,7 @@ const isAdminOrDeveloper = account.role === "ADMIN" || account.role === "DEVELOP
 1. **ทดสอบด้วย User ธรรมดา**:
    - เข้าสู่ระบบด้วย account ที่มี role = "USER"
    - พยายามเข้าหน้า `/management/user` หรือ `/management/records`
-   - ควรเห็นหน้า AccessDenied
+   - ควรถูก redirect ไปหน้า `/management` โดยอัตโนมัติ
 
 2. **ทดสอบด้วย Admin**:
    - เข้าสู่ระบบด้วย account ที่มี role = "ADMIN"
@@ -133,5 +136,6 @@ const isAdminOrDeveloper = user?.role === 'ADMIN' || user?.role === 'DEVELOPER';
 ## หมายเหตุ
 
 - ระบบใช้ client-side protection เป็นหลัก
+- เมื่อผู้ใช้ไม่มีสิทธิ์เข้าถึง จะถูก redirect ไปหน้า `/management` แทนการแสดงข้อความแจ้งเตือน
 - ควรเพิ่ม server-side validation ใน API routes ที่สำคัญ
 - การเปลี่ยนแปลง role ต้องทำผ่าน admin interface เท่านั้น 

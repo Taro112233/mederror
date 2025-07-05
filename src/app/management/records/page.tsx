@@ -21,7 +21,6 @@ import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import * as XLSX from "xlsx";
 import { useAuth } from "@/hooks/use-auth";
-import AccessDenied from "@/components/AccessDenied";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
@@ -66,7 +65,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function AdminRecordsPage() {
-  const { user, loading: authLoading, isAdminOrDeveloper } = useAuth();
+  const { loading: authLoading, isAdminOrDeveloper } = useAuth();
   const [records, setRecords] = useState<MedErrorRecord[]>([]);
   const [showDetailId, setShowDetailId] = useState<string | null>(null);
   const [deleteRecordId, setDeleteRecordId] = useState<string | null>(null);
@@ -80,27 +79,6 @@ export default function AdminRecordsPage() {
   // For debounced search
   const [searchInput, setSearchInput] = useState("");
   const debouncedSearch = useDebounce(searchInput, 1000);
-
-  // ตรวจสอบสิทธิ์การเข้าถึง
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-muted-foreground">กำลังโหลด...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdminOrDeveloper) {
-    return (
-      <AccessDenied 
-        title="ไม่มีสิทธิ์เข้าถึงหน้าจัดการข้อมูล"
-        message="เฉพาะผู้ดูแลระบบ (Admin) และนักพัฒนา (Developer) เท่านั้นที่สามารถเข้าถึงหน้านี้ได้"
-      />
-    );
-  }
 
   // Fetch organizationId on mount
   useEffect(() => {
@@ -341,6 +319,24 @@ export default function AdminRecordsPage() {
     setGlobalFilter(debouncedSearch);
     setPage(0);
   }, [debouncedSearch]);
+
+  // ตรวจสอบสิทธิ์การเข้าถึง - ต้องอยู่หลัง hooks ทั้งหมด
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdminOrDeveloper) {
+    // Redirect ไปหน้า management แทนที่จะแสดง AccessDenied
+    window.location.href = '/management';
+    return null;
+  }
 
   // ฟังก์ชัน export ข้อมูล filteredRows เป็น Excel
   const exportFilteredToExcel = () => {
