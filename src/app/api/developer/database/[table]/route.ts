@@ -48,14 +48,12 @@ export async function GET(
       case 'organization':
         // @ts-ignore
         data = await prisma.organization.findMany({
-          include: { accounts: true },
           orderBy: { createdAt: "desc" }
         });
         break;
       case 'user':
         // @ts-ignore
         data = await prisma.user.findMany({
-          include: { account: true },
           orderBy: { id: "desc" }
         });
         break;
@@ -67,7 +65,6 @@ export async function GET(
             severity: true,
             subErrorType: true,
             unit: true,
-            reporterAccount: true,
           },
           orderBy: { eventDate: "desc" }
         });
@@ -143,40 +140,81 @@ export async function POST(
       return NextResponse.json({ error: "Invalid table" }, { status: 400 });
     }
 
+    // กรองข้อมูลที่ส่งไปให้ Prisma (ไม่รวมข้อมูลที่เกี่ยวข้อง)
+    const filterData = (data: any, tableName: string) => {
+      const filtered = { ...data };
+      
+      // ลบ fields ที่ไม่ควรสร้าง
+      delete filtered.id;
+      delete filtered.createdAt;
+      delete filtered.updatedAt;
+      
+      // ลบข้อมูลที่เกี่ยวข้องตามตาราง
+      switch (tableName) {
+        case 'account':
+          delete filtered.organization;
+          delete filtered.user;
+          delete filtered.medErrors;
+          break;
+        case 'organization':
+          delete filtered.accounts;
+          break;
+        case 'user':
+          delete filtered.account;
+          break;
+        case 'medError':
+          delete filtered.errorType;
+          delete filtered.severity;
+          delete filtered.subErrorType;
+          delete filtered.unit;
+          delete filtered.reporterAccount;
+          delete filtered.images;
+          break;
+        case 'errorType':
+          delete filtered.subErrorTypes;
+          break;
+        case 'subErrorType':
+          delete filtered.errorType;
+          break;
+      }
+      
+      return filtered;
+    };
+
     // เพิ่มข้อมูลในตารางที่ระบุ
     let result;
     switch (table) {
       case 'account':
         // @ts-ignore
-        result = await prisma.account.create({ data: body });
+        result = await prisma.account.create({ data: filterData(body, 'account') });
         break;
       case 'organization':
         // @ts-ignore
-        result = await prisma.organization.create({ data: body });
+        result = await prisma.organization.create({ data: filterData(body, 'organization') });
         break;
       case 'user':
         // @ts-ignore
-        result = await prisma.user.create({ data: body });
+        result = await prisma.user.create({ data: filterData(body, 'user') });
         break;
       case 'medError':
         // @ts-ignore
-        result = await prisma.medError.create({ data: body });
+        result = await prisma.medError.create({ data: filterData(body, 'medError') });
         break;
       case 'severity':
         // @ts-ignore
-        result = await prisma.severity.create({ data: body });
+        result = await prisma.severity.create({ data: filterData(body, 'severity') });
         break;
       case 'errorType':
         // @ts-ignore
-        result = await prisma.errorType.create({ data: body });
+        result = await prisma.errorType.create({ data: filterData(body, 'errorType') });
         break;
       case 'subErrorType':
         // @ts-ignore
-        result = await prisma.subErrorType.create({ data: body });
+        result = await prisma.subErrorType.create({ data: filterData(body, 'subErrorType') });
         break;
       case 'unit':
         // @ts-ignore
-        result = await prisma.unit.create({ data: body });
+        result = await prisma.unit.create({ data: filterData(body, 'unit') });
         break;
       default:
         return NextResponse.json({ error: "Invalid table" }, { status: 400 });

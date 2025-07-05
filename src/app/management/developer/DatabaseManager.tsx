@@ -81,8 +81,8 @@ const TABLE_CONFIGS: TableConfig[] = [
     fields: [
       { name: 'username', label: 'Username', type: 'text', required: true },
       { name: 'passwordHash', label: 'Password Hash', type: 'password', required: true },
-      { name: 'onboarded', label: 'Onboarded', type: 'select', options: ['true', 'false'] },
-      { name: 'role', label: 'Role', type: 'select', options: ['UNAPPROVED', 'USER', 'ADMIN', 'DEVELOPER'] },
+      { name: 'onboarded', label: 'Onboarded', type: 'select', options: ['true', 'false'], required: true },
+      { name: 'role', label: 'Role', type: 'select', options: ['UNAPPROVED', 'USER', 'ADMIN', 'DEVELOPER'], required: true },
       { name: 'organizationId', label: 'Organization ID', type: 'text' },
     ]
   },
@@ -225,6 +225,7 @@ export default function DatabaseManager() {
   const [globalFilter, setGlobalFilter] = useState("");
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const currentTableConfig = TABLE_CONFIGS.find(config => config.name === activeTable);
   const debouncedSearch = useDebounce(searchInput, 1000);
@@ -269,11 +270,31 @@ export default function DatabaseManager() {
   }, [debouncedSearch]);
 
   const handleAdd = async () => {
+    // Validation
+    if (!currentTableConfig) return;
+    
+    const requiredFields = currentTableConfig.fields.filter(field => field.required);
+    const missingFields = requiredFields.filter(field => !formData[field.name]);
+    
+    if (missingFields.length > 0) {
+      toast.error(`กรุณากรอกข้อมูลที่จำเป็น: ${missingFields.map(f => f.label).join(', ')}`);
+      return;
+    }
+
+    setActionLoading(true);
     try {
+      // Prepare data for API
+      const dataToSend = { ...formData };
+      
+      // Handle boolean fields
+      if (dataToSend.onboarded !== undefined) {
+        dataToSend.onboarded = dataToSend.onboarded === 'true';
+      }
+
       const response = await fetch(`/api/developer/database/${activeTable}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {
@@ -286,18 +307,39 @@ export default function DatabaseManager() {
         toast.error(error.error || 'เพิ่มข้อมูลไม่สำเร็จ');
       }
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาด');
+      console.error('Add error:', error);
+      toast.error('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleEdit = async () => {
-    if (!selectedRecord) return;
+    if (!selectedRecord || !currentTableConfig) return;
     
+    // Validation
+    const requiredFields = currentTableConfig.fields.filter(field => field.required);
+    const missingFields = requiredFields.filter(field => !formData[field.name]);
+    
+    if (missingFields.length > 0) {
+      toast.error(`กรุณากรอกข้อมูลที่จำเป็น: ${missingFields.map(f => f.label).join(', ')}`);
+      return;
+    }
+
+    setActionLoading(true);
     try {
+      // Prepare data for API
+      const dataToSend = { ...formData };
+      
+      // Handle boolean fields
+      if (dataToSend.onboarded !== undefined) {
+        dataToSend.onboarded = dataToSend.onboarded === 'true';
+      }
+
       const response = await fetch(`/api/developer/database/${activeTable}/${selectedRecord.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {
@@ -311,13 +353,17 @@ export default function DatabaseManager() {
         toast.error(error.error || 'แก้ไขข้อมูลไม่สำเร็จ');
       }
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาด');
+      console.error('Edit error:', error);
+      toast.error('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+    } finally {
+      setActionLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!selectedRecord) return;
     
+    setActionLoading(true);
     try {
       const response = await fetch(`/api/developer/database/${activeTable}/${selectedRecord.id}`, {
         method: 'DELETE',
@@ -333,7 +379,10 @@ export default function DatabaseManager() {
         toast.error(error.error || 'ลบข้อมูลไม่สำเร็จ');
       }
     } catch (error) {
-      toast.error('เกิดข้อผิดพลาด');
+      console.error('Delete error:', error);
+      toast.error('เกิดข้อผิดพลาดในการลบข้อมูล');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -344,7 +393,21 @@ export default function DatabaseManager() {
 
   const openEditDialog = (record: TableData) => {
     setSelectedRecord(record);
-    setFormData(record);
+    // Convert data for form
+    const formDataForEdit = { ...record };
+    
+    // Handle boolean fields
+    if (formDataForEdit.onboarded !== undefined) {
+      formDataForEdit.onboarded = formDataForEdit.onboarded ? 'true' : 'false';
+    }
+    
+    // Handle date fields
+    if (formDataForEdit.eventDate) {
+      const date = new Date(formDataForEdit.eventDate);
+      formDataForEdit.eventDate = date.toISOString().slice(0, 16); // Format for datetime-local
+    }
+    
+    setFormData(formDataForEdit);
     setShowEditDialog(true);
   };
 
@@ -369,6 +432,7 @@ export default function DatabaseManager() {
             onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
             placeholder={field.label}
             required={field.required}
+            className="min-h-[100px]"
           />
         );
       case 'select':
@@ -399,6 +463,16 @@ export default function DatabaseManager() {
         return (
           <Input
             type="password"
+            value={value}
+            onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
+            placeholder={field.label}
+            required={field.required}
+          />
+        );
+      case 'number':
+        return (
+          <Input
+            type="number"
             value={value}
             onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })}
             placeholder={field.label}
@@ -644,7 +718,13 @@ export default function DatabaseManager() {
       </Card>
 
       {/* Add Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+      <Dialog open={showAddDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowAddDialog(false);
+          setFormData({});
+          setActionLoading(false);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>เพิ่ม {currentTableConfig?.displayName}</DialogTitle>
@@ -661,18 +741,29 @@ export default function DatabaseManager() {
             ))}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowAddDialog(false);
+              setFormData({});
+              setActionLoading(false);
+            }} disabled={actionLoading}>
               ยกเลิก
             </Button>
-            <Button onClick={handleAdd}>
-              เพิ่ม
+            <Button onClick={handleAdd} disabled={actionLoading}>
+              {actionLoading ? 'กำลังเพิ่ม...' : 'เพิ่ม'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+      <Dialog open={showEditDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowEditDialog(false);
+          setSelectedRecord(null);
+          setFormData({});
+          setActionLoading(false);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>แก้ไข {currentTableConfig?.displayName}</DialogTitle>
@@ -689,18 +780,29 @@ export default function DatabaseManager() {
             ))}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowEditDialog(false);
+              setSelectedRecord(null);
+              setFormData({});
+              setActionLoading(false);
+            }} disabled={actionLoading}>
               ยกเลิก
             </Button>
-            <Button onClick={handleEdit}>
-              บันทึก
+            <Button onClick={handleEdit} disabled={actionLoading}>
+              {actionLoading ? 'กำลังบันทึก...' : 'บันทึก'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <Dialog open={showDeleteDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowDeleteDialog(false);
+          setSelectedRecord(null);
+          setActionLoading(false);
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-red-600">ยืนยันการลบ</DialogTitle>
@@ -721,11 +823,15 @@ export default function DatabaseManager() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+            <Button variant="outline" onClick={() => {
+              setShowDeleteDialog(false);
+              setSelectedRecord(null);
+              setActionLoading(false);
+            }} disabled={actionLoading}>
               ยกเลิก
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              ลบ
+            <Button variant="destructive" onClick={handleDelete} disabled={actionLoading}>
+              {actionLoading ? 'กำลังลบ...' : 'ลบ'}
             </Button>
           </DialogFooter>
         </DialogContent>

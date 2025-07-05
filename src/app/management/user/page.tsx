@@ -38,8 +38,6 @@ const ROLE_OPTIONS = [
   { value: "DEVELOPER", label: "Developer" },
 ];
 
-
-
 // Simple debounce hook
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
@@ -51,7 +49,7 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function AdminUserPage() {
-  const { loading, isAdminOrDeveloper } = useAuth();
+  const { loading, isAdminOrDeveloper, isDeveloper, isAdmin, user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -95,6 +93,34 @@ export default function AdminUserPage() {
     }
   }, [justDeleted]);
 
+  // ฟังก์ชันตรวจสอบสิทธิ์การเปลี่ยน role
+  const canChangeRole = (targetUser: UserRow) => {
+    if (isDeveloper) return true; // Developer สามารถเปลี่ยน role ได้ทุกคน
+    
+    if (isAdmin) {
+      // Admin ไม่สามารถเปลี่ยน role ของ Developer ได้
+      if (targetUser.role === 'DEVELOPER') return false;
+      return true;
+    }
+    
+    return false;
+  };
+
+  // ฟังก์ชันสร้าง role options ตามสิทธิ์
+  const getRoleOptions = (targetUser: UserRow) => {
+    if (isDeveloper) {
+      // Developer สามารถเลือก role ได้ทุกตัว
+      return ROLE_OPTIONS;
+    }
+    
+    if (isAdmin) {
+      // Admin ไม่สามารถเลือก DEVELOPER role ได้
+      return ROLE_OPTIONS.filter(option => option.value !== 'DEVELOPER');
+    }
+    
+    return [];
+  };
+
   const data: UserRow[] = useMemo(() =>
     users.map(u => ({
       ...u,
@@ -113,6 +139,14 @@ export default function AdminUserPage() {
     try {
       const user = users.find(x => x.id === id);
       if (!user) return;
+      
+      // ตรวจสอบสิทธิ์อีกครั้งก่อนส่ง API
+      if (!canChangeRole(user)) {
+        toast.error("คุณไม่มีสิทธิ์เปลี่ยน role ของผู้ใช้นี้");
+        setPendingRoleChange(null);
+        return;
+      }
+      
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -204,17 +238,40 @@ export default function AdminUserPage() {
       {
         header: "สถานะ",
         accessorKey: "role",
-        cell: ({ row, getValue }) => (
-          <select
-            value={getValue() as string}
-            onChange={e => row.original.onRoleChange?.(row.original.id, e.target.value)}
-            className="input input-bordered"
-          >
-            {ROLE_OPTIONS.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        ),
+        cell: ({ row, getValue }) => {
+          const targetUser = row.original;
+          const canChange = canChangeRole(targetUser);
+          const roleOptions = getRoleOptions(targetUser);
+          
+          return (
+            <div className="flex items-center gap-2">
+              <select
+                value={getValue() as string}
+                onChange={e => row.original.onRoleChange?.(row.original.id, e.target.value)}
+                className={`input input-bordered ${!canChange ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                disabled={!canChange}
+              >
+                {roleOptions.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+              {!canChange && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-xs text-gray-500">🔒</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {targetUser.role === 'DEVELOPER' 
+                        ? 'ไม่สามารถเปลี่ยน role ของ Developer ได้' 
+                        : 'ไม่มีสิทธิ์เปลี่ยน role'}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </div>
+          );
+        },
         meta: { filterVariant: "select" },
       },
       {
