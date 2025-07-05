@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import React from "react";
 import SelectOrgForm from "@/components/forms/SelectOrgForm";
-import { useRouter } from "next/navigation";
 import GlobalSidebar from "@/components/GlobalSidebar";
 
 // [AUTH] ถ้า login แล้วให้ redirect ไปหน้าหลัก
