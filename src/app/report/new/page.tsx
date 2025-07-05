@@ -1,33 +1,36 @@
-"use client";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import jwt from "jsonwebtoken";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import MedErrorForm, { ReporterInfoCard } from "@/components/forms/MedErrorForm";
 import { useState, useEffect } from "react";
 import { AlertCircleIcon } from "lucide-react";
 
-export default function ReportNewPage() {
-  const [userInfo, setUserInfo] = useState<
-    | { accountId: string; username: string; name: string; position: string; phone: string; role: string; organizationId: string }
-    | null
-  >(null);
-  const [userLoading, setUserLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/users/me")
-      .then((res) => res.json())
-      .then((data) => {
-        setUserInfo({
-          accountId: data.accountId,
-          username: data.username,
-          name: data.name,
-          position: data.position,
-          phone: data.phone,
-          role: data.role,
-          organizationId: data.organizationId,
-        });
-        setUserLoading(false);
-      })
-      .catch(() => setUserLoading(false));
-  }, []);
+// [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
+export default async function ReportNewPage() {
+  // --- Logic ตรวจสอบ session, onboarding, approved, role ---
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
+  if (!sessionToken) {
+    redirect("/login");
+  }
+  let payload: jwt.JwtPayload;
+  try {
+    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
+    redirect("/login");
+  }
+  const account = await prisma.account.findUnique({ where: { id: payload.id }, include: { organization: true, user: true } });
+  if (!account) {
+    redirect("/login");
+  }
+  if (!account.onboarded) {
+    redirect("/onboarding");
+  }
+  if (!account.role || account.role === "UNAPPROVED") {
+    redirect("/pending-approval");
+  }
 
   return (
     <div className="space-y-6">
@@ -55,7 +58,18 @@ export default function ReportNewPage() {
         
         {/* ข้อมูลผู้รายงาน - ใช้พื้นที่ 1/3 */}
         <div className="lg:col-span-1">
-          <ReporterInfoCard userInfo={userInfo} userLoading={userLoading} />
+          <ReporterInfoCard 
+            userInfo={{
+              accountId: account.id,
+              username: account.username,
+              name: account.user?.name || "",
+              position: account.user?.position || "",
+              phone: account.user?.phone || "",
+              role: account.role,
+              organizationId: account.organizationId || "",
+            }} 
+            userLoading={false} 
+          />
         </div>
       </div>
 
@@ -74,7 +88,18 @@ export default function ReportNewPage() {
           </CardContent>
         </Card>
         
-        <ReporterInfoCard userInfo={userInfo} userLoading={userLoading} />
+        <ReporterInfoCard 
+          userInfo={{
+            accountId: account.id,
+            username: account.username,
+            name: account.user?.name || "",
+            position: account.user?.position || "",
+            phone: account.user?.phone || "",
+            role: account.role,
+            organizationId: account.organizationId || "",
+          }} 
+          userLoading={false} 
+        />
       </div>
     </div>
   );

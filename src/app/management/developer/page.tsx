@@ -1,46 +1,39 @@
-"use client";
-import { useState, useEffect } from "react";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
+import jwt from "jsonwebtoken";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function DeveloperPanel() {
-  const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  // ดึงรายชื่อองค์กรจาก API
-  useEffect(() => {
-    fetch("/api/organizations")
-      .then(res => res.json())
-      .then(data => setOrgs(data));
-  }, []);
-
-  // สร้างองค์กรใหม่
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!name.trim()) return;
-    setLoading(true);
-    try {
-      const res = await fetch("/api/organizations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        setError(err.error || "เกิดข้อผิดพลาด");
-      } else {
-        const org = await res.json();
-        setOrgs(prev => [org, ...prev]);
-        setName("");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+// [AUTH] เฉพาะผู้ใช้ที่มี role เป็น DEVELOPER เท่านั้นที่เข้าถึงได้
+export default async function DeveloperPanel() {
+  // --- Logic ตรวจสอบ session, onboarding, approved, role ---
+  const cookieStore = await cookies();
+  const sessionToken = cookieStore.get("session_token")?.value;
+  if (!sessionToken) {
+    redirect("/login");
+  }
+  let payload: jwt.JwtPayload;
+  try {
+    payload = jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret") as jwt.JwtPayload;
+  } catch {
+    redirect("/login");
+  }
+  const account = await prisma.account.findUnique({ where: { id: payload.id } });
+  if (!account) {
+    redirect("/login");
+  }
+  if (!account.onboarded) {
+    redirect("/onboarding");
+  }
+  if (!account.role || account.role === "UNAPPROVED") {
+    redirect("/pending-approval");
+  }
+  // ตรวจสอบว่าเป็น DEVELOPER เท่านั้น
+  if (account.role !== "DEVELOPER") {
+    redirect("/management");
+  }
 
   return (
     <div className="space-y-6">
@@ -53,19 +46,19 @@ export default function DeveloperPanel() {
           <CardTitle>สร้าง Organization ใหม่</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleCreate} className="flex gap-2">
+          <div className="flex gap-2">
             <Input
               placeholder="ชื่อ Organization"
-              value={name}
-              onChange={e => setName(e.target.value)}
               className="flex-1"
-              disabled={loading}
+              disabled
             />
-            <Button type="submit" disabled={loading || !name.trim()}>
-              {loading ? "กำลังสร้าง..." : "สร้าง Organization"}
+            <Button disabled>
+              สร้าง Organization
             </Button>
-          </form>
-          {error && <div className="text-red-500 mt-2">{error}</div>}
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">
+            ฟีเจอร์นี้จะถูกพัฒนาในอนาคต
+          </p>
         </CardContent>
       </Card>
 
@@ -75,11 +68,9 @@ export default function DeveloperPanel() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {orgs.map(org => (
-              <div key={org.id} className="border rounded px-4 py-2 bg-muted/50">
-                {org.name}
-              </div>
-            ))}
+            <p className="text-sm text-muted-foreground">
+              ฟีเจอร์นี้จะถูกพัฒนาในอนาคต
+            </p>
           </div>
         </CardContent>
       </Card>
