@@ -35,7 +35,7 @@ export default function OnboardingForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      router.push("/");
+      router.push("/pending-approval");
     } catch (error) {
       console.error("Error during onboarding:", error);
     } finally {
