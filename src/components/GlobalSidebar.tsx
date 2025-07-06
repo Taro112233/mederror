@@ -191,7 +191,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             <SidebarGroupLabel>
               <div className="flex flex-col gap-1">
                 <div>ระบบรายงานความคลาดเคลื่อนทางยา</div>
-                <div className="text-xs text-muted-foreground font-normal">
+                <div className="text-xs font-normal">
                   {userInfo?.organizationName || 'ระบบจัดการข้อผิดพลาดทางการแพทย์'}
                 </div>
               </div>
