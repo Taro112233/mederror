@@ -118,12 +118,12 @@ export default function OrganizationSelectForm({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="flex justify-end pt-4"
+            className="flex flex-col sm:flex-row gap-3 pt-4"
           >
             <Button 
               type="submit" 
               disabled={loading || orgs.length === 0 || disabled} 
-              className="w-full sm:w-auto"
+              className="flex-1 h-10"
             >
               <ArrowRight className="h-4 w-4 mr-2" />
               {disabled ? "กำลังประมวลผล..." : "ถัดไป"}
