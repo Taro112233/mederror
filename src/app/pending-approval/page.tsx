@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import LogoutButton from "../../components/button/LogoutButton";
 import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/ui/auth-layout";
 import { motion } from "framer-motion";
@@ -109,16 +108,26 @@ export default function PendingApprovalPage() {
           transition={{ duration: 0.4, delay: 0.8 }}
           className="flex flex-col sm:flex-row gap-3 pt-4"
         >
-          <div className="flex-1">
-            <LogoutButton 
-              className="w-full" 
-              variant="secondary" 
-              disabled={isLoading} 
-            />
-          </div>
+          <Button 
+            type="button"
+            variant="secondary" 
+            disabled={isLoading}
+            className="flex-1 h-10"
+            onClick={async () => {
+              if (isLoading) return;
+              try {
+                await fetch('/api/logout', { method: 'POST' });
+                router.replace('/login');
+              } catch (error) {
+                console.error('Error during logout:', error);
+              }
+            }}
+          >
+            ออกจากระบบ
+          </Button>
           <Button 
             onClick={handleRefresh} 
-            className="flex-1" 
+            className="flex-1 h-10" 
             disabled={isLoading}
           >
             <Clock className="h-4 w-4 mr-2" />

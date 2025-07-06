@@ -27,7 +27,7 @@ export default function RegisterForm() {
         headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
-        toast.success("สมัครสมาชิกสำเร็จ กรุณารอการอนุมัติ");
+        toast.success("สมัครสมาชิกสำเร็จ");
         router.push("/");
       } else {
         toast.error("สมัครสมาชิกไม่สำเร็จ");

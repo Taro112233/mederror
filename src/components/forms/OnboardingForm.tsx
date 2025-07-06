@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { OnboardingFormSchema, OnboardingFormSchemaType } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
-import LogoutButton from "@/components/button/LogoutButton";
 import { motion } from "framer-motion";
 import { User, Phone, Briefcase, Save } from "lucide-react";
 
@@ -112,14 +111,26 @@ export default function OnboardingForm() {
             transition={{ duration: 0.3, delay: 0.4 }}
             className="flex flex-col sm:flex-row gap-3 pt-4"
           >
-            <LogoutButton 
-              className="flex-1" 
+            <Button 
+              type="button"
               variant="secondary" 
-              disabled={isLoading} 
-            />
+              disabled={isLoading}
+              className="flex-1 h-10"
+              onClick={async () => {
+                if (isLoading) return;
+                try {
+                  await fetch('/api/logout', { method: 'POST' });
+                  router.replace('/login');
+                } catch (error) {
+                  console.error('Error during logout:', error);
+                }
+              }}
+            >
+              ออกจากระบบ
+            </Button>
             <Button 
               type="submit" 
-              className="flex-1" 
+              className="flex-1 h-10" 
               disabled={isLoading}
             >
               <Save className="h-4 w-4 mr-2" />

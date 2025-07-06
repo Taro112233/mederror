@@ -24,9 +24,9 @@ export default async function SelectOrganizationPage() {
       <div className="flex flex-col items-center justify-center min-h-screen">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold">เลือกองค์กร</h1>
+            <h1 className="text-2xl font-bold">เลือกหน่วยงาน หรือ องค์กร</h1>
             <p className="text-muted-foreground">
-              กรุณาเลือกองค์กรที่คุณต้องการเข้าถึง
+              กรุณาเลือกหน่วยงาน หรือ องค์กรที่คุณต้องการเข้าถึง
             </p>
           </div>
           <SelectOrgForm onSelect={() => {}} />

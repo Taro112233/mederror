@@ -54,14 +54,14 @@ export default function LoginCredentialForm({
                 <FormItem>
                   <FormLabel className="flex items-center space-x-2">
                     <User className="h-4 w-4" />
-                    <span>ชื่อผู้ใช้</span>
+                    <span>Username</span>
                   </FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       disabled={disabled}
                       className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                      placeholder="กรอกชื่อผู้ใช้"
+                      placeholder="กรอก Username"
                     />
                   </FormControl>
                   <FormMessage />
@@ -109,7 +109,7 @@ export default function LoginCredentialForm({
               type="button" 
               variant="outline" 
               onClick={onBack} 
-              className="flex-1" 
+              className="flex-1 h-10" 
               disabled={disabled}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -117,7 +117,7 @@ export default function LoginCredentialForm({
             </Button>
             <Button 
               type="submit" 
-              className="flex-1" 
+              className="flex-1 h-10" 
               disabled={disabled}
             >
               <LogIn className="h-4 w-4 mr-2" />

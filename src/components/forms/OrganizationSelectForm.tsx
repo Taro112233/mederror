@@ -78,7 +78,7 @@ export default function OrganizationSelectForm({
                 <FormItem>
                   <FormLabel className="flex items-center space-x-2">
                     <Building2 className="h-4 w-4" />
-                    <span>เลือกองค์กร</span>
+                    <span>เลือกหน่วยงาน หรือ องค์กร</span>
                   </FormLabel>
                   <FormControl>
                     <Select 
@@ -95,7 +95,7 @@ export default function OrganizationSelectForm({
                                 <Loader2 className="h-4 w-4 animate-spin" />
                                 <span>กำลังโหลด...</span>
                               </div>
-                            ) : "--เลือกองค์กร--"
+                            ) : "--เลือกหน่วยงาน หรือ องค์กร--"
                           } 
                         />
                       </SelectTrigger>

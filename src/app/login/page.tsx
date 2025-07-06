@@ -23,7 +23,7 @@ export default async function LoginPage() {
   return (
     <AuthLayout 
       title="เข้าสู่ระบบ" 
-      subtitle="กรุณาเลือกองค์กรและเข้าสู่ระบบ"
+      subtitle="กรุณาเลือกหน่วยงาน หรือ องค์กรและเข้าสู่ระบบ"
     >
       <LoginForm />
       <div className="mt-6 text-center text-sm">
