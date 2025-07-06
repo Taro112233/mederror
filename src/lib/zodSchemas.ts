@@ -27,15 +27,15 @@ export type MedErrorFormSchemaType = z.infer<typeof MedErrorFormSchema>;
 // Login: แค่ username, password
 export const LoginCredentialSchema = z.object({
   username: z.string().min(1, { message: "" }),
-  password: z.string().min(1, { message: "" }),
+  password: z.string().min(8, { message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" }),
 });
 export type LoginCredentialSchemaType = z.infer<typeof LoginCredentialSchema>;
 
 // Register: username, password, confirmPassword
 export const RegisterCredentialSchema = z.object({
   username: z.string().min(1, { message: "" }),
-  password: z.string().min(1, { message: "" }),
-  confirmPassword: z.string().min(1, { message: "" }),
+  password: z.string().min(8, { message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" }),
+  confirmPassword: z.string().min(8, { message: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "รหัสผ่านไม่ตรงกัน",
   path: ["confirmPassword"],

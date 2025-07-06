@@ -62,8 +62,8 @@ export async function PATCH(req: NextRequest) {
     if (newPassword !== confirmPassword) {
       return NextResponse.json({ error: "รหัสผ่านใหม่ไม่ตรงกัน" }, { status: 400 });
     }
-    if (newPassword.length < 6) {
-      return NextResponse.json({ error: "รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร" }, { status: 400 });
+    if (newPassword.length < 8) {
+      return NextResponse.json({ error: "รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร" }, { status: 400 });
     }
     const account = await prisma.account.findUnique({ where: { id: accountId } });
     if (!account) {

@@ -8,6 +8,9 @@ export async function POST(req: NextRequest) {
     if (!username || !password) {
       return NextResponse.json({ error: "Missing username or password" }, { status: 400 });
     }
+    if (password.length < 8) {
+      return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" }, { status: 400 });
+    }
     // Check if username exists
     const existing = await prisma.account.findFirst({ where: { username, organizationId: organizationId || undefined } });
     if (existing) {

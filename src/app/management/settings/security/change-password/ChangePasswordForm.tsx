@@ -33,8 +33,8 @@ export default function ChangePasswordForm() {
       toast.error("รหัสผ่านใหม่ไม่ตรงกัน");
       return;
     }
-    if (passwordForm.newPassword.length < 6) {
-      toast.error("รหัสผ่านใหม่ต้องมีอย่างน้อย 6 ตัวอักษร");
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร");
       return;
     }
     setIsChangingPassword(true);
@@ -106,7 +106,7 @@ export default function ChangePasswordForm() {
               value={passwordForm.newPassword}
               onChange={(e) => handlePasswordChange("newPassword", e.target.value)}
               className="mt-1 pr-10"
-              placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)"
+              placeholder="กรอกรหัสผ่านใหม่ (อย่างน้อย 8 ตัวอักษร)"
             />
             <Button
               type="button"
