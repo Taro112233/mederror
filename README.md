@@ -29,6 +29,26 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/mederror"
+
+# Vercel Blob Storage
+BLOB_READ_WRITE_TOKEN="your_vercel_blob_token_here"
+```
+
+### Setting up Vercel Blob
+
+1. Go to your [Vercel Dashboard](https://vercel.com/dashboard)
+2. Select your project
+3. Go to Storage tab
+4. Create a new Blob store
+5. Copy the `BLOB_READ_WRITE_TOKEN` and add it to your `.env.local` file
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

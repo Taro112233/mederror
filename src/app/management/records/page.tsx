@@ -562,6 +562,7 @@ export default function AdminRecordsPage() {
                             width={300}
                             height={128}
                             className="w-full h-32 object-cover rounded"
+                            unoptimized={image.url.includes('blob.vercel-storage.com')}
                           />
                         ))}
                       </div>

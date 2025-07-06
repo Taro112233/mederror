@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { v4 as uuidv4 } from "uuid";
-import path from "path";
-import fs from "fs/promises";
+import { uploadMultipleToBlob } from "@/lib/blob";
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,25 +47,30 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // บันทึกไฟล์รูปภาพ (สมมติบันทึกใน public/uploads)
+    // บันทึกไฟล์รูปภาพไปยัง Vercel Blob
     const imageRecords = [];
-    for (const file of images) {
-      if (typeof file === "string") continue;
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const ext = path.extname(file.name) || ".jpg";
-      const filename = `${uuidv4()}${ext}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      await fs.mkdir(uploadDir, { recursive: true });
-      const filePath = path.join(uploadDir, filename);
-      await fs.writeFile(filePath, buffer);
-      const url = `/uploads/${filename}`;
-      const img = await prisma.medErrorImage.create({
-        data: {
-          medErrorId: medError.id,
-          url,
-        },
-      });
-      imageRecords.push(img);
+    if (images.length > 0) {
+      try {
+        // Filter out string values and only keep File objects
+        const fileImages = images.filter((img): img is File => img instanceof File);
+        
+        if (fileImages.length > 0) {
+          const uploadedBlobs = await uploadMultipleToBlob(fileImages);
+          
+          for (const blob of uploadedBlobs) {
+            const img = await prisma.medErrorImage.create({
+              data: {
+                medErrorId: medError.id,
+                url: blob.url,
+              },
+            });
+            imageRecords.push(img);
+          }
+        }
+      } catch (error) {
+        console.error('Error uploading images to blob:', error);
+        // Continue with the medError creation even if image upload fails
+      }
     }
 
     return NextResponse.json({ success: true, medError, images: imageRecords }, { status: 201 });

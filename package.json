@@ -9,6 +9,7 @@
     "lint": "next lint",
     "seed": "prisma db seed",
     "seed:mock": "tsx prisma/seed.mock.ts",
+    "migrate:images": "tsx scripts/migrate-images-to-blob.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -42,6 +43,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-table": "^8.21.3",
     "@types/xlsx": "^0.0.36",
+    "@vercel/blob": "^1.1.1",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
