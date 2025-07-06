@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { User, Settings, FileText, BarChart3 } from "lucide-react";
 import CardButton from "@/components/CardButton";
 import prisma from "@/lib/prisma";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function HomePage() {
@@ -32,6 +33,23 @@ export default async function HomePage() {
     redirect("/pending-approval");
   }
   // --- END Logic ---
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <Skeleton className="h-24 w-full mb-4" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <Skeleton className="h-6 w-1/2 mt-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

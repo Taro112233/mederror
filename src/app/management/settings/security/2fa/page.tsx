@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock } from "lucide-react";
 import Link from "next/link";
 import TwoFactorAuthForm from "./TwoFactorAuthForm";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [SECURITY] ตรวจสอบ security token ในฝั่ง server
 export default async function TwoFactorAuthPage() {
@@ -36,6 +37,18 @@ export default async function TwoFactorAuthPage() {
 
   if (minutesDiff > 15) {
     redirect("/management/settings/security/verify");
+  }
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+      </div>
+    );
   }
 
   return (

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { Badge } from "@/components/ui/badge";
 import { Database, Shield, AlertTriangle } from "lucide-react";
 import DatabaseManager from "./DatabaseManager";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [AUTH] เฉพาะผู้ใช้ที่มี role เป็น DEVELOPER เท่านั้นที่เข้าถึงได้
 export default async function DeveloperPanel() {
@@ -52,6 +53,23 @@ export default async function DeveloperPanel() {
     medErrors: medErrorsCount,
     users: usersCount,
   };
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+        <Skeleton className="h-16 w-full mt-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

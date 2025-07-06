@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { User, Shield, Bell, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import CardButton from "@/components/CardButton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function AdminSettings() {
@@ -30,6 +31,22 @@ export default async function AdminSettings() {
   }
   if (!account.role || account.role === "UNAPPROVED") {
     redirect("/pending-approval");
+  }
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <Skeleton className="h-10 w-1/4 mt-8" />
+      </div>
+    );
   }
 
   return (

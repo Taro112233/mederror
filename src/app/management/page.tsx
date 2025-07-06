@@ -6,6 +6,7 @@ import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import CardButton from "@/components/CardButton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function ManagementMenu() {
@@ -35,6 +36,21 @@ export default async function ManagementMenu() {
   // กำหนดสิทธิ์การเห็นเมนู
   const isDeveloper = account.role === "DEVELOPER";
   const isAdmin = account.role === "ADMIN";
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-8">
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

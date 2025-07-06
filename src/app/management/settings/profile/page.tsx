@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { User, ArrowLeft, Edit, Save, X } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Account {
   id: string;
@@ -123,7 +124,13 @@ export default function ProfileSettings() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+      </div>
+    );
   }
 
   if (!account) {

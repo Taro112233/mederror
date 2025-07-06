@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Bell, ArrowLeft, Mail, MessageSquare, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function NotificationSettings() {
@@ -30,6 +31,18 @@ export default async function NotificationSettings() {
   }
   if (!account.role || account.role === "UNAPPROVED") {
     redirect("/pending-approval");
+  }
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+        <Skeleton className="h-32 w-full mb-4" />
+      </div>
+    );
   }
 
   return (

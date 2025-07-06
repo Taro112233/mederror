@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import ReportNewClient from "./ReportNewClient";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function ReportNewPage() {
@@ -38,6 +39,18 @@ export default async function ReportNewPage() {
     role: account.role,
     organizationId: account.organizationId || "",
   };
+
+  // Add a loading state skeleton (for demonstration, always false)
+  const loading = false; // Replace with real loading logic if needed
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <Skeleton className="h-24 w-full mb-4" />
+        <Skeleton className="h-96 w-full mb-4" />
+      </div>
+    );
+  }
 
   return <ReportNewClient userInfo={userInfo} />;
 }
