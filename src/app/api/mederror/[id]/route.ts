@@ -4,10 +4,10 @@ import { deleteMultipleFromBlob } from "@/lib/blob";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Get the med error with its images
     const medError = await prisma.medError.findUnique({
