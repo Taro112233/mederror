@@ -182,12 +182,13 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-50 h-svh w-(--sidebar-width) flex bg-sidebar text-sidebar-foreground transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 z-50 h-svh w-(--sidebar-width) flex transition-transform duration-300 ease-in-out",
           side === "left"
             ? (showSidebar ? "translate-x-0 left-0" : "-translate-x-full left-0")
             : (showSidebar ? "translate-x-0 right-0" : "translate-x-full right-0"),
           className
         )}
+        style={{ background: 'var(--sidebar)', color: 'var(--sidebar-foreground)' }}
         {...props}
       >
         <div
