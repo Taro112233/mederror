@@ -1,9 +1,18 @@
 import { Card, CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { User, Bot } from "lucide-react";
+import { User, Bot, Copy as CopyIcon } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { Button } from "../ui/button";
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "../ui/tooltip";
+// Optional: use toast if available
+let toast: ((msg: string) => void) | undefined = undefined;
+try {
+  // Dynamically import sonner toast if available
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  toast = require("sonner").toast;
+} catch {}
 
 interface MessageBubbleProps {
   role: "user" | "ai";
@@ -14,6 +23,10 @@ interface MessageBubbleProps {
 
 export function MessageBubble({ role, content, timestamp, className }: MessageBubbleProps) {
   const isUser = role === "user";
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content);
+    if (toast) toast("คัดลอกข้อความแล้ว");
+  };
   return (
     <div
       className={cn(
@@ -31,7 +44,7 @@ export function MessageBubble({ role, content, timestamp, className }: MessageBu
       )}
       <Card
         className={cn(
-          "max-w-[75%] rounded-2xl shadow p-4",
+          "max-w-[75%] rounded-2xl shadow p-4 group relative",
           isUser
             ? "bg-blue-600 text-white ml-auto dark:bg-blue-500"
             : "bg-gray-100 text-gray-900 dark:bg-muted dark:text-gray-100"
@@ -41,11 +54,7 @@ export function MessageBubble({ role, content, timestamp, className }: MessageBu
           <div className="prose prose-sm dark:prose-invert break-words">
             <ReactMarkdown>{content}</ReactMarkdown>
           </div>
-          <div className="flex items-center gap-1 mt-2">
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">
-              {new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </span>
-          </div>
+          {/* No copy button */}
         </CardContent>
       </Card>
       {isUser && (

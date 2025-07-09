@@ -3,29 +3,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ChatInputBar } from "@/components/chat/ChatInputBar";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-const mockMessages = [
-  {
-    role: "ai" as const,
-    content: "สวัสดีค่ะ! ฉันคือ AI Assistant ของคุณ มีอะไรให้ช่วยเหลือไหม?",
-    timestamp: Date.now() - 1000 * 60 * 60,
-  },
-  {
-    role: "user" as const,
-    content: "ช่วยสรุปเหตุการณ์ Med Error ล่าสุดให้หน่อย",
-    timestamp: Date.now() - 1000 * 60 * 55,
-  },
-  {
-    role: "ai" as const,
-    content:
-      "เหตุการณ์ Med Error ล่าสุดเกิดขึ้นเมื่อวันที่ 1 มิถุนายน 2024 เกี่ยวกับการจ่ายยาเกินขนาด\n\n**รายละเอียด:**\n- ผู้ป่วย: นายสมชาย\n- ยาที่เกี่ยวข้อง: Paracetamol\n- ผลกระทบ: ไม่มีอาการรุนแรง พบและแก้ไขได้ทันเวลา\n\n> หากต้องการข้อมูลเพิ่มเติม สามารถสอบถามได้เลยค่ะ!",
-    timestamp: Date.now() - 1000 * 60 * 54,
-  },
-];
+// import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sparkles } from "lucide-react";
 
 export default function AiAssistantChatPage() {
-  const [messages, setMessages] = useState(mockMessages);
+  const [messages, setMessages] = useState<{role: "user"|"ai"; content: string; timestamp: number;}[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,17 +16,18 @@ export default function AiAssistantChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = (msg?: string) => {
+    const text = typeof msg === "string" ? msg : input;
+    if (!text.trim()) return;
     setSending(true);
     const now = Date.now();
     setMessages((prev) => [
       ...prev,
-      { role: "user" as const, content: input, timestamp: now },
+      { role: "user" as const, content: text, timestamp: now },
       {
         role: "ai" as const,
         content:
-          "(AI ตอบกลับตัวอย่าง) ขอบคุณสำหรับคำถาม: \n\n" + input +
+          "(AI ตอบกลับตัวอย่าง) ขอบคุณสำหรับคำถาม: \n\n" + text +
           "\n\n*หมายเหตุ: นี่เป็นข้อความตัวอย่าง ไม่มีการเชื่อมต่อ backend จริง*",
         timestamp: now + 1000,
       },
@@ -53,17 +36,37 @@ export default function AiAssistantChatPage() {
     setTimeout(() => setSending(false), 500);
   };
 
+  // Frequently asked questions for suggestion
+  const faqSuggestions = [
+    "Med Error คืออะไร?",
+    "จะป้องกันความผิดพลาดทางยาได้อย่างไร?",
+    "ช่วยสรุปเหตุการณ์ Med Error ล่าสุดให้หน่อย",
+  ];
+
   return (
-    <div className="w-full max-w-2xl mx-auto my-8 flex flex-col h-[80vh] shadow-lg border rounded-2xl p-0 md:p-0 bg-white dark:bg-muted">
-      {/* Header */}
-      <div className="p-4 md:p-6 border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-muted/80 rounded-t-2xl">
-        <h1 className="text-lg font-bold">AI Assistant</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">ถาม AI เกี่ยวกับ Med Error หรือเรื่องอื่น ๆ ในองค์กรของคุณ</p>
+    <div className="w-full max-w-2xl mx-auto flex flex-col shadow-lg border rounded-2xl p-0 md:p-0 bg-white dark:bg-muted h-[100dvh]">
+      {/* Minimal Header */}
+      <div className="flex items-center justify-center gap-2 py-4">
+        <span className="text-lg font-bold">AI Assistant</span>
+        <Sparkles className="h-6 w-6 text-yellow-400" />
       </div>
-      {/* Messages */}
-      <ScrollArea className="flex-1 px-2 md:px-6 py-4 overflow-y-auto">
+      <div className="flex-1 px-2 md:px-6 py-4 overflow-y-auto">
         {messages.length === 0 && (
-          <div className="text-center text-gray-400 mt-12">เริ่มต้นสนทนาโดยพิมพ์ข้อความด้านล่าง</div>
+          <div className="flex flex-col items-center text-center text-gray-400 mt-12 gap-4">
+            <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
+              {faqSuggestions.map((q, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="bg-muted hover:bg-primary/10 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm transition-colors"
+                  onClick={() => handleSend(q)}
+                  disabled={sending}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
         {messages.map((msg, idx) => (
           <MessageBubble
@@ -74,14 +77,15 @@ export default function AiAssistantChatPage() {
           />
         ))}
         <div ref={messagesEndRef} />
-      </ScrollArea>
+      </div>
       <Separator />
       {/* Input */}
       <ChatInputBar
         value={input}
         onChange={setInput}
-        onSend={handleSend}
+        onSend={() => handleSend()}
         disabled={sending}
+        placeholder="พิมพ์คำถาม เช่น 'ช่วยสรุปเหตุการณ์ล่าสุด' หรือ 'AI ช่วยแนะนำวิธีป้องกันความผิดพลาด'..."
       />
     </div>
   );
