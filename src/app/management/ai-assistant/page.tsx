@@ -232,7 +232,7 @@ export default function AiAssistantChatPage() {
         onChange={setInput}
         onSend={() => handleSend()}
         disabled={sending}
-        placeholder="พิมพ์คำถาม เช่น 'ช่วยสรุปเหตุการณ์ล่าสุด' หรือ 'AI ช่วยแนะนำวิธีป้องกันความผิดพลาด'..."
+        placeholder="ถามอะไรก็ได้"
       />
     </div>
   );
