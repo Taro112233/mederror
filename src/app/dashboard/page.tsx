@@ -316,10 +316,6 @@ export default function DashboardPage() {
               <TabsTrigger value="week" className="md:min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button variant="outline" className="ml-auto">
-            <Sparkles className="w-4 h-4 mr-2 text-blue-500 animate-pulse" />
-            วิเคราะห์ด้วย AI
-          </Button>
         </div>
       </div>
 

@@ -25,7 +25,8 @@ import {
   Bell,
   Shield,
   Key,
-  BarChart3
+  BarChart3,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -125,7 +126,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             </span>
           ),
           href: "/management/ai-assistant",
-          icon: <BarChart3 className="h-4 w-4" />, isCurrent: true
+          icon: <Sparkles className="h-4 w-4 text-yellow-400" />, isCurrent: true
         });
       } else if (pathname === "/management/developer") {
         items.push({
@@ -273,7 +274,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={pathname === "/management/ai-assistant"}>
                       <Link href="/management/ai-assistant">
-                        <BarChart3 />
+                        <Sparkles />
                         <span>AI Assistant</span>
                       </Link>
                     </SidebarMenuButton>
@@ -312,7 +313,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       </Sidebar>
       <SidebarInset>
         <header
-          className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+          className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-white dark:bg-muted border-b border-gray-200 dark:border-gray-700"
           style={{ background: 'var(--header)', color: 'var(--header-foreground)' }}
         >
           <div className="flex items-center gap-2 px-4">
