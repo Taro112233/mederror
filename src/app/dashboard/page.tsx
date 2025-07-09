@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Users, TrendingUp, Calendar, Filter } from "lucide-react";
+import { AlertTriangle, Users, TrendingUp, Calendar, Filter, Plus } from "lucide-react";
 import { DashboardCharts } from "@/components/DashboardCharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 interface MedError {
   id: string;
@@ -45,6 +46,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<"year" | "month" | "week">("year");
   const [selectedBar, setSelectedBar] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchDashboardData();
@@ -309,13 +311,26 @@ export default function DashboardPage() {
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         </div>
         <div className="flex flex-row items-center space-x-2 w-full md:w-auto">
-          <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}>
-            <TabsList className="w-full md:w-auto">
-              <TabsTrigger value="year" className="md:min-w-[80px] flex-1">ปี</TabsTrigger>
-              <TabsTrigger value="month" className="md:min-w-[80px] flex-1">เดือน</TabsTrigger>
-              <TabsTrigger value="week" className="md:min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex-1">
+            <Tabs value={selectedPeriod} onValueChange={(value) => setSelectedPeriod(value as "year" | "month" | "week")}>
+              <TabsList className="w-full md:w-auto">
+                <TabsTrigger value="year" className="md:min-w-[80px] flex-1">ปี</TabsTrigger>
+                <TabsTrigger value="month" className="md:min-w-[80px] flex-1">เดือน</TabsTrigger>
+                <TabsTrigger value="week" className="md:min-w-[80px] flex-1">สัปดาห์</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          <div className="flex-0 ml-auto">
+            <Button
+              variant="outline"
+              className="ml-2 bg-white text-black border border-gray-300 hover:bg-gray-50"
+              aria-label="เพิ่มรายงานใหม่"
+              onClick={() => router.push("/report/new")}
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              เพิ่มรายงานใหม่
+            </Button>
+          </div>
         </div>
       </div>
 
