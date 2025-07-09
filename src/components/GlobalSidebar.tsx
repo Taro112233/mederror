@@ -117,6 +117,17 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
           icon: <User className="h-4 w-4" />,
           isCurrent: true
         });
+      } else if (pathname === "/management/ai-rca") {
+        items.push({
+          label: (
+            <span className="flex items-center gap-1">
+              AI RCA
+            </span>
+          ),
+          href: "/management/ai-rca",
+          icon: <BarChart3 className="h-4 w-4" />,
+          isCurrent: true
+        });
       } else if (pathname === "/management/developer") {
         items.push({
           label: "Developer Panel",
@@ -258,6 +269,17 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                {/* AI RCA for ADMIN only */}
+                {user?.role === "ADMIN" && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={pathname === "/management/ai-rca"}>
+                      <Link href="/management/ai-rca">
+                        <BarChart3 />
+                        <span>AI RCA</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroup>
           )}

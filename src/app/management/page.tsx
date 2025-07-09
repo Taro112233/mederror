@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Code, Settings, UserCheck } from "lucide-react";
+import { Users, FileText, Code, Settings, UserCheck, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import CardButton from "@/components/CardButton";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -83,6 +83,23 @@ export default async function ManagementMenu() {
               </div>
               <CardDescription>
                 ดูและจัดการรายการข้อผิดพลาดทั้งหมด
+              </CardDescription>
+            </CardHeader>
+          </CardButton>
+        )}
+        {/* 2.5 AI RCA (ADMIN only) */}
+        {isAdmin && (
+          <CardButton href="/management/ai-rca">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  AI RCA
+                </CardTitle>
+                <Badge variant="destructive">ADMIN</Badge>
+              </div>
+              <CardDescription>
+                วิเคราะห์ RCA ด้วย AI จากข้อมูล Med Error
               </CardDescription>
             </CardHeader>
           </CardButton>
