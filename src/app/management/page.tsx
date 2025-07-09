@@ -87,8 +87,8 @@ export default async function ManagementMenu() {
             </CardHeader>
           </CardButton>
         )}
-        {/* 2.5 AI Assistant (ADMIN only) */}
-        {isAdmin && (
+        {/* 2.5 AI Assistant (ADMIN, DEVELOPER) */}
+        {(isAdmin || isDeveloper) && (
           <CardButton href="/management/ai-assistant">
             <CardHeader>
               <div className="flex items-center gap-2">

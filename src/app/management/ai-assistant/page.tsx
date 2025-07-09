@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function AiAssistantChatPage() {
+  const { loading: authLoading, isAdminOrDeveloper } = useAuth();
   const [messages, setMessages] = useState<{role: "user"|"ai"; content: string; timestamp: number;}[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -158,6 +159,25 @@ export default function AiAssistantChatPage() {
     }
     setRandomFaqs(arr.slice(0, 3));
   }, []);
+
+  // ตรวจสอบสิทธิ์การเข้าถึง - ต้องอยู่หลัง hooks ทั้งหมด
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">กำลังโหลด...</p>
+        </div>
+      </div>
+    );
+  }
+  if (!isAdminOrDeveloper) {
+    // Redirect ไปหน้า management แทนที่จะแสดง AccessDenied
+    if (typeof window !== 'undefined') {
+      window.location.href = '/management';
+    }
+    return null;
+  }
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col shadow-lg border rounded-lg p-0 md:p-0 bg-white dark:bg-muted h-[80dvh]">

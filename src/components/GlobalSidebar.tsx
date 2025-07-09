@@ -269,8 +269,8 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                {/* AI Assistant for ADMIN only */}
-                {user?.role === "ADMIN" && (
+                {/* AI Assistant for ADMIN and DEVELOPER */}
+                {(user?.role === "ADMIN" || user?.role === "DEVELOPER") && (
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={pathname === "/management/ai-assistant"}>
                       <Link href="/management/ai-assistant">
