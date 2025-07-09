@@ -1,6 +1,5 @@
 import { Button } from "../ui/button";
 import { ScrollArea } from "../ui/scroll-area";
-import { Separator } from "../ui/separator";
 import { cn } from "@/lib/utils";
 import { Plus, User, Settings, HelpCircle } from "lucide-react";
 import React from "react";

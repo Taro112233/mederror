@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Users, TrendingUp, Calendar, Filter, Sparkles } from "lucide-react";
+import { AlertTriangle, Users, TrendingUp, Calendar, Filter } from "lucide-react";
 import { DashboardCharts } from "@/components/DashboardCharts";
 import { Skeleton } from "@/components/ui/skeleton";
 

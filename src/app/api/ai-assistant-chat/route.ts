@@ -18,9 +18,6 @@ export async function POST(req: NextRequest) {
     } catch {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }
-    if (payload.role !== "ADMIN") {
-      return NextResponse.json({ error: "Admin only" }, { status: 401 });
-    }
     const organizationId = payload.organizationId;
     if (!organizationId) {
       return NextResponse.json({ error: "No organization" }, { status: 400 });
@@ -55,15 +52,31 @@ export async function POST(req: NextRequest) {
     if (Array.isArray(body.messages)) {
       // Validate messages
       const messages = body.messages.filter(
-        (m: any) => m && typeof m.role === "string" && typeof m.content === "string"
+        (m: { role: string; content: string }) => m && typeof m.role === "string" && typeof m.content === "string"
       );
       if (messages.length === 0) {
         return NextResponse.json({ error: "No messages" }, { status: 400 });
       }
       // แนบข้อมูล medErrors (ถ้ามี) เข้าไปใน system prompt
-      let medErrorRaw: any[] = [];
+      let medErrorRaw: {
+        id: string;
+        eventDate: string;
+        unit: string | null;
+        severity: string | null;
+        errorType: string | null;
+        subErrorType: string | null;
+        description: string;
+      }[] = [];
       if (Array.isArray(body.medErrors) && body.medErrors.length > 0) {
-        medErrorRaw = body.medErrors.map((e: any) => ({
+        medErrorRaw = body.medErrors.map((e: {
+          id: string;
+          eventDate: string;
+          unit?: { label?: string };
+          severity?: { label?: string };
+          errorType?: { label?: string };
+          subErrorType?: { label?: string };
+          description: string;
+        }) => ({
           id: e.id,
           eventDate: e.eventDate,
           unit: e.unit?.label || null,
@@ -73,7 +86,7 @@ export async function POST(req: NextRequest) {
           description: e.description,
         }));
       }
-      let medErrorJson = JSON.stringify(medErrorRaw);
+      const medErrorJson = JSON.stringify(medErrorRaw);
       const systemPrompt = `คุณคือ AI Assistant สำหรับเหตุการณ์ Med Error ในโรงพยาบาล กรุณาตอบเป็นภาษาไทยโดยอ้างอิงข้อมูล MedError ที่อยู่ใน JSON ด้านล่างนี้ หากคำถามหรือคำตอบเกี่ยวข้องกับเหตุการณ์ใด ๆ กรุณาระบุ \"MedError ID\" ของเหตุการณ์นั้นในคำตอบด้วย`;
       // ปรับ role ให้ถูกต้องตาม OpenAI API
       let chatMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
@@ -84,7 +97,7 @@ export async function POST(req: NextRequest) {
       }
       chatMessages = [
         ...chatMessages,
-        ...messages.map((m: any) => ({
+        ...messages.map((m: { role: string; content: string }) => ({
           role: m.role === "assistant" || m.role === "ai" ? "assistant" : m.role,
           content: m.content,
         })),
@@ -104,9 +117,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing question" }, { status: 400 });
     }
     // ใช้ medErrors จาก body ถ้ามี, ถ้าไม่มีให้ fallback ไปดึงเอง
-    let medErrorRaw: any[];
+    let medErrorRaw: {
+      id: string;
+      eventDate: string;
+      unit: string | null;
+      severity: string | null;
+      errorType: string | null;
+      subErrorType: string | null;
+      description: string;
+    }[];
     if (Array.isArray(medErrorsFromBody) && medErrorsFromBody.length > 0) {
-      medErrorRaw = medErrorsFromBody.map(e => ({
+      medErrorRaw = medErrorsFromBody.map((e: {
+        id: string;
+        eventDate: string;
+        unit?: { label?: string };
+        severity?: { label?: string };
+        errorType?: { label?: string };
+        subErrorType?: { label?: string };
+        description: string;
+      }) => ({
         id: e.id,
         eventDate: e.eventDate,
         unit: e.unit?.label || null,

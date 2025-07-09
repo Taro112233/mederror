@@ -1,32 +1,18 @@
 import { Card, CardContent } from "../ui/card";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { User, Bot, Copy as CopyIcon } from "lucide-react";
+import { User, Bot } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { Button } from "../ui/button";
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "../ui/tooltip";
-// Optional: use toast if available
-let toast: ((msg: string) => void) | undefined = undefined;
-try {
-  // Dynamically import sonner toast if available
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  toast = require("sonner").toast;
-} catch {}
 
 interface MessageBubbleProps {
   role: "user" | "ai";
   content: string;
-  timestamp: number;
   className?: string;
 }
 
-export function MessageBubble({ role, content, timestamp, className }: MessageBubbleProps) {
+export function MessageBubble({ role, content, className }: MessageBubbleProps) {
   const isUser = role === "user";
-  const handleCopy = () => {
-    navigator.clipboard.writeText(content);
-    if (toast) toast("คัดลอกข้อความแล้ว");
-  };
   return (
     <div
       className={cn(

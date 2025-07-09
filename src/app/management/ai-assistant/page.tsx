@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ChatInputBar } from "@/components/chat/ChatInputBar";
 import { Separator } from "@/components/ui/separator";
@@ -8,13 +8,24 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
+// Define MedError type
+interface MedError {
+  id: string;
+  eventDate: string;
+  unit?: { label?: string };
+  severity?: { label?: string };
+  errorType?: { label?: string };
+  subErrorType?: { label?: string };
+  description: string;
+}
+
 export default function AiAssistantChatPage() {
   const { loading: authLoading, isAdminOrDeveloper } = useAuth();
-  const [messages, setMessages] = useState<{role: "user"|"ai"; content: string; timestamp: number;}[]>([]);
+  const [messages, setMessages] = useState<{role: "user"|"ai"; content: string;}[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [organizationId, setOrganizationId] = useState<string | null>(null);
-  const [medErrors, setMedErrors] = useState<any[]>([]);
+  const [medErrors, setMedErrors] = useState<MedError[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // ดึง organizationId ของผู้ใช้ปัจจุบัน
@@ -45,9 +56,9 @@ export default function AiAssistantChatPage() {
           const now = new Date();
           const since = new Date();
           since.setDate(now.getDate() - 30);
-          data = data.filter((e: any) => new Date(e.eventDate) >= since);
+          data = data.filter((e: MedError) => new Date(e.eventDate) >= since);
           // เรียง eventDate จากใหม่ไปเก่า
-          data.sort((a: any, b: any) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
+          data.sort((a: MedError, b: MedError) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
           // เอาน้อยสุดระหว่าง 30 วันล่าสุด กับ 30 รายการล่าสุด
           if (data.length > 30) data = data.slice(0, 30);
           setMedErrors(data);
@@ -67,18 +78,17 @@ export default function AiAssistantChatPage() {
     const text = typeof msg === "string" ? msg : input;
     if (!text.trim()) return;
     setSending(true);
-    const now = Date.now();
     // เพิ่มข้อความ user ลงใน state ก่อน
     setMessages((prev) => [
       ...prev,
-      { role: "user" as const, content: text, timestamp: now },
+      { role: "user" as const, content: text },
     ]);
     setInput("");
     try {
       // เตรียม messages array สำหรับ backend (role: "user" | "ai")
       const history = [
         ...messages,
-        { role: "user", content: text, timestamp: now },
+        { role: "user", content: text },
       ].map((m) => ({
         role: m.role === "ai" ? "assistant" : "user",
         content: m.content,
@@ -98,16 +108,14 @@ export default function AiAssistantChatPage() {
         {
           role: "ai" as const,
           content: data.answer || "(ไม่สามารถตอบได้)",
-          timestamp: Date.now(),
         },
       ]);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setMessages((prev) => [
         ...prev,
         {
           role: "ai" as const,
-          content: e.message || "(เกิดข้อผิดพลาดในการเชื่อมต่อ AI)",
-          timestamp: Date.now(),
+          content: (e as Error).message || "(เกิดข้อผิดพลาดในการเชื่อมต่อ AI)",
         },
       ]);
     } finally {
@@ -119,8 +127,7 @@ export default function AiAssistantChatPage() {
   const handleExportChat = () => {
     if (messages.length === 0) return;
     const lines = messages.map(m => {
-      const date = new Date(m.timestamp).toLocaleString();
-      return `[${date}] ${m.role === "user" ? "User" : "AI"}: ${m.content}`;
+      return `${m.role === "user" ? "User" : "AI"}: ${m.content}`;
     });
     const blob = new Blob([lines.join("\n\n")], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -136,18 +143,18 @@ export default function AiAssistantChatPage() {
   };
 
   // Frequently asked questions for suggestion (10 questions)
-  const faqSuggestions = [
+  const faqSuggestions = useMemo(() => [
     "Med Error คืออะไร?",
     "จะป้องกันความผิดพลาดทางยาได้อย่างไร?",
     "ช่วยสรุปเหตุการณ์ Med Error ล่าสุดให้หน่อย",
     "AI ช่วยวิเคราะห์สาเหตุของ Med Error ได้ไหม?",
     "ควรทำอย่างไรเมื่อเกิด Med Error?",
-    "AI ช่วยแนะนำแนวทางการสื่อสารกับทีมเมื่อเกิดข้อผิดพลาด",
+    "AI แนะนำทางการสื่อสารกับทีมเมื่อเกิดข้อผิดพลาด",
     "มีวิธีติดตามและประเมิน Med Error อย่างไร?",
     "AI ช่วยสรุปข้อควรระวังในการจ่ายยา",
     "จะสร้างวัฒนธรรมความปลอดภัยในองค์กรได้อย่างไร?",
-    "AI ช่วยแนะนำการอบรมป้องกัน Med Error",
-  ];
+    "AI แนะนำการอบรมป้องกัน Med Error",
+  ], []);
 
   // SSR-safe: show first 3, then randomize after mount
   const [randomFaqs, setRandomFaqs] = React.useState(faqSuggestions.slice(0, 3));
@@ -158,7 +165,7 @@ export default function AiAssistantChatPage() {
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     setRandomFaqs(arr.slice(0, 3));
-  }, []);
+  }, [faqSuggestions]);
 
   // ตรวจสอบสิทธิ์การเข้าถึง - ต้องอยู่หลัง hooks ทั้งหมด
   if (authLoading) {
@@ -214,7 +221,6 @@ export default function AiAssistantChatPage() {
             key={idx}
             role={msg.role}
             content={msg.content}
-            timestamp={msg.timestamp}
           />
         ))}
         <div ref={messagesEndRef} />
