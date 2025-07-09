@@ -117,16 +117,15 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
           icon: <User className="h-4 w-4" />,
           isCurrent: true
         });
-      } else if (pathname === "/management/ai-rca") {
+      } else if (pathname === "/management/ai-assistant") {
         items.push({
           label: (
             <span className="flex items-center gap-1">
-              AI RCA
+              AI Assistant
             </span>
           ),
-          href: "/management/ai-rca",
-          icon: <BarChart3 className="h-4 w-4" />,
-          isCurrent: true
+          href: "/management/ai-assistant",
+          icon: <BarChart3 className="h-4 w-4" />, isCurrent: true
         });
       } else if (pathname === "/management/developer") {
         items.push({
@@ -269,13 +268,13 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                {/* AI RCA for ADMIN only */}
+                {/* AI Assistant for ADMIN only */}
                 {user?.role === "ADMIN" && (
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === "/management/ai-rca"}>
-                      <Link href="/management/ai-rca">
+                    <SidebarMenuButton asChild isActive={pathname === "/management/ai-assistant"}>
+                      <Link href="/management/ai-assistant">
                         <BarChart3 />
-                        <span>AI RCA</span>
+                        <span>AI Assistant</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
