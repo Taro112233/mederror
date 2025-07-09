@@ -6,35 +6,112 @@ import { Separator } from "@/components/ui/separator";
 // import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function AiAssistantChatPage() {
   const [messages, setMessages] = useState<{role: "user"|"ai"; content: string; timestamp: number;}[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [medErrors, setMedErrors] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // ดึง organizationId ของผู้ใช้ปัจจุบัน
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await fetch("/api/users/me");
+        if (res.ok) {
+          const user = await res.json();
+          setOrganizationId(user.organizationId || null);
+        }
+      } catch {
+        setOrganizationId(null);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // ดึง med error records ขององค์กร (30 รายการล่าสุด หรือ 30 วันล่าสุด เอาน้อยสุด)
+  useEffect(() => {
+    if (!organizationId) return;
+    const fetchMedErrors = async () => {
+      try {
+        const res = await fetch(`/api/mederror?organizationId=${organizationId}`);
+        if (res.ok) {
+          let data = await res.json();
+          // กรอง 30 วันล่าสุด
+          const now = new Date();
+          const since = new Date();
+          since.setDate(now.getDate() - 30);
+          data = data.filter((e: any) => new Date(e.eventDate) >= since);
+          // เรียง eventDate จากใหม่ไปเก่า
+          data.sort((a: any, b: any) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
+          // เอาน้อยสุดระหว่าง 30 วันล่าสุด กับ 30 รายการล่าสุด
+          if (data.length > 30) data = data.slice(0, 30);
+          setMedErrors(data);
+        }
+      } catch {
+        setMedErrors([]);
+      }
+    };
+    fetchMedErrors();
+  }, [organizationId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = (msg?: string) => {
+  const handleSend = async (msg?: string) => {
     const text = typeof msg === "string" ? msg : input;
     if (!text.trim()) return;
     setSending(true);
     const now = Date.now();
+    // เพิ่มข้อความ user ลงใน state ก่อน
     setMessages((prev) => [
       ...prev,
       { role: "user" as const, content: text, timestamp: now },
-      {
-        role: "ai" as const,
-        content:
-          "(AI ตอบกลับตัวอย่าง) ขอบคุณสำหรับคำถาม: \n\n" + text +
-          "\n\n*หมายเหตุ: นี่เป็นข้อความตัวอย่าง ไม่มีการเชื่อมต่อ backend จริง*",
-        timestamp: now + 1000,
-      },
     ]);
     setInput("");
-    setTimeout(() => setSending(false), 500);
+    try {
+      // เตรียม messages array สำหรับ backend (role: "user" | "ai")
+      const history = [
+        ...messages,
+        { role: "user", content: text, timestamp: now },
+      ].map((m) => ({
+        role: m.role === "ai" ? "assistant" : "user",
+        content: m.content,
+      }));
+      const res = await fetch("/api/ai-assistant-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history, medErrors }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ AI");
+      }
+      const data = await res.json();
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai" as const,
+          content: data.answer || "(ไม่สามารถตอบได้)",
+          timestamp: Date.now(),
+        },
+      ]);
+    } catch (e: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai" as const,
+          content: e.message || "(เกิดข้อผิดพลาดในการเชื่อมต่อ AI)",
+          timestamp: Date.now(),
+        },
+      ]);
+    } finally {
+      setSending(false);
+    }
   };
 
   // Export chat as .txt file

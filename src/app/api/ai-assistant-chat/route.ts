@@ -60,9 +60,38 @@ export async function POST(req: NextRequest) {
       if (messages.length === 0) {
         return NextResponse.json({ error: "No messages" }, { status: 400 });
       }
+      // แนบข้อมูล medErrors (ถ้ามี) เข้าไปใน system prompt
+      let medErrorRaw: any[] = [];
+      if (Array.isArray(body.medErrors) && body.medErrors.length > 0) {
+        medErrorRaw = body.medErrors.map((e: any) => ({
+          id: e.id,
+          eventDate: e.eventDate,
+          unit: e.unit?.label || null,
+          severity: e.severity?.label || null,
+          errorType: e.errorType?.label || null,
+          subErrorType: e.subErrorType?.label || null,
+          description: e.description,
+        }));
+      }
+      let medErrorJson = JSON.stringify(medErrorRaw);
+      const systemPrompt = `คุณคือ AI Assistant สำหรับเหตุการณ์ Med Error ในโรงพยาบาล กรุณาตอบเป็นภาษาไทยโดยอ้างอิงข้อมูล MedError ที่อยู่ใน JSON ด้านล่างนี้ หากคำถามหรือคำตอบเกี่ยวข้องกับเหตุการณ์ใด ๆ กรุณาระบุ \"MedError ID\" ของเหตุการณ์นั้นในคำตอบด้วย`;
+      // ปรับ role ให้ถูกต้องตาม OpenAI API
+      let chatMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
+        { role: "system", content: systemPrompt },
+      ];
+      if (medErrorRaw.length > 0) {
+        chatMessages.push({ role: "system", content: `MedErrorRecords: ${medErrorJson}` });
+      }
+      chatMessages = [
+        ...chatMessages,
+        ...messages.map((m: any) => ({
+          role: m.role === "assistant" || m.role === "ai" ? "assistant" : m.role,
+          content: m.content,
+        })),
+      ];
       const completion = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
-        messages,
+        messages: chatMessages,
         max_tokens: 2000,
         temperature: 0.2,
       });
@@ -70,37 +99,50 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ answer: aiAnswer });
     }
     // Fallback: single question (legacy)
-    const { question } = body;
+    const { question, medErrors: medErrorsFromBody } = body;
     if (!question || typeof question !== "string") {
       return NextResponse.json({ error: "Missing question" }, { status: 400 });
     }
-    // Fetch recent mederror data (last 30 days)
-    const since = new Date();
-    since.setDate(since.getDate() - 30);
-    const medErrors = await prisma.medError.findMany({
-      where: {
-        reporterOrganizationId: organizationId,
-        eventDate: { gte: since },
-      },
-      orderBy: { eventDate: "desc" },
-      take: 50,
-      include: {
-        unit: true,
-        severity: true,
-        errorType: true,
-        subErrorType: true,
-      },
-    });
-    // สร้าง JSON array ของ MedError ดิบ ๆ
-    let medErrorRaw = medErrors.map(e => ({
-      id: e.id,
-      eventDate: e.eventDate.toISOString(),
-      unit: e.unit?.label || null,
-      severity: e.severity?.label || null,
-      errorType: e.errorType?.label || null,
-      subErrorType: e.subErrorType?.label || null,
-      description: e.description,
-    }));
+    // ใช้ medErrors จาก body ถ้ามี, ถ้าไม่มีให้ fallback ไปดึงเอง
+    let medErrorRaw: any[];
+    if (Array.isArray(medErrorsFromBody) && medErrorsFromBody.length > 0) {
+      medErrorRaw = medErrorsFromBody.map(e => ({
+        id: e.id,
+        eventDate: e.eventDate,
+        unit: e.unit?.label || null,
+        severity: e.severity?.label || null,
+        errorType: e.errorType?.label || null,
+        subErrorType: e.subErrorType?.label || null,
+        description: e.description,
+      }));
+    } else {
+      // Fetch recent mederror data (last 30 days)
+      const since = new Date();
+      since.setDate(since.getDate() - 30);
+      const medErrors = await prisma.medError.findMany({
+        where: {
+          reporterOrganizationId: organizationId,
+          eventDate: { gte: since },
+        },
+        orderBy: { eventDate: "desc" },
+        take: 50,
+        include: {
+          unit: true,
+          severity: true,
+          errorType: true,
+          subErrorType: true,
+        },
+      });
+      medErrorRaw = medErrors.map(e => ({
+        id: e.id,
+        eventDate: e.eventDate.toISOString(),
+        unit: e.unit?.label || null,
+        severity: e.severity?.label || null,
+        errorType: e.errorType?.label || null,
+        subErrorType: e.subErrorType?.label || null,
+        description: e.description,
+      }));
+    }
     // ปรับ input/output token
     const MAX_CONTEXT = 4096;
     const MAX_OUTPUT_TOKENS = 1200;
