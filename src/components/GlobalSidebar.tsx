@@ -126,7 +126,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             </span>
           ),
           href: "/management/ai-assistant",
-          icon: <Sparkles className="h-4 w-4 text-yellow-400" />, isCurrent: true
+          icon: <Sparkles className="h-4 w-4 text-blue-500" />, isCurrent: true
         });
       } else if (pathname === "/management/developer") {
         items.push({
@@ -314,7 +314,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       <SidebarInset>
         <header
           className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-white dark:bg-muted border-b border-gray-200 dark:border-gray-700"
-          style={{ background: 'var(--header)', color: 'var(--header-foreground)' }}
+          style={{ background: 'linear-gradient(to right, var(--header), oklch(83.7% 0.128 66.29))', color: 'var(--header-foreground)' }}
         >
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />

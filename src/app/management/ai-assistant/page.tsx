@@ -191,8 +191,8 @@ export default function AiAssistantChatPage() {
       {/* Minimal Header */}
       <div className="flex items-center justify-between gap-2 py-3 px-4">
         <div className="flex items-center gap-2">
+          <Sparkles className="h-6 w-6 text-blue-500" />
           <span className="text-lg font-bold">AI Assistant</span>
-          <Sparkles className="h-6 w-6 text-yellow-400" />
         </div>
         <Button size="sm" variant="outline" onClick={handleExportChat} disabled={messages.length === 0}>
           Export Chat
