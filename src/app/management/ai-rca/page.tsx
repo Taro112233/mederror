@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BarChart3, Settings } from "lucide-react";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "ai";
@@ -35,14 +36,35 @@ export default function AiRcaChatPage() {
     setMessages((prev) => [...prev, { role: "user", content: input }]);
     setInput("");
     setSending(true);
-    // Simulate AI response (replace with real API call later)
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/ai-rca-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: input }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ AI");
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", content: "(เกิดข้อผิดพลาดในการเชื่อมต่อ AI)" },
+        ]);
+      } else {
+        const data = await res.json();
+        setMessages((prev) => [
+          ...prev,
+          { role: "ai", content: data.answer || "(AI ไม่สามารถตอบได้)" },
+        ]);
+      }
+    } catch (e) {
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ AI");
       setMessages((prev) => [
         ...prev,
-        { role: "ai", content: "(AI ตอบกลับที่นี่ - ฟีเจอร์ backend ยังไม่เชื่อมต่อ)" },
+        { role: "ai", content: "(เกิดข้อผิดพลาดในการเชื่อมต่อ AI)" },
       ]);
+    } finally {
       setSending(false);
-    }, 1200);
+    }
   };
 
   if (loading) {
