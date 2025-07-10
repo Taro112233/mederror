@@ -37,7 +37,7 @@ export default function LoginForm() {
       } else if (data.account.role === "UNAPPROVED") {
         router.replace("/pending-approval");
       } else {
-        router.replace("/");
+        router.replace("/home");
       }
     } catch {
       toast.error("เกิดข้อผิดพลาด");

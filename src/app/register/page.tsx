@@ -14,7 +14,7 @@ export default async function RegisterPage() {
   if (sessionToken) {
     try {
       jwt.verify(sessionToken, process.env.JWT_SECRET || "dev_secret");
-      redirect("/");
+      redirect("/home");
     } catch {
       // Token ไม่ถูกต้อง ให้ลบ cookie และแสดงหน้า register
     }

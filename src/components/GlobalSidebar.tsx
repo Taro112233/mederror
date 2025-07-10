@@ -65,9 +65,9 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
     // Always add home
     items.push({
       label: "หน้าแรก",
-      href: "/",
+      href: "/home",
       icon: <Home className="h-4 w-4" />,
-      isCurrent: pathname === "/"
+      isCurrent: pathname === "/home"
     });
 
     // Dashboard

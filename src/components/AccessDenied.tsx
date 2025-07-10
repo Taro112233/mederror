@@ -30,7 +30,7 @@ export default function AccessDenied({
           {showBackButton && (
             <div className="flex justify-center">
               <Button asChild>
-                <Link href="/">
+                <Link href="/home">
                   หน้าแรก
                 </Link>
               </Button>

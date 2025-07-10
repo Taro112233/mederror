@@ -45,19 +45,19 @@ export default function PendingApprovalPage() {
         const userData = await res.json();
         // If user is no longer UNAPPROVED, redirect to home
         if (userData.role !== "UNAPPROVED") {
-          router.replace(process.env.NEXT_PUBLIC_APP_URL || "/");
+          router.replace("/home");
         } else {
           // If still UNAPPROVED, just refresh the page
           window.location.reload();
         }
       } else {
         // If API call fails, redirect to home
-        router.replace(process.env.NEXT_PUBLIC_APP_URL || "/");
+        router.replace("/home");
       }
     } catch (error) {
       console.error("Error checking user status:", error);
       // If error occurs, redirect to home
-      router.replace(process.env.NEXT_PUBLIC_APP_URL || "/");
+      router.replace("/home");
     } finally {
       setIsLoading(false);
     }

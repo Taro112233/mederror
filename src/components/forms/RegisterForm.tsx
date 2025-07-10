@@ -28,7 +28,7 @@ export default function RegisterForm() {
       });
       if (res.ok) {
         toast.success("สมัครสมาชิกสำเร็จ");
-        router.push("/");
+        router.push("/home");
       } else {
         toast.error("สมัครสมาชิกไม่สำเร็จ");
       }
