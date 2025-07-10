@@ -23,15 +23,15 @@ const aj = arcjet({
     // Create a token bucket rate limit. Other algorithms are supported.
     tokenBucket({
       mode: "LIVE",
-      refillRate: 5, // Refill 5 tokens per interval
+      refillRate: 5, // เติม 5 tokens ทุก 10 วินาที
       interval: 10, // Refill every 10 seconds
-      capacity: 10, // Bucket capacity of 10 tokens
+      capacity: 5, // Bucket capacity of 5 tokens
     }),
   ],
 });
 
 export async function GET(req: Request) {
-  const decision = await aj.protect(req, { requested: 5 }); // Deduct 5 tokens from the bucket
+  const decision = await aj.protect(req, { requested: 1 }); // ใช้ 1 token ต่อ request
   console.log("Arcjet decision", decision);
 
   if (decision.isDenied()) {
