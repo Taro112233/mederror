@@ -3,8 +3,54 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
+import { isSpoofedBot } from "@arcjet/inspect";
+
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  characteristics: ["ip.src"],
+  rules: [
+    shield({ mode: "LIVE" }),
+    detectBot({
+      mode: "LIVE",
+      allow: ["CATEGORY:SEARCH_ENGINE"],
+    }),
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 5,
+      interval: 10,
+      capacity: 10,
+    }),
+  ],
+});
 
 export async function POST(request: NextRequest) {
+  const decision = await aj.protect(request, { requested: 5 });
+  if (decision.isDenied()) {
+    if (decision.reason.isRateLimit()) {
+      return NextResponse.json(
+        { error: "Too Many Requests", reason: decision.reason },
+        { status: 429 },
+      );
+    } else if (decision.reason.isBot()) {
+      return NextResponse.json(
+        { error: "No bots allowed", reason: decision.reason },
+        { status: 403 },
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Forbidden", reason: decision.reason },
+        { status: 403 },
+      );
+    }
+  }
+  if (decision.results.some(isSpoofedBot)) {
+    return NextResponse.json(
+      { error: "Forbidden", reason: decision.reason },
+      { status: 403 },
+    );
+  }
+
   try {
     const cookieStore = await cookies();
     const sessionToken = cookieStore.get("session_token")?.value;
