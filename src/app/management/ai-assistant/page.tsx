@@ -4,7 +4,7 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 import { ChatInputBar } from "@/components/chat/ChatInputBar";
 import { Separator } from "@/components/ui/separator";
 // import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles } from "lucide-react";
+import { Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -191,7 +191,7 @@ export default function AiAssistantChatPage() {
       {/* Minimal Header */}
       <div className="flex items-center justify-between gap-2 py-3 px-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-blue-500" />
+          <Bot className="h-6 w-6 text-black" />
           <span className="text-lg font-bold">AI Assistant</span>
         </div>
         <Button size="sm" variant="outline" onClick={handleExportChat} disabled={messages.length === 0}>

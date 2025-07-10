@@ -26,7 +26,7 @@ import {
   Shield,
   Key,
   BarChart3,
-  Sparkles
+  Bot
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -126,7 +126,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             </span>
           ),
           href: "/management/ai-assistant",
-          icon: <Sparkles className="h-4 w-4 text-blue-500" />, isCurrent: true
+          icon: <Bot className="h-4 w-4 text-black" />, isCurrent: true
         });
       } else if (pathname === "/management/developer") {
         items.push({
@@ -274,7 +274,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={pathname === "/management/ai-assistant"}>
                       <Link href="/management/ai-assistant">
-                        <Sparkles />
+                        <Bot className="text-black" />
                         <span>AI Assistant</span>
                       </Link>
                     </SidebarMenuButton>
