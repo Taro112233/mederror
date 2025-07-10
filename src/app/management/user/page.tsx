@@ -15,7 +15,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import * as XLSX from "xlsx";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -316,25 +315,6 @@ export default function AdminUserPage() {
     [filteredRows, page, pageSize]
   );
 
-  // ฟังก์ชัน export ข้อมูล filteredRows เป็น Excel
-  const exportFilteredToExcel = () => {
-    const exportData = filteredRows.map(row => {
-      const r = row.original;
-      return {
-        id: r.id,
-        username: r.username,
-        name: r.name,
-        position: r.position,
-        phone: r.phone,
-        role: r.role,
-      };
-    });
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Users");
-    XLSX.writeFile(wb, "users.xlsx");
-  };
-
   // Update globalFilter when debouncedSearch changes
   useEffect(() => {
     setGlobalFilter(debouncedSearch);
@@ -372,15 +352,6 @@ export default function AdminUserPage() {
           >
             <RefreshCwIcon size={16} />
             รีเฟรช
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={exportFilteredToExcel}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-900 hover:bg-gray-100"
-            disabled={filteredRows.length === 0}
-          >
-            Export Excel
           </Button>
         </div>
       </div>

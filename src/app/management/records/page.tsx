@@ -338,32 +338,6 @@ export default function AdminRecordsPage() {
     return null;
   }
 
-  // ฟังก์ชัน export ข้อมูล filteredRows เป็น Excel
-  const exportFilteredToExcel = () => {
-    // เตรียมข้อมูลสำหรับ export (เฉพาะ field ที่ต้องการ)
-    const exportData = filteredRows.map(row => {
-      const r = row.original;
-      return {
-        errorID: r.id,
-        eventDate: r.eventDate,
-        unit: r.unit.label,
-        description: r.description,
-        severity: r.severity.label,
-        errorType: r.errorType.label,
-        subErrorType: r.subErrorType.label,
-        reporterName: r.reporterName,
-        reporterPosition: r.reporterPosition,
-        reporterPhone: r.reporterPhone,
-        createdAt: r.createdAt,
-        images: r.images && r.images.length > 0 ? r.images.map(img => img.url).join(", ") : ""
-      };
-    });
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "MedErrorRecords");
-    XLSX.writeFile(wb, "mederror-records.xlsx");
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
@@ -378,15 +352,6 @@ export default function AdminRecordsPage() {
           >
             <RefreshCwIcon size={16} className={loading ? "animate-spin" : ""} />
             รีเฟรช
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={exportFilteredToExcel}
-            className="flex items-center gap-2 bg-white border border-gray-300 text-gray-900 hover:bg-gray-100"
-            disabled={filteredRows.length === 0}
-          >
-            Export Excel
           </Button>
         </div>
       </div>
