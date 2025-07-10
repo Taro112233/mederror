@@ -7,11 +7,11 @@ export default function Header() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="w-full flex items-center justify-between py-4 px-2 md:px-6"
+      className="sticky top-0 z-50 w-full flex items-center justify-between py-4 px-2 md:px-6 backdrop-blur overflow-hidden"
     >
-      <div className="font-bold text-xl">ระบบรายงานความคลาดเคลื่อนทางยา</div>
+      <div className="absolute inset-0 w-screen h-full bg-[linear-gradient(90deg,_oklch(92.4%_0.12_95.746),_oklch(83.7%_0.128_66.29))] pointer-events-none -z-10" />
+      <div className="font-bold text-xl">Med Error</div>
       <nav className="space-x-6">
-        <a href="#hero" className="hover:underline">หน้าแรก</a>
         <a href="#features" className="hover:underline">ฟีเจอร์</a>
         <a href="#about" className="hover:underline">เกี่ยวกับ</a>
         <a href="#contact" className="hover:underline">ติดต่อ</a>
