@@ -120,6 +120,17 @@ export default function OrganizationSelectForm({
             transition={{ duration: 0.3, delay: 0.2 }}
             className="flex flex-col sm:flex-row gap-3 pt-4"
           >
+            <Button
+              type="button"
+              variant="secondary"
+              className="flex-1 h-10"
+              onClick={() => {
+                window.location.href = "/";
+              }}
+              disabled={disabled}
+            >
+              ย้อนกลับ
+            </Button>
             <Button 
               type="submit" 
               disabled={loading || orgs.length === 0 || disabled} 
