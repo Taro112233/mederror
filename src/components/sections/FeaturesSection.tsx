@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { FileText, BarChart3, Shield, Bell, Users, Bot, Database, Settings, Sparkles } from "lucide-react";
+import { FileText, BarChart3, Shield, Users, Bot, Database } from "lucide-react";
 
 const features = [
   {

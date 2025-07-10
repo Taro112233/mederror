@@ -19,7 +19,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import Image from "next/image";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import * as XLSX from "xlsx";
 import { useAuth } from "@/hooks/use-auth";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
