@@ -33,7 +33,7 @@ export function MessageBubble({ role, content, className }: MessageBubbleProps) 
           "max-w-[75%] rounded-2xl shadow p-4 group relative",
           isUser
             ? "bg-blue-600 text-white ml-auto dark:bg-blue-500"
-            : "bg-gray-100 text-gray-900 dark:bg-muted dark:text-gray-100"
+            : "bg-gray-100 text-black dark:bg-muted dark:text-black"
         )}
       >
         <CardContent className="p-0">
