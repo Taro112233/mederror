@@ -215,7 +215,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={pathname === "/"}>
-                  <Link href="/">
+                  <Link href="/home">
                     <Home />
                     <span>หน้าแรก</span>
                   </Link>
