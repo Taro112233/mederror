@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { verifyJwtToken } from "@/lib/utils";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -20,6 +21,11 @@ export function middleware(request: NextRequest) {
     const sessionToken = request.cookies.get("session_token")?.value;
     
     if (!sessionToken) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+    try {
+      verifyJwtToken(sessionToken);
+    } catch {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }

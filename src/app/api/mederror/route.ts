@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { uploadMultipleToBlob } from "@/lib/blob";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
+import { verifyJwtToken } from "@/lib/utils";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -49,6 +50,16 @@ export async function POST(req: NextRequest) {
     );
   }
   try {
+    // JWT verification
+    const sessionToken = req.cookies.get("session_token")?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    try {
+      verifyJwtToken(sessionToken);
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    }
     // รับ multipart form-data
     const formData = await req.formData();
     // รับข้อมูลฟอร์ม
@@ -127,6 +138,16 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    // JWT verification
+    const sessionToken = req.cookies.get("session_token")?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    try {
+      verifyJwtToken(sessionToken);
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    }
     // รับ organizationId และ reporterAccountId จาก query parameter
     const { searchParams } = new URL(req.url);
     const organizationId = searchParams.get("organizationId");
@@ -175,6 +196,16 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    // JWT verification
+    const sessionToken = req.cookies.get("session_token")?.value;
+    if (!sessionToken) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    try {
+      verifyJwtToken(sessionToken);
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) {

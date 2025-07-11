@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
+import { LoginCredentialSchema } from "@/lib/zodSchemas";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -50,10 +51,12 @@ export async function POST(req: NextRequest) {
     );
   }
   try {
-    const { username, password, organizationId } = await req.json();
-    if (!username || !password) {
-      return NextResponse.json({ error: "Missing username or password" }, { status: 400 });
+    const body = await req.json();
+    const parseResult = LoginCredentialSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json({ error: parseResult.error.errors[0]?.message || "Invalid input" }, { status: 400 });
     }
+    const { username, password, organizationId } = body;
     // หา account ตาม username + organizationId
     const account = await prisma.account.findFirst({
       where: { username, organizationId: organizationId || undefined },
@@ -69,7 +72,13 @@ export async function POST(req: NextRequest) {
     // Clear session เดิม (set session_token ให้หมดอายุทันที)
     // (Next.js API route ไม่มี access cookie เดิมโดยตรง แต่ client ควรลบ cookie ก่อน login ใหม่)
     // สร้าง JWT token
-    const jwtSecret = process.env.JWT_SECRET || "dev_secret";
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("JWT_SECRET must be set in production environment");
+      }
+    }
+    const secretToUse = jwtSecret || "dev_secret";
     const payload = {
       id: account.id,
       sub: account.id,
@@ -77,7 +86,7 @@ export async function POST(req: NextRequest) {
       organizationId: account.organizationId,
       role: account.role,
     };
-    const sessionToken = jwt.sign(payload, jwtSecret, { expiresIn: "7d" });
+    const sessionToken = jwt.sign(payload, secretToUse, { expiresIn: "2h" });
     // set cookie (httpOnly, secure, path=/, maxAge 7 วัน)
     const res = NextResponse.json({
       success: true,

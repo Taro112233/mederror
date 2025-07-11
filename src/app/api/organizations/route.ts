@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyJwtToken } from "@/lib/utils";
 
 // GET: ดึงรายชื่อองค์กรทั้งหมด
 export async function GET() {
@@ -11,6 +12,16 @@ export async function GET() {
 
 // POST: สร้างองค์กรใหม่
 export async function POST(req: NextRequest) {
+  // JWT verification
+  const sessionToken = req.cookies.get("session_token")?.value;
+  if (!sessionToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  try {
+    verifyJwtToken(sessionToken);
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+  }
   const { name } = await req.json();
   if (!name || typeof name !== "string") {
     return NextResponse.json({ error: "ชื่อองค์กรไม่ถูกต้อง" }, { status: 400 });

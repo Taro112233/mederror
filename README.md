@@ -54,3 +54,12 @@ BLOB_READ_WRITE_TOKEN="your_vercel_blob_token_here"
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Security Notice
+
+- **ต้องตั้งค่า environment variable `JWT_SECRET` ที่ปลอดภัยใน production**
+- ห้าม deploy production โดยไม่มี JWT_SECRET (ระบบจะ throw error)
+- JWT access token มีอายุ 2 ชั่วโมง (refresh token/revoke list: coming soon)
+- ทุก endpoint ที่ต้องการ auth จะ verify JWT signature เสมอ
+- มีการ validate input ด้วย zod ใน API สำคัญ (login, register)
+- Cookie เก็บ JWT เป็น httpOnly, secure, sameSite=lax

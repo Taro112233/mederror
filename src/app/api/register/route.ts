@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
+import { RegisterCredentialSchema } from "@/lib/zodSchemas";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -49,13 +50,12 @@ export async function POST(req: NextRequest) {
     );
   }
   try {
-    const { username, password, organizationId } = await req.json();
-    if (!username || !password) {
-      return NextResponse.json({ error: "Missing username or password" }, { status: 400 });
+    const body = await req.json();
+    const parseResult = RegisterCredentialSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json({ error: parseResult.error.errors[0]?.message || "Invalid input" }, { status: 400 });
     }
-    if (password.length < 8) {
-      return NextResponse.json({ error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" }, { status: 400 });
-    }
+    const { username, password, organizationId } = body;
     // Check if username exists
     const existing = await prisma.account.findFirst({ where: { username, organizationId: organizationId || undefined } });
     if (existing) {
