@@ -5,12 +5,21 @@ import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/ui/auth-layout";
 import { motion } from "framer-motion";
 import { Clock, User, Phone, Briefcase, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role เป็น UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default function PendingApprovalPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<{ name: string; phone: string; position: string } | null>(null);
   const router = useRouter();
+  const { user: authUser, loading: authLoading } = useAuth();
+
+  // Redirect to /login if not logged in
+  useEffect(() => {
+    if (!authLoading && !authUser) {
+      router.replace("/login");
+    }
+  }, [authLoading, authUser, router]);
 
   // Fetch user info from DB
   const fetchUserInfo = async () => {
