@@ -24,7 +24,11 @@ export default function LoginForm() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, organizationId: organization }),
+        body: JSON.stringify({
+          username,
+          password,
+          organizationId: organization,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -37,7 +41,7 @@ export default function LoginForm() {
       } else if (data.account.role === "UNAPPROVED") {
         router.replace("/pending-approval");
       } else {
-        router.replace("/home");
+        window.location.href = "/home";
       }
     } catch {
       toast.error("เกิดข้อผิดพลาด");
@@ -48,9 +52,18 @@ export default function LoginForm() {
 
   return (
     <div>
-      {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} disabled={isLoading} />}
+      {step === 1 && (
+        <OrganizationSelectForm
+          onSelect={handleOrganizationSelect}
+          disabled={isLoading}
+        />
+      )}
       {step === 2 && (
-        <LoginCredentialForm onSubmit={handleLogin} onBack={() => setStep(1)} disabled={isLoading} />
+        <LoginCredentialForm
+          onSubmit={handleLogin}
+          onBack={() => setStep(1)}
+          disabled={isLoading}
+        />
       )}
     </div>
   );

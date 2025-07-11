@@ -23,12 +23,16 @@ export default function RegisterForm() {
     try {
       const res = await fetch("/api/register", {
         method: "POST",
-        body: JSON.stringify({ organizationId: organization, username, password }),
+        body: JSON.stringify({
+          organizationId: organization,
+          username,
+          password,
+        }),
         headers: { "Content-Type": "application/json" },
       });
       if (res.ok) {
         toast.success("สมัครสมาชิกสำเร็จ");
-        router.push("/home");
+        window.location.href = "/home";
       } else {
         toast.error("สมัครสมาชิกไม่สำเร็จ");
       }
@@ -41,10 +45,19 @@ export default function RegisterForm() {
 
   return (
     <div>
-      {step === 1 && <OrganizationSelectForm onSelect={handleOrganizationSelect} disabled={isLoading} />}
+      {step === 1 && (
+        <OrganizationSelectForm
+          onSelect={handleOrganizationSelect}
+          disabled={isLoading}
+        />
+      )}
       {step === 2 && (
-        <RegisterCredentialForm onSubmit={handleRegister} onBack={() => setStep(1)} disabled={isLoading} />
+        <RegisterCredentialForm
+          onSubmit={handleRegister}
+          onBack={() => setStep(1)}
+          disabled={isLoading}
+        />
       )}
     </div>
   );
-} 
+}
