@@ -19,8 +19,9 @@ export async function POST(req: NextRequest) {
   }
   try {
     verifyJwtToken(sessionToken);
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+  } catch (e: unknown) {
+    const error = e as Error;
+    return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
   }
   const { name } = await req.json();
   if (!name || typeof name !== "string") {

@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import RegisterCredentialForm from "./RegisterCredentialForm";
 import OrganizationSelectForm from "./OrganizationSelectForm";
@@ -9,7 +8,7 @@ export default function RegisterForm() {
   const [step, setStep] = useState(1);
   const [organization, setOrganization] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  // const router = useRouter(); // Removed unused variable
 
   const handleOrganizationSelect = (value: string) => {
     if (isLoading) return;

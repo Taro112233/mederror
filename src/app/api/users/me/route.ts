@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
@@ -30,14 +29,15 @@ export async function GET(req: NextRequest) {
     if (!sessionToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    let payload: any;
+    let payload: unknown;
     try {
       payload = verifyJwtToken(sessionToken);
-    } catch (e: any) {
-      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    } catch (e: unknown) {
+      const error = e as Error;
+      return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
     }
     const account = await prisma.account.findUnique({
-      where: { id: payload.id },
+      where: { id: (payload as { id: string }).id },
       include: { user: true, organization: true },
     });
     if (!account) {
@@ -92,13 +92,14 @@ export async function PATCH(req: NextRequest) {
     if (!sessionToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    let payload: any;
+    let payload: unknown;
     try {
       payload = verifyJwtToken(sessionToken);
-    } catch (e: any) {
-      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    } catch (e: unknown) {
+      const error = e as Error;
+      return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
     }
-    const accountId = payload.id;
+    const accountId = (payload as { id: string }).id;
     if (!accountId) {
       return NextResponse.json({ error: "Invalid session" }, { status: 401 });
     }

@@ -57,8 +57,9 @@ export async function POST(req: NextRequest) {
     }
     try {
       verifyJwtToken(sessionToken);
-    } catch (e: any) {
-      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    } catch (e: unknown) {
+      const error = e as Error;
+      return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
     }
     // รับ multipart form-data
     const formData = await req.formData();
@@ -145,8 +146,9 @@ export async function GET(req: NextRequest) {
     }
     try {
       verifyJwtToken(sessionToken);
-    } catch (e: any) {
-      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    } catch (e: unknown) {
+      const error = e as Error;
+      return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
     }
     // รับ organizationId และ reporterAccountId จาก query parameter
     const { searchParams } = new URL(req.url);
@@ -203,8 +205,9 @@ export async function DELETE(req: NextRequest) {
     }
     try {
       verifyJwtToken(sessionToken);
-    } catch (e: any) {
-      return NextResponse.json({ error: e.message || "Invalid session" }, { status: 401 });
+    } catch (e: unknown) {
+      const error = e as Error;
+      return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
     }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
