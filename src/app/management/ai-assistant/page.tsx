@@ -206,7 +206,7 @@ export default function AiAssistantChatPage() {
                 <button
                   key={i}
                   type="button"
-                  className="bg-muted hover:bg-primary/10 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm transition-colors"
+                  className="bg-muted hover:bg-primary/10 text-black border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm transition-colors"
                   onClick={() => handleSend(q)}
                   disabled={sending}
                 >
