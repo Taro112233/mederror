@@ -14,10 +14,14 @@ export default function PendingApprovalPage() {
   const router = useRouter();
   const { user: authUser, loading: authLoading } = useAuth();
 
-  // Redirect to /login if not logged in
+  // Redirect to /login if not logged in, and to /onboarding if not onboarded
   useEffect(() => {
-    if (!authLoading && !authUser) {
-      router.replace("/login");
+    if (!authLoading) {
+      if (!authUser) {
+        router.replace("/login");
+      } else if (authUser && authUser.onboarded === false) {
+        router.replace("/onboarding");
+      }
     }
   }, [authLoading, authUser, router]);
 

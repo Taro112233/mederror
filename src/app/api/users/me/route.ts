@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
       phone: account.user?.phone || "",
       organizationId: account.organizationId || "",
       organizationName: account.organization?.name || "",
+      onboarded: account.onboarded,
     });
   } catch (e) {
     console.error(e);

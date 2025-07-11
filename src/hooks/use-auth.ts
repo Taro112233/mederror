@@ -8,6 +8,7 @@ interface User {
   position: string;
   organizationId: string;
   organizationName: string;
+  onboarded: boolean;
 }
 
 export function useAuth() {
