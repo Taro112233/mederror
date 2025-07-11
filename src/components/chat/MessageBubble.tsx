@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { User, Bot } from "lucide-react";
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MessageBubbleProps {
   role: "user" | "ai";
@@ -38,7 +39,7 @@ export function MessageBubble({ role, content, className }: MessageBubbleProps) 
       >
         <CardContent className="p-0">
           <div className="prose prose-sm dark:prose-invert break-words">
-            <ReactMarkdown>{content}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
           </div>
           {/* No copy button */}
         </CardContent>
