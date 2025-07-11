@@ -16,20 +16,6 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // ตรวจสอบสิทธิ์การเข้าถึงหน้า management ที่ต้องการ admin/developer
-  if (pathname === "/management/user" || pathname === "/management/records") {
-    const sessionToken = request.cookies.get("session_token")?.value;
-    
-    if (!sessionToken) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-    try {
-      verifyJwtToken(sessionToken);
-    } catch {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-  }
-
   return NextResponse.next();
 }
 

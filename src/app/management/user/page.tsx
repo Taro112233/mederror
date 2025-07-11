@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 export type UserRow = {
   id: number;
@@ -49,6 +50,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function AdminUserPage() {
   const { loading, isAdminOrDeveloper, isDeveloper, isAdmin } = useAuth();
+  const router = useRouter();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -321,6 +323,12 @@ export default function AdminUserPage() {
     setPage(0);
   }, [debouncedSearch]);
 
+  useEffect(() => {
+    if (!loading && !isAdminOrDeveloper) {
+      router.replace("/management");
+    }
+  }, [loading, isAdminOrDeveloper, router]);
+
   // ตรวจสอบสิทธิ์การเข้าถึง - ต้องอยู่หลัง hooks ทั้งหมด
   if (loading) {
     return (
@@ -334,8 +342,6 @@ export default function AdminUserPage() {
   }
 
   if (!isAdminOrDeveloper) {
-    // Redirect ไปหน้า management แทนที่จะแสดง AccessDenied
-    window.location.href = '/management';
     return null;
   }
 

@@ -20,6 +20,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 // ประเภทข้อมูล Med Error จากฐานข้อมูล
 export type MedErrorRecord = {
@@ -65,6 +66,7 @@ function useDebounce<T>(value: T, delay: number): T {
 
 export default function AdminRecordsPage() {
   const { loading: authLoading, isAdminOrDeveloper } = useAuth();
+  const router = useRouter();
   const [records, setRecords] = useState<MedErrorRecord[]>([]);
   const [showDetailId, setShowDetailId] = useState<string | null>(null);
   const [deleteRecordId, setDeleteRecordId] = useState<string | null>(null);
@@ -135,6 +137,12 @@ export default function AdminRecordsPage() {
       fetchMedErrors(organizationId);
     }
   }, [organizationId]);
+
+  useEffect(() => {
+    if (!authLoading && !isAdminOrDeveloper) {
+      router.replace("/management");
+    }
+  }, [authLoading, isAdminOrDeveloper, router]);
 
   // inject action handlers to each row
   const data: MedErrorRecord[] = useMemo(() =>
@@ -332,8 +340,6 @@ export default function AdminRecordsPage() {
   }
 
   if (!isAdminOrDeveloper) {
-    // Redirect ไปหน้า management แทนที่จะแสดง AccessDenied
-    window.location.href = '/management';
     return null;
   }
 
