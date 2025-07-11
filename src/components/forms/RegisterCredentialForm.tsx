@@ -20,7 +20,7 @@ export default function RegisterCredentialForm({
   submitLabel = "สมัครสมาชิก",
   disabled = false,
 }: {
-  onSubmit: (username: string, password: string) => void;
+  onSubmit: (username: string, password: string, confirmPassword: string) => void;
   onBack: () => void;
   submitLabel?: string;
   disabled?: boolean;
@@ -40,7 +40,7 @@ export default function RegisterCredentialForm({
         <form
           onSubmit={form.handleSubmit((values) => {
             if (disabled) return;
-            onSubmit(values.username, values.password);
+            onSubmit(values.username, values.password, values.confirmPassword);
           })}
           className="space-y-6"
         >

@@ -16,7 +16,7 @@ export default function RegisterForm() {
     setStep(2);
   };
 
-  const handleRegister = async (username: string, password: string) => {
+  const handleRegister = async (username: string, password: string, confirmPassword: string) => {
     if (isLoading) return;
     setIsLoading(true);
     try {
@@ -26,6 +26,7 @@ export default function RegisterForm() {
           organizationId: organization,
           username,
           password,
+          confirmPassword, // ส่งเพิ่ม
         }),
         headers: { "Content-Type": "application/json" },
       });
