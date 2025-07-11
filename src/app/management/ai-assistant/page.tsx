@@ -187,7 +187,7 @@ export default function AiAssistantChatPage() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col shadow-lg border rounded-lg p-0 md:p-0 bg-white dark:bg-muted h-[80dvh]">
+    <div className="w-full max-w-2xl mx-auto flex flex-col shadow-lg border rounded-lg p-0 md:p-0 bg-white dark:bg-muted h-[80dvh] text-black dark:text-black">
       {/* Minimal Header */}
       <div className="flex items-center justify-between gap-2 py-3 px-4">
         <div className="flex items-center gap-2">

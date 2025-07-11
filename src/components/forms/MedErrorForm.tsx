@@ -181,7 +181,13 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       }
       
       const formData = new FormData();
-      formData.append("eventDate", values.eventDate);
+      // แปลง eventDate (local) เป็น UTC ISO string
+      let eventDateUTC = "";
+      if (values.eventDate) {
+        const localDate = new Date(values.eventDate); // "YYYY-MM-DDTHH:mm" local
+        eventDateUTC = localDate.toISOString(); // always UTC
+      }
+      formData.append("eventDate", eventDateUTC);
       formData.append("unitId", values.unit);
       formData.append("description", values.description);
       formData.append("severity", values.severity);
@@ -209,7 +215,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       form.reset();
       if (onSuccess) onSuccess();
       setTimeout(() => {
-        router.push("/");
+        router.push("/home");
       }, 100);
     } catch (e: unknown) {
       if (e instanceof Error) {
