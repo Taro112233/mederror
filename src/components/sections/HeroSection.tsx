@@ -2,8 +2,20 @@
 
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function HeroSection() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStartClick = () => {
+    setIsLoading(true);
+    // Simulate loading time before navigation
+    setTimeout(() => {
+      window.location.href = '/login';
+    }, 1000);
+  };
+
   return (
     <section id="hero" className="w-full flex flex-col items-center justify-center text-center py-16">
       <motion.h1
@@ -29,11 +41,19 @@ export default function HeroSection() {
         className="flex flex-col sm:flex-row gap-4 justify-center"
       >
         <Button
-          asChild
+          onClick={handleStartClick}
+          disabled={isLoading}
           size="lg"
           className="px-8 py-3 text-lg font-semibold shadow-lg"
         >
-          <a href="/login">เริ่มใช้งาน</a>
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              กำลังเริ่มต้น
+            </>
+          ) : (
+            'เริ่มต้นใช้งาน'
+          )}
         </Button>
         <Button
           asChild
