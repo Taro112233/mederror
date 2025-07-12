@@ -25,7 +25,9 @@ export default function Header() {
         Med Error
       </div>
       <nav className="space-x-6 px-4 flex items-center">
-        <a href="#contact" className="hover:underline" onClick={handleContactClick}>ติดต่อเรา</a>
+        <Button asChild variant="ghost" size="default">
+          <a href="#contact" onClick={handleContactClick}>ติดต่อเรา</a>
+        </Button>
         <Button
           variant="ghost"
           size="icon"
