@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
 import { verifyJwtToken } from "@/lib/utils";
+import { updateUserActivity, checkSessionActivity } from "@/lib/server-utils";
 
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
@@ -36,8 +37,19 @@ export async function GET(req: NextRequest) {
       const error = e as Error;
       return NextResponse.json({ error: error.message || "Invalid session" }, { status: 401 });
     }
+    const accountId = (payload as { id: string }).id;
+    
+    // ตรวจสอบการใช้งานล่าสุด
+    const isSessionActive = await checkSessionActivity(accountId);
+    if (!isSessionActive) {
+      return NextResponse.json({ error: "Session expired due to inactivity" }, { status: 401 });
+    }
+
+    // อัปเดตการใช้งานล่าสุด
+    await updateUserActivity(accountId);
+
     const account = await prisma.account.findUnique({
-      where: { id: (payload as { id: string }).id },
+      where: { id: accountId },
       include: { user: true, organization: true },
     });
     if (!account) {

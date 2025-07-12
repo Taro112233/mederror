@@ -14,10 +14,12 @@ model Account {
   onboarded      Boolean       @default(false)
   role           Role          @default(UNAPPROVED)
   organizationId String?
+  lastActivityAt DateTime      @default(now())
   createdAt      DateTime      @default(now())
   organization   Organization? @relation(fields: [organizationId], references: [id])
   medErrors      MedError[]    @relation("AccountMedErrors")
   user           User?
+  refreshTokens  RefreshToken[]
 
   @@unique([organizationId, username])
 }
@@ -100,6 +102,15 @@ model Unit {
   code      String     @unique
   label     String
   medErrors MedError[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  accountId String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
 }
 
 enum Role {

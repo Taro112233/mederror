@@ -19,7 +19,10 @@ export default function LogoutButton({
     if (isLoading || disabled) return;
     setIsLoading(true);
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include'
+      });
       router.replace('/login');
     } catch (error) {
       console.error('Error during logout:', error);

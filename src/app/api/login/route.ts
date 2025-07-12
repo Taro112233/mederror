@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { randomBytes } from "crypto";
 import arcjet, { detectBot, shield, tokenBucket } from "@arcjet/next";
 import { isSpoofedBot } from "@arcjet/inspect";
 import { LoginCredentialSchema } from "@/lib/zodSchemas";
@@ -87,19 +88,50 @@ export async function POST(req: NextRequest) {
       role: account.role,
     };
     const sessionToken = jwt.sign(payload, secretToUse, { expiresIn: "2h" });
-    // set cookie (httpOnly, secure, path=/, maxAge 7 วัน)
+    
+    // สร้าง refresh token
+    const refreshToken = randomBytes(32).toString('hex');
+    const refreshExpiresAt = new Date();
+    refreshExpiresAt.setDate(refreshExpiresAt.getDate() + 30); // 30 วัน
+
+    // บันทึก refresh token ใน database
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        accountId: account.id,
+        expiresAt: refreshExpiresAt,
+      },
+    });
+
+    // อัปเดต lastActivityAt
+    await prisma.account.update({
+      where: { id: account.id },
+      data: { lastActivityAt: new Date() },
+    });
+
     const res = NextResponse.json({
       success: true,
       account: payload,
       sessionToken,
     });
+
+    // ตั้งค่า cookies
     res.cookies.set("session_token", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 วัน
+      maxAge: 60 * 60 * 2, // 2 ชั่วโมง
       sameSite: "lax",
     });
+
+    res.cookies.set("refresh_token", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30, // 30 วัน
+      sameSite: "lax",
+    });
+
     return res;
   } catch (e) {
     console.error(e);

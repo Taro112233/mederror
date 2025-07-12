@@ -2,10 +2,16 @@ import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient();
+// ตรวจสอบว่าเป็น server-side
+const isServer = typeof window === "undefined";
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = isServer
+  ? globalForPrisma.prisma ||
+    new PrismaClient()
+  : (() => {
+      throw new Error("PrismaClient is unable to be run in the browser");
+    })();
+
+if (process.env.NODE_ENV !== "production" && isServer) globalForPrisma.prisma = prisma;
 
 export default prisma; 
