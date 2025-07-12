@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function GlobeLogo({ className = "" }: { className?: string }) {
+export default function GlobeLogo({ className = "", isLoading = false }: { className?: string; isLoading?: boolean }) {
   // ตำแหน่งจุด radar (x, y) เป็นเปอร์เซ็นต์ของขนาด SVG
   const radarPoints = [
     { x: 70, y: 30, delay: 0 },
@@ -14,7 +14,7 @@ export default function GlobeLogo({ className = "" }: { className?: string }) {
       initial={{ opacity: 0, scale: 0.7, y: 20 }}
       animate={{
         opacity: 1,
-        scale: 1,
+        scale: isLoading ? 1.3 : 1,
         y: [0, 10, 0, 10, 0],
         rotate: [0, 360],
       }}
@@ -22,7 +22,7 @@ export default function GlobeLogo({ className = "" }: { className?: string }) {
         opacity: { duration: 0.7 },
         scale: { duration: 0.7 },
         y: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-        rotate: { duration: 10, repeat: Infinity, ease: 'linear' },
+        rotate: { duration: isLoading ? 1 : 10, repeat: Infinity, ease: 'linear' },
       }}
       style={{ width: 120, height: 120 }}
     >

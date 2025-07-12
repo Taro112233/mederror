@@ -19,7 +19,7 @@ export default function HeroSection() {
 
   return (
     <section id="hero" className="w-full flex flex-col items-center justify-center text-center py-16 mt-10 sm:mt-20 md:mt-40">
-      <GlobeLogo className="mb-10" />
+      <GlobeLogo className="mb-10" isLoading={isLoading} />
       <motion.h1
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,21 +42,26 @@ export default function HeroSection() {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="flex flex-col sm:flex-row gap-4 justify-center"
       >
-        <Button
-          onClick={handleStartClick}
-          disabled={isLoading}
-          size="lg"
-          className="px-8 py-3 text-lg font-semibold shadow-lg"
+        <motion.div
+          animate={isLoading ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+          transition={isLoading ? { duration: 0.4, repeat: 2 } : {}}
         >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              กำลังเริ่มต้น
-            </>
-          ) : (
-            'เริ่มต้นใช้งาน'
-          )}
-        </Button>
+          <Button
+            onClick={handleStartClick}
+            disabled={isLoading}
+            size="lg"
+            className="px-8 py-3 text-lg font-semibold shadow-lg"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                กำลังเริ่มต้น
+              </>
+            ) : (
+              'เริ่มต้นใช้งาน'
+            )}
+          </Button>
+        </motion.div>
       </motion.div>
     </section>
   );
