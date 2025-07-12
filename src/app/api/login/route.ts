@@ -87,12 +87,12 @@ export async function POST(req: NextRequest) {
       organizationId: account.organizationId,
       role: account.role,
     };
-    const sessionToken = jwt.sign(payload, secretToUse, { expiresIn: "2h" });
+    const sessionToken = jwt.sign(payload, secretToUse, { expiresIn: "1h" });
     
     // สร้าง refresh token
     const refreshToken = randomBytes(32).toString('hex');
     const refreshExpiresAt = new Date();
-    refreshExpiresAt.setDate(refreshExpiresAt.getDate() + 30); // 30 วัน
+    refreshExpiresAt.setDate(refreshExpiresAt.getDate() + 14); // 14 วัน
 
     // บันทึก refresh token ใน database
     await prisma.refreshToken.create({
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 2, // 2 ชั่วโมง
+      maxAge: 60 * 60 * 1, // 1 ชั่วโมง
       sameSite: "lax",
     });
 
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 วัน
+      maxAge: 60 * 60 * 24 * 14, // 14 วัน
       sameSite: "lax",
     });
 

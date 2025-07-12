@@ -81,7 +81,7 @@ export function useAuth() {
         } catch (error) {
           console.error('Auto refresh failed:', error);
         }
-      }, 90 * 60 * 1000); // 90 นาที
+      }, 50 * 60 * 1000); // 50 นาที
 
       return () => clearInterval(interval);
     }
