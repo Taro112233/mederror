@@ -1,6 +1,7 @@
 "use client";
 import { motion } from 'framer-motion';
-import { Globe } from 'lucide-react';
+import { Globe, RotateCcw } from 'lucide-react';
+import { Button } from '../ui/button';
 
 export default function Header() {
   const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -23,8 +24,25 @@ export default function Header() {
         <Globe className="h-8 w-8 text-primary" />
         Med Error
       </div>
-      <nav className="space-x-6 px-4">
+      <nav className="space-x-6 px-4 flex items-center">
         <a href="#contact" className="hover:underline" onClick={handleContactClick}>ติดต่อเรา</a>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Refresh"
+          onClick={() => {
+            // Clear all cookies
+            document.cookie.split(';').forEach(cookie => {
+              const eqPos = cookie.indexOf('=');
+              const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+              document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+            });
+            // Reload the page
+            window.location.reload();
+          }}
+        >
+          <RotateCcw className="h-5 w-5" />
+        </Button>
       </nav>
     </motion.header>
   );
