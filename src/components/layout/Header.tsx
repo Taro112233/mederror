@@ -3,6 +3,14 @@ import { motion } from 'framer-motion';
 import { Globe } from 'lucide-react';
 
 export default function Header() {
+  const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById('contact');
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -16,7 +24,7 @@ export default function Header() {
         Med Error
       </div>
       <nav className="space-x-6 px-4">
-        <a href="#contact" className="hover:underline">ติดต่อเรา</a>
+        <a href="#contact" className="hover:underline" onClick={handleContactClick}>ติดต่อเรา</a>
       </nav>
     </motion.header>
   );
