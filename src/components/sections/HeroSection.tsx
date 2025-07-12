@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import GlobeLogo from "@/components/common/GlobeLogo";
 
 export default function HeroSection() {
   const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +18,8 @@ export default function HeroSection() {
   };
 
   return (
-    <section id="hero" className="w-full flex flex-col items-center justify-center text-center py-16">
+    <section id="hero" className="w-full flex flex-col items-center justify-center text-center py-16 mt-10 sm:mt-20 md:mt-40">
+      <GlobeLogo className="mb-10" />
       <motion.h1
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,14 +56,6 @@ export default function HeroSection() {
           ) : (
             'เริ่มต้นใช้งาน'
           )}
-        </Button>
-        <Button
-          asChild
-          size="lg"
-          variant="secondary"
-          className="px-8 py-3 text-lg font-semibold shadow-lg"
-        >
-          <a href="#" target="_blank" rel="noopener noreferrer">Download iOS</a>
         </Button>
       </motion.div>
     </section>

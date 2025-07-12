@@ -38,7 +38,7 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="w-full flex flex-col items-center py-12">
+    <section id="features" className="w-full flex flex-col items-center py-12 mt-36">
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
