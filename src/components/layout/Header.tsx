@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { Globe, RotateCcw } from 'lucide-react';
 import { Button } from '../ui/button';
+import { useState } from 'react';
 
 export default function Header() {
   const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -11,6 +12,8 @@ export default function Header() {
       target.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   return (
     <motion.header
@@ -32,18 +35,29 @@ export default function Header() {
           variant="ghost"
           size="icon"
           aria-label="Refresh"
-          onClick={() => {
-            // Clear all cookies
-            document.cookie.split(';').forEach(cookie => {
-              const eqPos = cookie.indexOf('=');
-              const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-              document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-            });
-            // Reload the page
-            window.location.reload();
+          disabled={isRefreshing}
+          onClick={async () => {
+            if (isRefreshing) return;
+            setIsRefreshing(true);
+            try {
+              await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+              });
+              // Clear all cookies (client-side, just in case)
+              document.cookie.split(';').forEach(cookie => {
+                const eqPos = cookie.indexOf('=');
+                const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+              });
+              window.location.reload();
+            } catch (error) {
+              console.error('Error during refresh/logout:', error);
+              setIsRefreshing(false);
+            }
           }}
         >
-          <RotateCcw className="h-5 w-5" />
+          <RotateCcw className={`h-5 w-5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
         </Button>
       </nav>
     </motion.header>
