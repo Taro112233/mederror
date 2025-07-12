@@ -31,7 +31,9 @@ function AnimatedNumber({ value, duration = 1.2 }: { value: string | number; dur
     function animate(now: number) {
       const elapsed = (now - startTime) / 1000;
       const progress = Math.min(elapsed / duration, 1);
-      const current = Math.floor(progress * (numberValue - start) + start);
+      // ใช้ ease-out function: 1 - (1 - t)^3
+      const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+      const current = Math.floor(easeOutProgress * (numberValue - start) + start);
       ref.current!.textContent = current.toLocaleString();
       if (progress < 1) {
         requestAnimationFrame(animate);
