@@ -302,19 +302,16 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>ส่ง Feedback</DialogTitle>
+                      <DialogTitle>Feedback</DialogTitle>
                     </DialogHeader>
                     <Textarea
-                      placeholder="เขียนความคิดเห็นหรือข้อเสนอแนะของคุณ..."
+                      placeholder="พิมพ์ความคิดเห็น ข้อเสนอแนะ หรือปัญหาที่พบ เพื่อช่วยให้เราพัฒนาระบบให้ดียิ่งขึ้น..."
                       value={feedback}
                       onChange={e => setFeedback(e.target.value)}
                       disabled={loading}
                       className="mt-2"
                     />
                     <DialogFooter>
-                      <DialogClose asChild>
-                        <Button variant="secondary" disabled={loading}>ยกเลิก</Button>
-                      </DialogClose>
                       <Button onClick={handleSendFeedback} disabled={loading || !feedback.trim()}>
                         {loading ? 'กำลังส่ง...' : 'ส่ง Feedback'}
                       </Button>
