@@ -19,7 +19,7 @@ export function ChatSidebar({ chats, selectedId, onSelect, onNewChat, className 
         "flex flex-col h-full w-64 border-r border-gray-200 dark:border-gray-800",
         className
       )}
-      style={{ background: 'oklch(85.5% 0.138 181.071)' }}
+      style={{ background: 'oklch(95.3% 0.051 180.801)' }}
     >
       <div className="p-4 border-b border-gray-200 dark:border-gray-800">
         <Button variant="outline" className="w-full flex gap-2" onClick={onNewChat}>
