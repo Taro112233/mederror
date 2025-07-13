@@ -24,7 +24,7 @@ export default function AuthLayout({
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4" style={{
-      background: "linear-gradient(135deg, oklch(91% 0.096 180.426) 0%, oklch(85.5% 0.138 181.071) 100%)"
+      background: "linear-gradient(135deg, oklch(85.5% 0.138 181.071) 0%, oklch(74.6% 0.16 232.661) 100%)"
     }}>
       <motion.div 
         className={`w-full ${maxWidthClasses[maxWidth]}`}

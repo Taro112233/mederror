@@ -188,7 +188,7 @@ function Sidebar({
             : (showSidebar ? "translate-x-0 right-0" : "translate-x-full right-0"),
           className
         )}
-        style={{ background: 'var(--sidebar)', color: 'var(--sidebar-foreground)' }}
+        style={{ background: 'oklch(85.5% 0.138 181.071)', color: 'var(--sidebar-foreground)' }}
         {...props}
       >
         <div

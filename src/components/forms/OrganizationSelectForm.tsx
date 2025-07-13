@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { OrganizationSelectSchema, OrganizationSelectSchemaType } from "@/lib/zodSchemas";
 import { motion } from "framer-motion";
-import { Building2, ArrowRight, Loader2 } from "lucide-react";
+import { Building2, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 
 export default function OrganizationSelectForm({ 
   onSelect,
@@ -129,6 +129,7 @@ export default function OrganizationSelectForm({
               }}
               disabled={disabled}
             >
+              <ArrowLeft className="h-4 w-4 mr-2" />
               ย้อนกลับ
             </Button>
             <Button 

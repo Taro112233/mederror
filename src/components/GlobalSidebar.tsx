@@ -413,8 +413,8 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       </Sidebar>
       <SidebarInset>
         <header
-          className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 bg-white dark:bg-muted border-b border-gray-200 dark:border-gray-700"
-          style={{ background: 'linear-gradient(to right, var(--header), oklch(85.5% 0.138 181.071))', color: 'var(--header-foreground)' }}
+          className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+          style={{ background: 'linear-gradient(90deg, oklch(85.5% 0.138 181.071), oklch(74.6% 0.16 232.661))', color: 'var(--header-foreground)' }}
         >
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
