@@ -215,7 +215,7 @@ export default function MedErrorForm({ onSuccess }: { onSuccess?: () => void }) 
       form.reset();
       if (onSuccess) onSuccess();
       setTimeout(() => {
-        router.push("/home");
+        router.push("/management/my-records");
       }, 100);
     } catch (e: unknown) {
       if (e instanceof Error) {
