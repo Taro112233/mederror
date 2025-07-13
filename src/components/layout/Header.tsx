@@ -24,10 +24,9 @@ export default function Header() {
     >
       <div className="absolute inset-0 w-screen h-full bg-[linear-gradient(90deg,_var(--header),_oklch(85.5%_0.138_181.071))] pointer-events-none -z-10" />
       <div className="font-bold text-3xl px-4 flex items-center gap-2">
-        <Globe className="h-8 w-8 text-primary" />
         Med Error
       </div>
-      <nav className="space-x-6 px-4 flex items-center">
+      <nav className="flex items-center gap-x-2">
         <Button asChild variant="ghost" size="default">
           <a href="#contact" onClick={handleContactClick}>ติดต่อเรา</a>
         </Button>
