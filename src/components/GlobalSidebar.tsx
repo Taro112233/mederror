@@ -20,15 +20,13 @@ import {
   Settings,
   Home,
   User,
-  UserCheck,
   Code,
   Bell,
   Shield,
   Key,
-  BarChart3,
+  MessageCircle,
   Bot,
-  Database,
-  MessageCircle
+  Database
 } from "lucide-react";
 import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
 import NotebookPen from "@/components/common/notebook-pen";
@@ -36,7 +34,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useAuth } from "@/hooks/use-auth";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -86,7 +84,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
         const data = await res.json();
         toast.error(data.error || 'เกิดข้อผิดพลาดในการส่ง Feedback');
       }
-    } catch (e) {
+    } catch {
       toast.error('เกิดข้อผิดพลาดในการเชื่อมต่อ');
     } finally {
       setLoading(false);

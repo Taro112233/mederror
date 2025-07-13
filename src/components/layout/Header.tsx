@@ -1,6 +1,6 @@
 "use client";
 import { motion } from 'framer-motion';
-import { Globe, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 

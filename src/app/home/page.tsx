@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Settings, FileText, BarChart3, Bot } from "lucide-react";
+import { User, Settings, Bot } from "lucide-react";
 import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
 import NotebookPen from "@/components/common/notebook-pen";
 import CardButton from "@/components/CardButton";

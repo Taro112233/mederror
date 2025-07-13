@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { FileText, BarChart3, Shield, Users, Bot, Database } from "lucide-react";
+import { Shield, Users, Bot, Database } from "lucide-react";
 import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
 import NotebookPen from "@/components/common/notebook-pen";
 

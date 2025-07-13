@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Code, Settings, UserCheck, Bot, Database } from "lucide-react";
+import { Users, Code, Settings, Database } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import CardButton from "@/components/CardButton";
 import { Skeleton } from "@/components/ui/skeleton";
