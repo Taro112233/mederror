@@ -187,53 +187,58 @@ export default function AiAssistantChatPage() {
   }
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col shadow-lg border rounded-lg p-0 md:p-0 bg-white dark:bg-muted h-[80dvh] text-black dark:text-black">
-      {/* Minimal Header */}
-      <div className="flex items-center justify-between gap-2 py-3 px-4">
-        <div className="flex items-center gap-2">
-          <Bot className="h-6 w-6 text-black" />
-          <span className="text-lg font-bold">AI Assistant</span>
-        </div>
-        <Button size="sm" variant="outline" onClick={handleExportChat} disabled={messages.length === 0}>
-          Export Chat
-        </Button>
-      </div>
-      <div className="flex-1 px-2 md:px-4 py-2 overflow-y-auto">
-        {messages.length === 0 && (
-          <div className="flex flex-col items-center text-center text-gray-400 mt-8 gap-3">
-            <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
-              {randomFaqs.map((q, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  className="bg-muted hover:bg-primary/10 text-black border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm transition-colors"
-                  onClick={() => handleSend(q)}
-                  disabled={sending}
-                >
-                  {q}
-                </button>
-              ))}
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-4">
+      {/* Main Chat Card */}
+      <div className="flex-1">
+        <div className="w-full flex flex-col shadow-lg border rounded-lg p-0 md:p-0 bg-white dark:bg-muted h-[80dvh] text-black dark:text-black">
+          {/* Minimal Header */}
+          <div className="flex items-center justify-between gap-2 py-3 px-4">
+            <div className="flex items-center gap-2">
+              <Bot className="h-6 w-6 text-black" />
+              <span className="text-lg font-bold">AI Assistant</span>
             </div>
+            <Button size="sm" variant="outline" onClick={handleExportChat} disabled={messages.length === 0}>
+              Export Chat
+            </Button>
           </div>
-        )}
-        {messages.map((msg, idx) => (
-          <MessageBubble
-            key={idx}
-            role={msg.role}
-            content={msg.content}
+          <div className="flex-1 px-2 md:px-4 py-2 overflow-y-auto">
+            {messages.length === 0 && (
+              <div className="flex flex-col items-center text-center text-gray-400 mt-8 gap-3">
+                <div className="flex flex-col gap-2 w-full max-w-xs mx-auto">
+                  {randomFaqs.map((q, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      className="bg-muted hover:bg-primary/10 text-black border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2 text-sm transition-colors"
+                      onClick={() => handleSend(q)}
+                      disabled={sending}
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {messages.map((msg, idx) => (
+              <MessageBubble
+                key={idx}
+                role={msg.role}
+                content={msg.content}
+              />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <Separator />
+          {/* Input */}
+          <ChatInputBar
+            value={input}
+            onChange={setInput}
+            onSend={() => handleSend()}
+            disabled={sending}
+            placeholder="ถามอะไรก็ได้"
           />
-        ))}
-        <div ref={messagesEndRef} />
+        </div>
       </div>
-      <Separator />
-      {/* Input */}
-      <ChatInputBar
-        value={input}
-        onChange={setInput}
-        onSend={() => handleSend()}
-        disabled={sending}
-        placeholder="ถามอะไรก็ได้"
-      />
     </div>
   );
 } 

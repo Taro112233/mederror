@@ -87,23 +87,6 @@ export default async function ManagementMenu() {
             </CardHeader>
           </CardButton>
         )}
-        {/* 2.5 AI Assistant (ADMIN, DEVELOPER) */}
-        {(isAdmin || isDeveloper) && (
-          <CardButton href="/management/ai-assistant">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-black" />
-                  AI Assistant
-                </CardTitle>
-                <Badge variant="destructive">ADMIN</Badge>
-              </div>
-              <CardDescription>
-                ถาม-ตอบกับ AI เกี่ยวกับ Med Error หรือเรื่องอื่น ๆ
-              </CardDescription>
-            </CardHeader>
-          </CardButton>
-        )}
         {/* 3. รายชื่อผู้ใช้งานในระบบ (ADMIN, DEVELOPER) */}
         {(isAdmin || isDeveloper) && (
           <CardButton href="/management/user">

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Settings, FileText, BarChart3 } from "lucide-react";
+import { User, Settings, FileText, BarChart3, Bot } from "lucide-react";
 import CardButton from "@/components/CardButton";
 import prisma from "@/lib/prisma";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -33,6 +33,10 @@ export default async function HomePage() {
     redirect("/pending-approval");
   }
   // --- END Logic ---
+
+  // กำหนดสิทธิ์การเห็นเมนู
+  const isDeveloper = account.role === "DEVELOPER";
+  const isAdmin = account.role === "ADMIN";
 
   // Add a loading state skeleton (for demonstration, always false)
   const loading = false; // Replace with real loading logic if needed
@@ -89,12 +93,12 @@ export default async function HomePage() {
               <div>
                 <Badge variant={
                   account.role === "ADMIN" ? "destructive" :
-                  account.role === "DEVELOPER" ? "purple" :
-                  "outline"
+                    account.role === "DEVELOPER" ? "purple" :
+                      "outline"
                 }>
                   {account.role === "ADMIN" ? "ADMIN" :
-                   account.role === "DEVELOPER" ? "DEVELOPER" :
-                   "USER"}
+                    account.role === "DEVELOPER" ? "DEVELOPER" :
+                      "USER"}
                 </Badge>
               </div>
             </div>
@@ -104,6 +108,24 @@ export default async function HomePage() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
+        {/* AI Assistant (ADMIN, DEVELOPER) */}
+        {(isAdmin || isDeveloper) && (
+          <CardButton href="/ai-assistant">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5 text-black" />
+                  AI Assistant
+                </CardTitle>
+                <Badge variant="destructive">ADMIN</Badge>
+              </div>
+              <CardDescription>
+                ถาม-ตอบกับ AI เกี่ยวกับ Med Error หรือเรื่องอื่น ๆ
+              </CardDescription>
+            </CardHeader>
+          </CardButton>
+        )}
+
         <CardButton href="/dashboard">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -139,6 +161,8 @@ export default async function HomePage() {
             </CardDescription>
           </CardHeader>
         </CardButton>
+
+
       </div>
 
       <div className="text-xs text-muted-foreground text-center">

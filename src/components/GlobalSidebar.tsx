@@ -70,8 +70,20 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       isCurrent: pathname === "/home"
     });
 
+    // AI Assistant (global, not under management)
+    if (pathname === "/ai-assistant") {
+      items.push({
+        label: (
+          <span className="flex items-center gap-1">
+            AI Assistant
+          </span>
+        ),
+        href: "/ai-assistant",
+        icon: <Bot className="h-4 w-4 text-black" />, isCurrent: true
+      });
+    }
     // Dashboard
-    if (pathname === "/dashboard") {
+    else if (pathname === "/dashboard") {
       items.push({
         label: "Dashboard",
         href: "/dashboard",
