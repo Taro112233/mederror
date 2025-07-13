@@ -31,6 +31,7 @@ model User {
   phone     String?
   accountId String  @unique
   account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  feedbacks Feedback[]
 }
 
 model Organization {
@@ -38,6 +39,7 @@ model Organization {
   name      String
   createdAt DateTime  @default(now())
   accounts  Account[]
+  feedbacks Feedback[]
 }
 
 model Severity {
@@ -111,6 +113,16 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now())
   account   Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+}
+
+model Feedback {
+  id             String        @id @default(uuid())
+  message        String
+  user           User          @relation(fields: [userId], references: [id])
+  userId         String
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+  organizationId String
+  createdAt      DateTime      @default(now())
 }
 
 enum Role {

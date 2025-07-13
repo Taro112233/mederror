@@ -27,7 +27,8 @@ import {
   Key,
   BarChart3,
   Bot,
-  Database
+  Database,
+  MessageCircle
 } from "lucide-react";
 import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
 import NotebookPen from "@/components/common/notebook-pen";
@@ -35,6 +36,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useAuth } from "@/hooks/use-auth";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface GlobalSidebarProps {
   children: ReactNode;
@@ -50,6 +55,9 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
   const pathname = usePathname();
   const { user, isAdminOrDeveloper } = useAuth();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [feedback, setFeedback] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // ใช้ข้อมูลจาก useAuth hook แทน
@@ -61,6 +69,29 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       });
     }
   }, [user]);
+
+  const handleSendFeedback = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: feedback }),
+      });
+      if (res.ok) {
+        toast.success('ส่ง Feedback สำเร็จ ขอบคุณสำหรับความคิดเห็น!');
+        setFeedback('');
+        setFeedbackOpen(false);
+      } else {
+        const data = await res.json();
+        toast.error(data.error || 'เกิดข้อผิดพลาดในการส่ง Feedback');
+      }
+    } catch (e) {
+      toast.error('เกิดข้อผิดพลาดในการเชื่อมต่อ');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function to get breadcrumb items based on current path
   const getBreadcrumbItems = () => {
@@ -259,6 +290,37 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                     <span>ตั้งค่าทั่วไป</span>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+              {/* Feedback Button in main menu */}
+              <SidebarMenuItem>
+                <Dialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
+                  <DialogTrigger asChild>
+                    <SidebarMenuButton isActive={false}>
+                      <MessageCircle />
+                      <span>Feedback</span>
+                    </SidebarMenuButton>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>ส่ง Feedback</DialogTitle>
+                    </DialogHeader>
+                    <Textarea
+                      placeholder="เขียนความคิดเห็นหรือข้อเสนอแนะของคุณ..."
+                      value={feedback}
+                      onChange={e => setFeedback(e.target.value)}
+                      disabled={loading}
+                      className="mt-2"
+                    />
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="secondary" disabled={loading}>ยกเลิก</Button>
+                      </DialogClose>
+                      <Button onClick={handleSendFeedback} disabled={loading || !feedback.trim()}>
+                        {loading ? 'กำลังส่ง...' : 'ส่ง Feedback'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>

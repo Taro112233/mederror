@@ -29,7 +29,7 @@ export async function GET(
     const { table } = await params;
     
     // ตรวจสอบว่าตารางที่ระบุมีอยู่จริง
-    const validTables = ['account', 'organization', 'user', 'medError', 'severity', 'errorType', 'subErrorType', 'unit'];
+    const validTables = ['account', 'organization', 'user', 'medError', 'severity', 'errorType', 'subErrorType', 'unit', 'feedback'];
     if (!validTables.includes(table)) {
       return NextResponse.json({ error: "Invalid table" }, { status: 400 });
     }
@@ -62,6 +62,15 @@ export async function GET(
             unit: true,
           },
           orderBy: { eventDate: "desc" }
+        });
+        break;
+      case 'feedback':
+        data = await prisma.feedback.findMany({
+          include: {
+            user: true,
+            organization: true,
+          },
+          orderBy: { createdAt: "desc" }
         });
         break;
       case 'severity':
@@ -125,7 +134,7 @@ export async function POST(
     const body = await req.json();
 
     // ตรวจสอบว่าตารางที่ระบุมีอยู่จริง
-    const validTables = ['account', 'organization', 'user', 'medError', 'severity', 'errorType', 'subErrorType', 'unit'];
+    const validTables = ['account', 'organization', 'user', 'medError', 'severity', 'errorType', 'subErrorType', 'unit', 'feedback'];
     if (!validTables.includes(table)) {
       return NextResponse.json({ error: "Invalid table" }, { status: 400 });
     }
@@ -140,6 +149,7 @@ export async function POST(
       errorType: ["code", "label"],
       subErrorType: ["code", "label", "errorTypeId"],
       unit: ["code", "label"],
+      feedback: ["message", "userId", "organizationId"],
     };
     const missingFields = (requiredFields[table] || []).filter((field) => !(field in body) || body[field] === undefined || body[field] === null || body[field] === "");
     if (missingFields.length > 0) {
@@ -172,6 +182,10 @@ export async function POST(
         data.code = body.code;
         data.label = body.label;
         data.errorType = { connect: { id: body.errorTypeId } };
+      } else if (table === 'feedback') {
+        data.message = body.message;
+        data.user = { connect: { id: body.userId } };
+        data.organization = { connect: { id: body.organizationId } };
       } else {
         for (const field of requiredFields[table] || []) {
           data[field] = body[field];
@@ -195,6 +209,10 @@ export async function POST(
       case 'medError':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         result = await prisma.medError.create({ data: buildData('medError', body) as any });
+        break;
+      case 'feedback':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result = await prisma.feedback.create({ data: buildData('feedback', body) as any });
         break;
       case 'severity':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

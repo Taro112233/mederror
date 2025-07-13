@@ -23,7 +23,8 @@ import {
   User,
   ChevronDownIcon,
   ChevronUpIcon,
-  CopyIcon
+  CopyIcon,
+  MessageCircle
 } from "lucide-react";
 import {
   ColumnFiltersState,
@@ -189,6 +190,23 @@ const TABLE_CONFIGS: TableConfig[] = [
     fields: [
       { name: 'code', label: 'Code', type: 'text', required: true },
       { name: 'label', label: 'Label', type: 'text', required: true },
+    ]
+  },
+  {
+    name: 'feedback',
+    displayName: 'Feedback',
+    icon: MessageCircle,
+    columns: [
+      { header: "ข้อความ", accessorKey: "message" },
+      { header: "User ID", accessorKey: "userId" },
+      { header: "Org ID", accessorKey: "organizationId" },
+      { header: "วันที่ส่ง", accessorKey: "createdAt", cell: (value) => new Date(value as string).toLocaleString('th-TH') },
+    ],
+    fields: [
+      { name: 'message', label: 'ข้อความ', type: 'textarea', required: true },
+      { name: 'userId', label: 'User ID', type: 'text' },
+      { name: 'organizationId', label: 'Organization ID', type: 'text' },
+      { name: 'createdAt', label: 'วันที่ส่ง', type: 'text' },
     ]
   }
 ];
