@@ -247,7 +247,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
           <SidebarGroup>
             <SidebarGroupLabel>
               <div className="flex flex-col gap-1">
-                <div>ระบบรายงานความคลาดเคลื่อนทางยา</div>
+                <div className="font-bold">ระบบรายงานความคลาดเคลื่อนทางยา</div>
                 <div className="text-xs font-normal">
                   {userInfo?.organizationName || 'ระบบจัดการข้อผิดพลาดทางการแพทย์'}
                 </div>
@@ -267,6 +267,25 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {/* AI Assistant for ADMIN and DEVELOPER - now in main menu */}
+              {isAdminOrDeveloper && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={pathname === "/ai-assistant"}>
+                    <Link href="/ai-assistant" className="flex items-center justify-between w-full">
+                      <span className="flex items-center gap-2">
+                        <Bot className="text-black h-4 w-4" />
+                        <span>AI Assistant</span>
+                      </span>
+                      {user?.role === "ADMIN" && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-sm bg-red-500 text-white leading-none">ADMIN</span>
+                      )}
+                      {user?.role === "DEVELOPER" && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-sm bg-red-500 text-white leading-none">ADMIN</span>
+                      )}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
                   <Link href="/dashboard">
@@ -329,31 +348,38 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={pathname === "/management/user"}>
-                    <Link href="/management/user">
-                      <User />
-                      <span>จัดการผู้ใช้</span>
+                    <Link href="/management/user" className="flex items-center justify-between w-full">
+                      <span className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>จัดการผู้ใช้</span>
+                      </span>
+                      {user?.role === "ADMIN" && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-sm bg-red-500 text-white leading-none">ADMIN</span>
+                      )}
+                      {user?.role === "DEVELOPER" && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-sm bg-red-500 text-white leading-none">ADMIN</span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={pathname === "/management/records"}>
-                    <Link href="/management/records">
-                      <Database />
-                      <span>ข้อมูลทั้งหมด</span>
+                    <Link href="/management/records" className="flex items-center justify-between w-full">
+                      <span className="flex items-center gap-2">
+                        <Database className="h-4 w-4" />
+                        <span>ข้อมูลทั้งหมด</span>
+                      </span>
+                      {user?.role === "ADMIN" && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-sm bg-red-500 text-white leading-none">ADMIN</span>
+                      )}
+                      {user?.role === "DEVELOPER" && (
+                        <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold rounded-sm bg-red-500 text-white leading-none">ADMIN</span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 {/* AI Assistant for ADMIN and DEVELOPER */}
-                {(user?.role === "ADMIN" || user?.role === "DEVELOPER") && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={pathname === "/management/ai-assistant"}>
-                      <Link href="/management/ai-assistant">
-                        <Bot className="text-black" />
-                        <span>AI Assistant</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )}
+                {/* (Removed from this section as per new requirements) */}
               </SidebarMenu>
             </SidebarGroup>
           )}
