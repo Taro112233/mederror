@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Settings, FileText, BarChart3, Bot } from "lucide-react";
+import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
+import NotebookPen from "@/components/common/notebook-pen";
 import CardButton from "@/components/CardButton";
 import prisma from "@/lib/prisma";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -129,7 +131,7 @@ export default async function HomePage() {
         <CardButton href="/dashboard">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
+              <ChartNoAxesCombined className="h-5 w-5" />
               Dashboard
             </CardTitle>
             <CardDescription>
@@ -141,7 +143,7 @@ export default async function HomePage() {
         <CardButton href="/report/new">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+              <NotebookPen className="h-5 w-5" />
               รายงานข้อผิดพลาด
             </CardTitle>
             <CardDescription>

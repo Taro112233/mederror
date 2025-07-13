@@ -26,8 +26,11 @@ import {
   Shield,
   Key,
   BarChart3,
-  Bot
+  Bot,
+  Database
 } from "lucide-react";
+import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
+import NotebookPen from "@/components/common/notebook-pen";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
@@ -87,7 +90,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       items.push({
         label: "Dashboard",
         href: "/dashboard",
-        icon: <BarChart3 className="h-4 w-4" />,
+        icon: <ChartNoAxesCombined className="h-4 w-4" />,
         isCurrent: true
       });
     }
@@ -96,7 +99,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
       items.push({
         label: "รายงานข้อผิดพลาดใหม่",
         href: "/report/new",
-        icon: <FileText className="h-4 w-4" />,
+        icon: <NotebookPen className="h-4 w-4" />,
         isCurrent: true
       });
     }
@@ -113,14 +116,14 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
         items.push({
           label: "Med Error ที่ส่งไป",
           href: "/management/my-records",
-          icon: <UserCheck className="h-4 w-4" />,
+          icon: <FileText className="h-4 w-4" />,
           isCurrent: true
         });
       } else if (pathname === "/management/records") {
         items.push({
           label: "Med Error ทั้งหมด",
           href: "/management/records",
-          icon: <FileText className="h-4 w-4" />,
+          icon: <Database className="h-4 w-4" />,
           isCurrent: true
         });
       } else if (pathname === "/management/user") {
@@ -236,7 +239,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
                   <Link href="/dashboard">
-                    <BarChart3 />
+                    <ChartNoAxesCombined />
                     <span>Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
@@ -244,7 +247,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={pathname === "/report/new"}>
                   <Link href="/report/new">
-                    <FileText />
+                    <NotebookPen />
                     <span>รายงานข้อผิดพลาด</span>
                   </Link>
                 </SidebarMenuButton>
@@ -276,7 +279,7 @@ export default function GlobalSidebar({ children }: GlobalSidebarProps) {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={pathname === "/management/records"}>
                     <Link href="/management/records">
-                      <FileText />
+                      <Database />
                       <span>ข้อมูลทั้งหมด</span>
                     </Link>
                   </SidebarMenuButton>

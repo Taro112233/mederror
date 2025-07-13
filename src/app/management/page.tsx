@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import jwt from "jsonwebtoken";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, Code, Settings, UserCheck, Bot } from "lucide-react";
+import { Users, FileText, Code, Settings, UserCheck, Bot, Database } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import CardButton from "@/components/CardButton";
 import { Skeleton } from "@/components/ui/skeleton";
+import FileCheck2 from "@/components/common/file-check-2";
 
 // [AUTH] เฉพาะผู้ใช้ที่ login แล้ว, onboarded แล้ว, และ role ไม่ใช่ UNAPPROVED เท่านั้นที่เข้าถึงได้
 export default async function ManagementMenu() {
@@ -62,7 +63,7 @@ export default async function ManagementMenu() {
         <CardButton href="/management/my-records">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5" />
+              <FileCheck2 className="h-5 w-5" />
               Med Error ที่ส่งไป
             </CardTitle>
             <CardDescription>
@@ -76,7 +77,7 @@ export default async function ManagementMenu() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
+                  <Database className="h-5 w-5" />
                   Med Error ทั้งหมด
                 </CardTitle>
                 <Badge variant="destructive">ADMIN</Badge>

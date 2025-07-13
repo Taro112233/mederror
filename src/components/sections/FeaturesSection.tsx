@@ -2,15 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { FileText, BarChart3, Shield, Users, Bot, Database } from "lucide-react";
+import ChartNoAxesCombined from "@/components/common/chart-no-axes-combined";
+import NotebookPen from "@/components/common/notebook-pen";
 
 const features = [
   {
-    icon: <FileText className="text-primary" size={32} />, // รายงานข้อผิดพลาด
+    icon: <NotebookPen className="text-primary w-8 h-8" />, // รายงานข้อผิดพลาด
     title: 'รายงานข้อผิดพลาด',
     description: 'แจ้งเหตุการณ์ความคลาดเคลื่อนทางยาได้ง่ายและรวดเร็ว'
   },
   {
-    icon: <BarChart3 className="text-primary" size={32} />, // Dashboard & วิเคราะห์
+    icon: <ChartNoAxesCombined className="text-primary w-8 h-8" />, // Dashboard & วิเคราะห์
     title: 'Dashboard & วิเคราะห์',
     description: 'ดูสถิติ วิเคราะห์แนวโน้ม และระบุจุดเสี่ยงในองค์กร'
   },
